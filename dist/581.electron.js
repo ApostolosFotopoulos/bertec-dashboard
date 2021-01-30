@@ -1,1 +1,0 @@
-(self.webpackChunkbertec_dashboard=self.webpackChunkbertec_dashboard||[]).push([[581],{581:(e,t,r)=>{"use strict";r.r(t),r.d(t,{default:()=>l});const l=(0,r(900).Z)({},(function(){var e=this,t=e.$createElement;return(e._self._c||t)("div",[e._v("Chart")])}),[],!1,null,null,null).exports}}]);

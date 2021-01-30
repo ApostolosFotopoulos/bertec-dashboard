@@ -1,33 +1,17 @@
-const {
-  app, BrowserWindow, ipcMain, dialog,
-} = require('electron');
+const { app, BrowserWindow } = require('electron')
+const MainWindow = require('./electron-windows/MainWindow');
+const mainWindow = new MainWindow()
 
-async function createWindow() {
-  const win = new BrowserWindow({
-    width: 1000,
-    height: 800,
-    minWidth: 1000,
-    minHeight: 800,
-    webPreferences: {
-      contextIsolation:false,
-      nodeIntegration: true,
-      devTools: true,
-    },
-  });
-
-  win.loadURL(`file://${__dirname}/dist/index.html#/`);
-}
-app.whenReady().then(createWindow);
+app.whenReady().then(() => mainWindow.createWindow())
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit();
-    listener.Destroy();
+    app.quit()
   }
-});
+})
 
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    mainWindow.createWindow()
   }
-});
+})

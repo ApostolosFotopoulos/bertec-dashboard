@@ -7,10 +7,12 @@ module.exports = {
   mode: 'production',
   entry: [
     './src/main.js',
-  ],
+	],
+	devtool: 'inline-source-map',
   output: {
-    path: path.resolve(__dirname, '../dist'),
-    filename: './electron.js',
+		filename: '[name].js',
+		path: path.resolve(__dirname, '../dist'),
+		chunkFilename: '[id].[chunkhash].js'
   },
   devServer: {
     contentBase: '../dist',
@@ -29,7 +31,12 @@ module.exports = {
 			test: /\.css$/,
 			use:[
 				"vue-style-loader",
-				"css-loader"
+				{
+					loader: "css-loader",
+					options: {
+						esModule: false
+					}
+				}
 			]
 		},
     {
@@ -38,7 +45,6 @@ module.exports = {
     },]
 	},
 	plugins:[
-		new VueLoaderPlugin(),
 		new HtmlWebpackPlugin({
 			template: path.resolve(__dirname, '/public/index.html'),
       filename: 'index.html',
@@ -46,6 +52,12 @@ module.exports = {
       publicPath: process.env.NODE_ENV === 'production'
       ? './'
       : '/'
-		})
-	]
+		}),
+		new VueLoaderPlugin(),
+	],
+	performance: {
+		hints: false,
+		maxEntrypointSize: 512000,
+		maxAssetSize: 512000
+	}
 }

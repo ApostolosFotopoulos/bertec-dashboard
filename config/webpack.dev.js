@@ -10,9 +10,9 @@ module.exports = {
     './src/main.js',
   ],
 	output: {
-    path: path.resolve(__dirname, '../dist'),
-    filename: './electron.js',
-    publicPath: '/',
+		filename: '[name].js',
+		path: path.resolve(__dirname, '../dist'),
+		chunkFilename: '[id].[chunkhash].js'
   },
 	devServer: {
     publicPath: '/',
@@ -33,21 +33,32 @@ module.exports = {
 			test: /\.css$/,
 			use:[
 				"vue-style-loader",
-				"css-loader"
+				{
+					loader:"css-loader",
+					options: {
+						esModule: false
+					}
+				}
 			]
 		},
     {
       test: /\.(png|j?g|svg|gif)?$/,
       use: 'file-loader',
-    },]
+		}]
 	},
 	plugins:[
-		new VueLoaderPlugin(),
 		new HtmlWebpackPlugin({
 			template: path.resolve(__dirname, '/public/index.html'),
       filename: 'index.html',
       inject: true,
     }),
-    new webpack.HotModuleReplacementPlugin(),
-	]
+		new webpack.HotModuleReplacementPlugin(),
+		new VueLoaderPlugin(),
+	],
+	optimization: {
+		splitChunks: {
+			minSize: 10000,
+			maxSize: 250000,
+		}
+	}
 }

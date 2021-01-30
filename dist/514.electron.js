@@ -1,1 +1,0 @@
-(self.webpackChunkbertec_dashboard=self.webpackChunkbertec_dashboard||[]).push([[514],{514:(e,t,l)=>{"use strict";l.r(t),l.d(t,{default:()=>n});const n=(0,l(900).Z)({},(function(){var e=this,t=e.$createElement;return(e._self._c||t)("div",[e._v("Index")])}),[],!1,null,null,null).exports}}]);
