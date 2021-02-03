@@ -14,13 +14,13 @@
 <script>
 export default {
   beforeMount(){
-    setInterval(()=>{
-      this.isVisible =!this.isVisible
-    },10000)
+    // setInterval(()=>{
+    //   this.isVisible =!this.isVisible
+    // },10000)
   },
   data(){
     return{
-      isVisible:true,
+      isVisible:false,
     }
   }
 }

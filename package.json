@@ -11,7 +11,8 @@
     "webapp:prod": "NODE_ENV=production webpack --config config/webpack.prod.js",
     "start": "NODE_ENV=production npm-run-all -s webapp:prod electron:dev",
     "dev": "NODE_ENV=development npm-run-all -p electron:dev webapp:dev",
-    "build:mac": "electron-builder build --mac"
+    "build:mac": "electron-builder build --mac",
+    "build:windows": "electron-builder build --windows"
   },
   "main": "main.js",
   "dependencies": {

@@ -1,7 +1,7 @@
 <template>
-  <v-card class="pa-3" elevation="10" color="#25282F">
-    <v-row>
-      <v-col>
+  
+    <v-row class="pa-5">
+      <v-col cols="6">
         <h3>Left Force Plate</h3>
         <v-select
           class="mt-3"
@@ -12,9 +12,7 @@
           solo
         ></v-select>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
+      <v-col  cols="6">
         <h3>Right Force Plate</h3>
         <v-select
           class="mt-3"
@@ -26,7 +24,7 @@
         ></v-select>
       </v-col>
     </v-row>
-  </v-card>
+
 </template>
 
 <script>

@@ -1,15 +1,8 @@
 <template>
   <v-container>
+    <Chart/>
     <v-row class="mt-2">
-      <v-col cols="8">
-        <Chart/>
-      </v-col>
-      <v-col>
-        <Channels/>
-        <div class="mt-2">
-          <ChartLine/>
-        </div>
-      </v-col>
+      <Channels/>
     </v-row>
     <v-row class="mt-2">
       <v-col>
@@ -22,14 +15,12 @@
 <script>
 import Chart from '../components/chart/Chart.vue'
 import Channels from '../components/chart/Channels.vue'
-import ChartLine from '../components/chart/ChartLine.vue'
 import MoreStatistics from '../components/chart/MoreStatistics.vue'
 
 export default {
   components:{
     Chart,
     Channels,
-    ChartLine,
     MoreStatistics
   }
 }
