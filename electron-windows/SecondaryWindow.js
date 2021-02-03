@@ -31,7 +31,7 @@ module.exports = class {
       const winURL = 'http://localhost:8080' +"#"+this.urlPath;
       this.window.loadURL(winURL);
     } else {
-      this.window.loadURL("file://" + path.join(`${__dirname}`, "../dist/index.html" + "#" + this.urlPath))
+      this.window.loadURL("file://" + path.resolve(`${__dirname}`, "../dist/index.html")+"#"+this.urlPath)
     }
     this.window.on('closed', () => {
       this.window = null;
