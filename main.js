@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require('electron')
-const MainWindow = require('./electron-windows/MainWindow');
+const MainWindow = require('./electron-helpers/MainWindow');
 const mainWindow = new MainWindow()
 
 app.whenReady().then(() => mainWindow.createWindow())

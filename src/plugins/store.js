@@ -7,7 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     selectedProtocol: "Walking",
-    selectedDataType: "Absolute",
+    selectedDataType: "Normalized",
     duration: 60,
     weight: 50,
     filePath: "",
@@ -17,14 +17,16 @@ export default new Vuex.Store({
     series: [{
       data: [{ x: 'Left Foot', y: 0 }, { x: 'Right Foot', y: 0 }],
     }],
-    seriesRightPlate:[{
-      type: 'line',
-      data: [],
-    }],
     seriesLeftPlate:[{
-      type: 'line',
-      data: [],
+      data: []
     }],
+    seriesRightPlate:[{
+      data: []
+    }],
+    isSeriesRightPlateLocked:false,
+    isSeriesLeftPlateLocked:false,
+    seriesLeftLinesCounter:0,
+    seriesRightLinesCounter:0,
     force: 0,
     nOfSteps: 0,
     axesMax: 100,
@@ -32,15 +34,6 @@ export default new Vuex.Store({
     rightForcePlateAnnotationY: 0,
     prevLeftForcePlateAnnotationY: 0,
     prevRightForcePlateAnnotationY: 0,
-    leftPlateDiagramCounter:0,
-    rightPlateDiagramCounter:0,
-    alreadyZeroLeft:false,
-    alreadyZeroRight:false,
-    clearStepLeft:false,
-    clearStepRight:false,
-    clearStep:false,
-    lockStepLeft:false,
-    lockStepRight:false
   },
   mutations: {
     setSelectedProtocol(state, protocol) {
@@ -64,72 +57,82 @@ export default new Vuex.Store({
     setLeftForcePlateChannel(state, channel) {
       state.leftForcePlateChannel = channel
       state.seriesLeftPlate = [{
-        type: 'line',
-        data: [],
+        data: []
       }]
-      state.leftPlateDiagramCounter = 0
+      state.seriesLeftLinesCounter = 0
     },
     setRightForcePlateChannel(state, channel) {
       state.rightForcePlateChannel = channel
       state.seriesRightPlate = [{
-        type: 'line',
-        data: [],
+        data: []
       }]
-      state.rightPlateDiagramCounter = 0
+      state.seriesRightLinesCounter = 0
+    },
+    setSeriesLeftPlate(state,rows){
+      let entry = rows[rowsNames[state.leftForcePlateChannel]] 
+      let fz1 = rows[2]
+    
+      // Every 20 lines remove all and keep only one
+      console.log(state.seriesLeftPlate.length)
+      if(state.seriesLeftPlate.length > 12){
+        state.seriesLeftPlate = [state.seriesLeftPlate[state.seriesLeftLinesCounter]]
+        state.seriesLeftLinesCounter = 0
+        state.isSeriesLeftPlateLocked = false
+      }
+
+
+      if(fz1 > 20 && !state.isSeriesLeftPlateLocked){
+        state.isSeriesLeftPlateLocked = true
+        let s = state.seriesLeftPlate
+        s.push({  
+          data: [],
+        })
+        state.seriesLeftPlate = s
+        state.seriesLeftLinesCounter +=1
+        console.log("fz1 > 20 and unlocked")
+      } else if (fz1 < 20 && state.isSeriesLeftPlateLocked){
+        state.isSeriesLeftPlateLocked = false
+        console.log("fz1 < 20 and locked")
+      } else if( fz1 > 20 && state.isSeriesLeftPlateLocked){
+        console.log("Write fz1")
+        let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
+        d.push(entry)
+        state.seriesLeftPlate[state.seriesLeftLinesCounter].data = d
+      }
+    },
+    setSeriesRightPlate(state,rows){
+      let entry = rows[rowsNames[state.rightForcePlateChannel]]
+      let fz2 = rows[8]
+      
+      if(state.seriesRightPlate.length > 12){
+        state.seriesRightPlate = [state.seriesRightPlate[state.seriesRightLinesCounter]]
+        state.seriesRightLinesCounter = 0
+        state.isSeriesRightPlateLocked = false
+      }
+
+      if(fz2 > 20 && !state.isSeriesRightPlateLocked){
+        state.isSeriesRightPlateLocked = true
+        let s = state.seriesRightPlate
+        s.push({  
+          data: [],
+        })
+        state.seriesRightPlate = s
+        state.seriesRightLinesCounter +=1
+        console.log("fz2 > 20 and unlocked")
+      } else if (fz2 < 20 && state.isSeriesRightPlateLocked){
+        state.isSeriesRightPlateLocked = false
+        console.log("fz2 < 20 and locked")
+      } else if( fz2 > 20 && state.isSeriesRightPlateLocked){
+        console.log("Write fz2")
+        let d = state.seriesRightPlate[state.seriesRightLinesCounter].data
+        d.push(entry)
+        state.seriesRightPlate[state.seriesRightLinesCounter].data = d
+      }
     },
     setSeries(state, rows) {
       state.series = [{
         data: [{ x: 'Left Foot', y: rows[rowsNames[state.leftForcePlateChannel]] }, { x: 'Right Foot', y: rows[rowsNames[state.rightForcePlateChannel]] }],
       }]
-    },
-    setSeriesRightPlate(state,rows){
-      let fzVal = rows[8]
-
-      if(state.seriesRightPlate.length == 1 && fzVal > 20){
-        state.lockStepRight = true
-      }
-      if((fzVal) &&(Number(fzVal) < 20 && !state.alreadyZeroRight)){
-        let s = state.seriesRightPlate
-        s.push({
-          type: 'line',
-          data: [],
-        })
-        state.seriesRightPlate = s
-        state.rightPlateDiagramCounter +=1
-        state.lockStepRight = false
-      } else if((fzVal) &&(Number(fzVal) >=20 && !state.lockStepRight)){
-        let d = state.seriesRightPlate[state.rightPlateDiagramCounter].data
-        //d.push(fzVal)
-        d.push(rows[rowsNames[state.rightForcePlateChannel]])
-        console.log(d)
-        state.seriesRightPlate[state.rightPlateDiagramCounter].data = d
-        state.alreadyZeroRight = false
-      }
-    },
-    setSeriesLeftPlate(state,rows){
-      let fzVal = rows[2]
-
-      if(state.seriesLeftPlate.length == 1 && fzVal > 20){
-        state.lockStepLeft = true
-      }
-
-      if((fzVal) &&(Number(fzVal) < 20 && !state.alreadyZeroLeft)){
-        let s = state.seriesLeftPlate
-        s.push({
-          type: 'line',
-          data: [],
-        })
-        state.seriesLeftPlate = s
-        state.leftPlateDiagramCounter +=1
-        state.alreadyZeroLeft = true
-        state.lockStepLeft = false
-      } else if((fzVal) &&(Number(fzVal) >=20) && !state.lockStepLeft){
-        let d = state.seriesLeftPlate[state.leftPlateDiagramCounter].data
-        //d.push(fzVal)
-        d.push(rows[rowsNames[state.leftForcePlateChannel]])
-        state.seriesLeftPlate[state.leftPlateDiagramCounter].data = d
-        state.alreadyZeroLeft = false
-      }
     },
     setForce(state, force) {
       state.force = force
@@ -156,14 +159,16 @@ export default new Vuex.Store({
       state.series = [{
         data: [{ x: 'Left Foot', y: 0 }, { x: 'Right Foot', y: 0 }],
       }]
-      state.seriesRightPlate = [{
-        type: 'line',
-        data: [],
-      }],
       state.seriesLeftPlate = [{
-        type: 'line',
-        data: [],
-      }],
+        data: []
+      }]
+      state.seriesRightPlate = [{
+        data: []
+      }]
+      state.isSeriesRightPlateLocked = false
+      state.isSeriesLeftPlateLocked = false
+      state.seriesLeftLinesCounter = 0
+      state.seriesRightLinesCounter = 0
       state.force = 0
       state.nOfSteps = 0
       state.axesMax = 100
@@ -171,15 +176,6 @@ export default new Vuex.Store({
       state.rightForcePlateAnnotationY = 0
       state.prevLeftForcePlateAnnotationY = 0
       state.prevRightForcePlateAnnotationY = 0
-      state.leftPlateDiagramCounter= 0
-      state.rightPlateDiagramCounter= 0
-      state.alreadyZeroLeft = false
-      state.alreadyZeroRight = false
-      state.clearStepLeft = false
-      state.clearStepRight = false
-      state.clearStep = false
-      state.lockStepLeft = false
-      state.lockStepRight = false
     }
   },
   actions:{}

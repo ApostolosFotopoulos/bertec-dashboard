@@ -51,6 +51,20 @@
         </v-btn>
       </v-col>
     </v-row>
+    <v-row class="mt-2">
+      <v-col>
+        <v-select
+          @change="(v)=>{
+            $store.commit('setDataType',v)
+          }"
+          :disabled="$store.state.isSessionRunning"
+          :value="this.$store.state.selectedDataType"
+          :items="dataType"
+          label="Data Type"
+          solo
+        ></v-select>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col>
         <v-checkbox
@@ -70,6 +84,15 @@
           @change="copCheckboxHandler"
         ></v-checkbox>
       </v-col>
+      <v-col>
+        <v-checkbox
+          v-model="isLineChartChecked"
+          label="Display Line Chart"
+          color="#6ab187"
+          hide-details
+          @change="lineChartCheckboxHandler"
+        ></v-checkbox>
+      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -81,16 +104,18 @@ export default {
     return{
       isChartChecked: false,
       isCopChecked: false,
+      isLineChartChecked:false,
       ipcRenderer: window.require('electron').ipcRenderer,
       protocols:["Walking","Running","Jumping","Landing","Balance"],
+      dataType:["Absolute","Normalized"],
     }
   },
   beforeMount(){
-    setInterval(()=>{ ipcRenderer.send('WINDOWS_STATUS') },100)
     ipcRenderer.on('WINDOWS_STATUS_RESPONSE',(_,responseData)=>{
-      const { chartWindowVisible, copWindowVisible } = responseData
+      const { chartWindowVisible, copWindowVisible,lineChartWindowVisible } = responseData
       this.isChartChecked = chartWindowVisible
       this.isCopChecked = copWindowVisible
+      this.isLineChartChecked = lineChartWindowVisible
     })
   },
   methods:{
@@ -100,14 +125,14 @@ export default {
         this.ipcRenderer.send('STOP_SESSION',)
       } else {
         this.$store.commit('startStopSession',true)
-        this.ipcRenderer.send('START_SESSION',{ weight: this.$store.state.weight })
+        this.ipcRenderer.send('START_SESSION',{ weight: this.$store.state.weight, dataType:this.$store.state.selectedDataType})
       }
     },
     chartCheckboxHandler(){
       if(this.isChartChecked){
-        this.ipcRenderer.send('OPEN_CHART_WINDOW');
+        this.ipcRenderer.send('OPEN_BARPLOT_WINDOW');
       } else {
-        this.ipcRenderer.send('CLOSE_CHART_WINDOW');
+        this.ipcRenderer.send('CLOSE_BARPLOT_WINDOW');
       }
     },
     copCheckboxHandler(){
@@ -115,6 +140,13 @@ export default {
         this.ipcRenderer.send('OPEN_COP_WINDOW');
       } else {
         this.ipcRenderer.send('CLOSE_COP_WINDOW');
+      }
+    },
+    lineChartCheckboxHandler(){
+      if(this.isLineChartChecked){
+        this.ipcRenderer.send('OPEN_LINECHART_WINDOW');
+      } else {
+        this.ipcRenderer.send('CLOSE_LINECHART_WINDOW');
       }
     }
   }

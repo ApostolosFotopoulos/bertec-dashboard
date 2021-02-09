@@ -8,13 +8,17 @@ const routes = [{
 	name: "Home",
 	component: ()=> import("../views/Index.vue"),
 },{
-	path: "/chart",
-	name: "Chart",
-	component: ()=> import("../views/Chart.vue")
+	path: "/barplot",
+	name: "BarPlotPage",
+	component: ()=> import("../views/BarPlotPage.vue")
 },{
 	path: "/cop",
 	name: "Cop",
 	component: ()=> import("../views/Cop.vue")
+},{
+	path: "/linechart",
+	name: "LineChartPage",
+	component: ()=> import("../views/LineChartPage.vue")
 }]
 
 export default new VueRouter({
