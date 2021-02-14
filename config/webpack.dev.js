@@ -46,6 +46,12 @@ module.exports = {
       use: 'file-loader',
 		}]
 	},
+	resolve: {
+		symlinks: true,
+		alias: {
+			'vue$': 'vue/dist/vue.esm.js'
+		}
+	},
 	plugins:[
 		new HtmlWebpackPlugin({
 			template: path.resolve(__dirname, '../public/index.html'),
@@ -54,6 +60,9 @@ module.exports = {
     }),
 		new webpack.HotModuleReplacementPlugin(),
 		new VueLoaderPlugin(),
+		new webpack.ProvidePlugin({
+			Vue: ['vue/dist/vue.esm.js'],
+		})
 	],
 	optimization: {
 		splitChunks: {

@@ -9,7 +9,7 @@ export default new Vuex.Store({
     selectedProtocol: "Walking",
     selectedDataType: "Normalized",
     duration: 60,
-    weight: 50,
+    weight: 500,
     filePath: "",
     isSessionRunning: false,
     leftForcePlateChannel: "FZ1",
@@ -34,6 +34,15 @@ export default new Vuex.Store({
     rightForcePlateAnnotationY: 0,
     prevLeftForcePlateAnnotationY: 0,
     prevRightForcePlateAnnotationY: 0,
+    stepsPerMinuteTarget:60,
+    stepsPerMinute:0,
+    maxLeftPlate:-1,
+    maxRightPlate:-1,
+    leftFootIsPressed:false,
+    rightFootIsPressed:false,
+    footAsymmetry:0,
+    stepsAsymmetry:0,
+    stepTime:-1,
   },
   mutations: {
     setSelectedProtocol(state, protocol) {
@@ -71,9 +80,8 @@ export default new Vuex.Store({
     setSeriesLeftPlate(state,rows){
       let entry = rows[rowsNames[state.leftForcePlateChannel]] 
       let fz1 = rows[2]
-    
+      console.log(fz1)
       // Every 20 lines remove all and keep only one
-      console.log(state.seriesLeftPlate.length)
       if(state.seriesLeftPlate.length > 12){
         state.seriesLeftPlate = [state.seriesLeftPlate[state.seriesLeftLinesCounter]]
         state.seriesLeftLinesCounter = 0
@@ -81,7 +89,7 @@ export default new Vuex.Store({
       }
 
 
-      if(fz1 > 20 && !state.isSeriesLeftPlateLocked){
+      if(fz1 > 4 && !state.isSeriesLeftPlateLocked){
         state.isSeriesLeftPlateLocked = true
         let s = state.seriesLeftPlate
         s.push({  
@@ -90,10 +98,10 @@ export default new Vuex.Store({
         state.seriesLeftPlate = s
         state.seriesLeftLinesCounter +=1
         console.log("fz1 > 20 and unlocked")
-      } else if (fz1 < 20 && state.isSeriesLeftPlateLocked){
+      } else if (fz1 < 4 && state.isSeriesLeftPlateLocked){
         state.isSeriesLeftPlateLocked = false
         console.log("fz1 < 20 and locked")
-      } else if( fz1 > 20 && state.isSeriesLeftPlateLocked){
+      } else if( fz1 > 4 && state.isSeriesLeftPlateLocked){
         console.log("Write fz1")
         let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
         d.push(entry)
@@ -110,7 +118,7 @@ export default new Vuex.Store({
         state.isSeriesRightPlateLocked = false
       }
 
-      if(fz2 > 20 && !state.isSeriesRightPlateLocked){
+      if(fz2 > 4 && !state.isSeriesRightPlateLocked){
         state.isSeriesRightPlateLocked = true
         let s = state.seriesRightPlate
         s.push({  
@@ -118,16 +126,87 @@ export default new Vuex.Store({
         })
         state.seriesRightPlate = s
         state.seriesRightLinesCounter +=1
-        console.log("fz2 > 20 and unlocked")
-      } else if (fz2 < 20 && state.isSeriesRightPlateLocked){
+        //console.log("fz2 > 20 and unlocked")
+      } else if (fz2 < 4 && state.isSeriesRightPlateLocked){
         state.isSeriesRightPlateLocked = false
-        console.log("fz2 < 20 and locked")
-      } else if( fz2 > 20 && state.isSeriesRightPlateLocked){
-        console.log("Write fz2")
+        //console.log("fz2 < 20 and locked")
+      } else if( fz2 > 4 && state.isSeriesRightPlateLocked){
+        //console.log("Write fz2")
         let d = state.seriesRightPlate[state.seriesRightLinesCounter].data
         d.push(entry)
         state.seriesRightPlate[state.seriesRightLinesCounter].data = d
       }
+    },
+    setMaxFootLeftPlate(state,rows){
+      let entry = rows[rowsNames[state.leftForcePlateChannel]] 
+      let fz1 = rows[2]
+    
+      if(fz1 > 200 && !state.leftFootIsPressed){
+        state.leftFootIsPressed = true
+        state.maxLeftPlate = -1
+        state.nOfSteps +=1
+
+        var now = new Date().getTime()
+        //console.log(now)
+        if(state.stepTime != -1){
+          //console.log(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
+          state.stepsPerMinute = 1/(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
+          state.stepsAsymmetry = clamp(((2*(state.stepsPerMinute - state.stepsPerMinuteTarget))/(state.stepsPerMinuteTarget + state.stepsPerMinute))*100,-100,100)
+          console.log(state.stepsAsymmetry)
+        }
+        state.stepTime = now
+      } else if (fz1 < 200 && state.leftFootIsPressed){
+        state.leftFootIsPressed = false
+      } else if(fz1 > 200 && state.leftFootIsPressed){
+        if(state.maxLeftPlate < entry){
+          state.maxLeftPlate = entry
+        }
+      }
+      if(state.maxLeftPlate!=-1 && state.maxRightPlate!=-1){
+        let upp = 2*(state.maxRightPlate - state.maxLeftPlate)
+        let down = (state.maxRightPlate + state.maxLeftPlate)
+        let percent = (upp/down)*100
+        state.footAsymmetry = clamp(percent,-100,100)
+        //console.log("Max Right: "+state.maxRightPlate)
+        //console.log("Max Left: "+state.maxLeftPlate)
+        //console.log(state.footAsymmetry)
+      } 
+    },
+    setMaxFootRightPlate(state,rows){
+      let entry = rows[rowsNames[state.rightForcePlateChannel]]
+      let fz2 = rows[8]
+
+      if(fz2 > 200 && !state.rightFootIsPressed){
+        state.rightFootIsPressed = true
+        state.maxRightPlate = -1
+        state.nOfSteps +=1
+
+        var now = new Date().getTime()
+        //console.log(now)
+        if(state.stepTime != -1){
+          //console.log(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
+          state.stepsPerMinute = 1/(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
+          console.log(state.stepsPerMinute)
+          state.stepsAsymmetry = clamp(((2*(state.stepsPerMinute - state.stepsPerMinuteTarget))/(state.stepsPerMinuteTarget + state.stepsPerMinute))*100,-100,100)
+          console.log(state.stepsAsymmetry)
+        }
+      } else if (fz2 < 200 && state.rightFootIsPressed){
+        state.rightFootIsPressed = false
+      } else if(fz2 > 200 && state.rightFootIsPressed){
+        if(state.maxRightPlate < entry){
+          state.maxRightPlate = entry
+        }
+      }
+      
+      if(state.maxLeftPlate!=-1 && state.maxRightPlate!=-1){
+        let upp = 2*(state.maxRightPlate - state.maxLeftPlate)
+        let down = (state.maxRightPlate + state.maxLeftPlate)
+        let percent = (upp/down)*100
+        state.footAsymmetry = clamp(percent,-100,100)
+        //console.log("Max Right: "+state.maxRightPlate)
+        //console.log("Max Left: "+state.maxLeftPlate)
+        //console.log(state.footAsymmetry)
+      } 
     },
     setSeries(state, rows) {
       state.series = [{
@@ -139,6 +218,12 @@ export default new Vuex.Store({
     },
     setnOfSteps(state, nOfSteps) {
       state.nOfSteps = nOfSteps
+    },
+    setStepsPerMinuteTarget(state,stepsPerMinute) {
+      state.stepsPerMinuteTarget = stepsPerMinute
+    },
+    setStepsPerMinute(state,stepsPerMinute) {
+      state.stepsPerMinute = stepsPerMin = stepsPerMinute
     },
     setAxesMax(state, axesMax) {
       state.axesMax = axesMax
@@ -180,3 +265,7 @@ export default new Vuex.Store({
   },
   actions:{}
 })
+
+function clamp(number, min, max) {
+  return Math.max(min, Math.min(number, max));
+}

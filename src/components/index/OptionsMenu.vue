@@ -12,14 +12,14 @@
         ></v-select>
       </v-col>
       <v-col>
-      <v-text-field
-        @change="(v)=>$store.commit('setTime',v)"
-        :value="this.$store.state.duration"
-        label="Time (in seconds)"
-        solo
-        :disabled="$store.state.isSessionRunning"
-        min="0"
-      />
+        <v-text-field
+          @change="(v)=>$store.commit('setTime',v)"
+          :value="this.$store.state.duration"
+          label="Time (in seconds)"
+          solo
+          :disabled="$store.state.isSessionRunning"
+          min="0"
+        />
       </v-col>
       <v-col>
         <v-btn 
@@ -63,6 +63,16 @@
           label="Data Type"
           solo
         ></v-select>
+      </v-col>
+      <v-col>
+        <v-text-field
+          @change="(v)=>$store.commit('setStepsPerMinuteTarget',v)"
+          :value="this.$store.state.stepsPerMinuteTarget"
+          label="Steps/Minute"
+          solo
+          :disabled="$store.state.isSessionRunning"
+          min="0"
+        />
       </v-col>
     </v-row>
     <v-row>
@@ -125,7 +135,7 @@ export default {
         this.ipcRenderer.send('STOP_SESSION',)
       } else {
         this.$store.commit('startStopSession',true)
-        this.ipcRenderer.send('START_SESSION',{ weight: this.$store.state.weight, dataType:this.$store.state.selectedDataType})
+        this.ipcRenderer.send('START_SESSION',{ weight: this.$store.state.weight, dataType:this.$store.state.selectedDataType, stepsPerMinuteTarget: this.$store.state.stepsPerMinuteTarget})
       }
     },
     chartCheckboxHandler(){

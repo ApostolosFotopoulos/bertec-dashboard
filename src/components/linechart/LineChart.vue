@@ -79,6 +79,7 @@ export default {
   },
   methods:{
     setupStoreVariables(responseData){
+      console.log(responseData.rows)
       this.$store.commit('setSeriesLeftPlate',responseData.rows)
       this.$store.commit('setSeriesRightPlate',responseData.rows)
     },

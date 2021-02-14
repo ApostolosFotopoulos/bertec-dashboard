@@ -19,7 +19,11 @@ const routes = [{
 	path: "/linechart",
 	name: "LineChartPage",
 	component: ()=> import("../views/LineChartPage.vue")
-}]
+	},{
+		path: "/speedmeter",
+		name: "SpeedMeterPage",
+		component: () => import("../views/SpeedMeterPage.vue")
+	}]
 
 export default new VueRouter({
 	routes
