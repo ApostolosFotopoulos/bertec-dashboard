@@ -75,6 +75,53 @@
         />
       </v-col>
     </v-row>
+    <v-row class="mt-2">
+      <v-col>
+        <v-text-field
+          @change="(v)=>$store.commit('setFrequency',v)"
+          :value="$store.state.frequency"
+          label="Frequency"
+          solo
+          :disabled="$store.state.isSessionRunning"
+          min="0"
+        />
+      </v-col>
+      <v-col>
+        <v-text-field
+          @change="(v)=>$store.commit('setThreshold',v)"
+          :value="$store.state.threshold"
+          label="Threshold"
+          solo
+          :disabled="$store.state.isSessionRunning"
+          min="0"
+        />
+      </v-col>
+      <v-col>
+        <v-text-field
+          @change="(v)=>$store.commit('setNofLines',v)"
+          :value="$store.state.nOfLines"
+          label="Number of Lines"
+          solo
+          :disabled="$store.state.isSessionRunning"
+          min="0"
+        />
+      </v-col>
+    </v-row>
+    <v-row class="mt-2">
+      <v-col>
+        <span class="pt-5">Step/minute Time Interval</span>
+        <v-slider
+          step="1"
+          thumb-label
+          min="10"
+          max="20"
+          ticks
+          @change="(v)=>{ $store.commit('setStepsTimeInterval',v) }"
+          :disabled="$store.state.isSessionRunning"
+          :value="$store.state.stepsTimeInteval"
+        ></v-slider>
+      </v-col>
+    </v-row>
     <v-row>
       <v-col>
         <v-checkbox
@@ -82,6 +129,7 @@
           label="Display Charts"
           color="#6ab187"
           hide-details
+          :disabled="!$store.state.isSessionRunning"
           @change="chartCheckboxHandler"
         ></v-checkbox>
       </v-col>
@@ -91,6 +139,7 @@
           label="Display COP"
           color="#6ab187"
           hide-details
+          :disabled="!$store.state.isSessionRunning"
           @change="copCheckboxHandler"
         ></v-checkbox>
       </v-col>
@@ -100,6 +149,7 @@
           label="Display Line Chart"
           color="#6ab187"
           hide-details
+          :disabled="!$store.state.isSessionRunning"
           @change="lineChartCheckboxHandler"
         ></v-checkbox>
       </v-col>
@@ -135,7 +185,15 @@ export default {
         this.ipcRenderer.send('STOP_SESSION',)
       } else {
         this.$store.commit('startStopSession',true)
-        this.ipcRenderer.send('START_SESSION',{ weight: this.$store.state.weight, dataType:this.$store.state.selectedDataType, stepsPerMinuteTarget: this.$store.state.stepsPerMinuteTarget})
+        this.ipcRenderer.send('START_SESSION',{ 
+          weight: this.$store.state.weight, 
+          dataType:this.$store.state.selectedDataType, 
+          stepsPerMinuteTarget: this.$store.state.stepsPerMinuteTarget,
+          stepsTimeInteval: this.$store.state.stepsTimeInteval,
+          frequency: this.$store.state.frequency,
+          threshold: this.$store.state.threshold,
+          nOfLines: this.$store.state.nOfLines,
+        })
       }
     },
     chartCheckboxHandler(){

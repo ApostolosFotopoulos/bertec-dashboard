@@ -1,6 +1,10 @@
 <template>
   <div id="app">
     <v-row>
+      <v-col><h2>Foot Asymmetry</h2></v-col>
+      <v-col><h2>Target Asymmetry</h2></v-col>
+    </v-row>
+    <v-row>
       <v-col>
         <vue-speedometer 
           textColor="#fff" 
@@ -33,12 +37,8 @@ const { ipcRenderer } = window.require('electron')
 
 export default {
   name: "App",
-  created() {
-    setInterval(() => (this.toggle = !this.toggle), 1111);
-  },
   data() {
     return {
-      toggle: false,
       segmentColors:["#d62828","#ffbe4d","#5fad56","#5fad56","#ffbe4d","#d62828"],
       customSegmentStops:[-100,-30,-10,0,10,30,100]
     };
@@ -57,10 +57,15 @@ export default {
   methods:{
     setupStoreVariables(responseData){
       this.$store.commit('setForce',responseData.force)
-      this.$store.commit('setSeries',responseData.rows)
-      this.$store.commit('setMaxFootLeftPlate',responseData.rows)
-      this.$store.commit('setMaxFootRightPlate',responseData.rows)
+      this.$store.commit('setSeriesLeftPlate',responseData.rows)
+      this.$store.commit('setSeriesRightPlate',responseData.rows)
       this.$store.commit('setStepsPerMinuteTarget',Number(responseData.stepsPerMinuteTarget))
+      this.$store.commit('setStepsTimeInterval',Number(responseData.stepsTimeInterval))
+      this.$store.commit('setFrequency',Number(responseData.frequency))
+      this.$store.commit('setThreshold',Number(responseData.threshold))
+      this.$store.commit('setNofLines',Number(responseData.nOfLines))
+      this.$store.commit('checkIfBothFeetsArePressed')
+      this.$store.commit('checkTimeInterval')
     }
   }
 };
@@ -72,7 +77,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #fff;
   margin-top: 60px;
 }
 .current-value{

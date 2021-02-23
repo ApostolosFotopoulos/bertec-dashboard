@@ -26,6 +26,7 @@ export default {
   data(){
     return{
       lineChartOptions: {
+        forceNiceScale: true,
         ...defaultLineChartOptions,
         yaxis: {
           dataLabels:{
@@ -79,13 +80,19 @@ export default {
   },
   methods:{
     setupStoreVariables(responseData){
-      console.log(responseData.rows)
       this.$store.commit('setSeriesLeftPlate',responseData.rows)
       this.$store.commit('setSeriesRightPlate',responseData.rows)
+      this.$store.commit('setStepsPerMinuteTarget',Number(responseData.stepsPerMinuteTarget))
+      this.$store.commit('setStepsTimeInterval',Number(responseData.stepsTimeInterval))
+      this.$store.commit('setFrequency',Number(responseData.frequency))
+      this.$store.commit('setThreshold',Number(responseData.threshold))
+      this.$store.commit('setNofLines',Number(responseData.nOfLines))
+      this.$store.commit('checkIfBothFeetsArePressed')
     },
     updateLeftChart(){
       this.$refs.chartLeftPlate.updateOptions({
         yaxis: {
+          forceNiceScale: true,
           dataLabels:{
             show:false,
             enabled:false,
@@ -109,7 +116,7 @@ export default {
           }
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesLeftPlate.length - 1)){
+          if(seriesIndex == (this.$store.state.seriesLeftPlate.length-2)){
             return "#d32d41"
           } else {
             return "gray"
@@ -120,6 +127,7 @@ export default {
     updateRightChart(){
       this.$refs.chartRightPlate.updateOptions({
         yaxis: {
+          forceNiceScale: true,
           labels:{
             style:{
               colors:['#fff']
@@ -135,7 +143,7 @@ export default {
           }
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesRightPlate.length - 1)){
+          if(seriesIndex == (this.$store.state.seriesRightPlate.length - 2)){
             return "#6ab187"
           } else {
             return "gray"

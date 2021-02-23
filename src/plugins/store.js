@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import rowsNames from '../assets/rowsNames.json'
+import _ from 'lodash'
+import moment from 'moment'
 
 Vue.use(Vuex)
 
@@ -20,12 +22,14 @@ export default new Vuex.Store({
     seriesLeftPlate:[{
       data: []
     }],
+    isStepFullLeft:false,
+    isSeriesLeftPlateLocked:true,
+    seriesLeftLinesCounter:0,
     seriesRightPlate:[{
       data: []
     }],
-    isSeriesRightPlateLocked:false,
-    isSeriesLeftPlateLocked:false,
-    seriesLeftLinesCounter:0,
+    isStepFullRight:false,
+    isSeriesRightPlateLocked:true,
     seriesRightLinesCounter:0,
     force: 0,
     nOfSteps: 0,
@@ -34,15 +38,20 @@ export default new Vuex.Store({
     rightForcePlateAnnotationY: 0,
     prevLeftForcePlateAnnotationY: 0,
     prevRightForcePlateAnnotationY: 0,
-    stepsPerMinuteTarget:60,
+    stepsPerMinuteTarget: 200,
     stepsPerMinute:0,
-    maxLeftPlate:-1,
-    maxRightPlate:-1,
-    leftFootIsPressed:false,
-    rightFootIsPressed:false,
+    stepsTimeInteval:10,
+    frequency:100,
+    threshold:-1,
+    nOfLines:3  ,
     footAsymmetry:0,
     stepsAsymmetry:0,
-    stepTime:-1,
+    leftIsPressed:false,
+    rightIsPressed: false,
+    leftMaxValue:0,
+    rightMaxValue: 0,
+    startTime: -1,
+    stepsCounter:0,
   },
   mutations: {
     setSelectedProtocol(state, protocol) {
@@ -79,139 +88,230 @@ export default new Vuex.Store({
     },
     setSeriesLeftPlate(state,rows){
       let entry = rows[rowsNames[state.leftForcePlateChannel]] 
-      let fz1 = rows[2]
-      console.log(fz1)
+      let fz1 = Number(rows[2])
+      let threshold
+
+      if(Number(state.threshold) !=-1 && state.threshold!=""){
+        threshold = Number(state.threshold)
+      } else {
+        threshold = Number( 0.05 * state.weight)
+      }
+
+
+      if(state.isSeriesLeftPlateLocked){
+        if(fz1 < threshold){
+
+          // Tell that the left foot is pressed
+          state.leftIsPressed = true
+          state.nOfSteps += 1
+          state.stepsCounter +=1
+
+          //console.log("In locked and a new step starts")
+          state.isStepFullLeft = false
+          state.isSeriesLeftPlateLocked = false
+          let s = state.seriesLeftPlate
+          s.push({  
+            data: [],
+          })
+          state.seriesLeftPlate = s
+
+          // Get the max value from the left feet
+          //console.log(state.seriesLeftPlate[state.seriesLeftLinesCounter])
+          state.leftMaxValue = Math.max.apply(null,state.seriesLeftPlate[state.seriesLeftLinesCounter].data)  || 0
+          //console.log("Left Max: "+state.leftMaxValue)
+          state.seriesLeftLinesCounter +=1
+
+          if(state.seriesLeftLinesCounter > Number(state.nOfLines)){
+
+            // Calcuate first all the length of the data
+            // Then calculate the average of the lengths and
+            // get those that are above average
+            let arrayLengths = state.seriesLeftPlate.filter(i=>i&&i.data.length && i.data.length > 0).map(e=>e.data.length)
+            let averageArrayLength = ArrayAverage(arrayLengths)
+            arrayLengths = state.seriesLeftPlate.filter(i=>i&&i.data.length && i.data.length > averageArrayLength).map(e=>e.data.length)
+    
+    
+            //console.log(arrayLengths)
+            let minArrayLength = Math.min.apply(null,arrayLengths)
+           // console.log(minArrayLength,averageArrayLength)
+    
+            let arraysToProceed = state.seriesLeftPlate.filter(i=>i&&i.data.length && i.data.length > averageArrayLength).map(e=>e.data.slice(0,minArrayLength))
+            //console.log(arraysToProceed)
+    
+            const avgEmAll = arrays => _.zip.apply(null, arrays).map(avg)
+            const sum = (y, z) => Number(y) + Number(z)
+            const avg = x => x.reduce(sum) / x.length
+            //console.log(avgEmAll(arraysToProceed))
+    
+            let d =[]
+            d.push({  
+              data: [],
+            })
+            state.seriesLeftPlate = [{
+              data: []
+            }]
+            state.seriesLeftLinesCounter = 0 
+            state.seriesLeftPlate[state.seriesLeftLinesCounter].data = avgEmAll(arraysToProceed)
+            state.seriesLeftLinesCounter +=1
+            state.isStepFullLeft = false
+            state.isSeriesLeftPlateLocked = false
+            let s = state.seriesLeftPlate
+            s.push({  
+              data: [],
+            })
+            state.seriesLeftPlate = s
+          }
+        }
+
+        if(fz1 > threshold && state.isStepFullLeft){
+          //console.log("In locked and writing data")
+          let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
+          d.push(entry)
+          state.seriesLeftPlate[state.seriesLeftLinesCounter].data = d
+        }
+      } else {
+        if(fz1 > threshold){
+          //console.log("In unlocked an a new step starts")
+          state.isStepFullLeft = true
+          state.isSeriesLeftPlateLocked = true
+          let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
+          d.push(entry)
+          state.seriesLeftPlate[state.seriesLeftLinesCounter].data = d
+        }
+      }
       // Every 20 lines remove all and keep only one
-      if(state.seriesLeftPlate.length > 12){
+      /*if(state.seriesLeftPlate.length > 12){
         state.seriesLeftPlate = [state.seriesLeftPlate[state.seriesLeftLinesCounter]]
         state.seriesLeftLinesCounter = 0
         state.isSeriesLeftPlateLocked = false
       }
-
-
-      if(fz1 > 4 && !state.isSeriesLeftPlateLocked){
-        state.isSeriesLeftPlateLocked = true
-        let s = state.seriesLeftPlate
-        s.push({  
-          data: [],
-        })
-        state.seriesLeftPlate = s
-        state.seriesLeftLinesCounter +=1
-        console.log("fz1 > 20 and unlocked")
-      } else if (fz1 < 4 && state.isSeriesLeftPlateLocked){
-        state.isSeriesLeftPlateLocked = false
-        console.log("fz1 < 20 and locked")
-      } else if( fz1 > 4 && state.isSeriesLeftPlateLocked){
-        console.log("Write fz1")
-        let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
-        d.push(entry)
-        state.seriesLeftPlate[state.seriesLeftLinesCounter].data = d
-      }
+      */
     },
     setSeriesRightPlate(state,rows){
       let entry = rows[rowsNames[state.rightForcePlateChannel]]
       let fz2 = rows[8]
-      
-      if(state.seriesRightPlate.length > 12){
-        state.seriesRightPlate = [state.seriesRightPlate[state.seriesRightLinesCounter]]
-        state.seriesRightLinesCounter = 0
-        state.isSeriesRightPlateLocked = false
+      let threshold
+      if(Number(state.threshold) !=-1 && state.threshold!=""){
+        threshold = Number(state.threshold)
+      } else {
+        threshold = Number( 0.05 * state.weight)
       }
+  
+      if(state.isSeriesRightPlateLocked){
+        if(fz2 < threshold){
 
-      if(fz2 > 4 && !state.isSeriesRightPlateLocked){
-        state.isSeriesRightPlateLocked = true
-        let s = state.seriesRightPlate
-        s.push({  
-          data: [],
-        })
-        state.seriesRightPlate = s
-        state.seriesRightLinesCounter +=1
-        //console.log("fz2 > 20 and unlocked")
-      } else if (fz2 < 4 && state.isSeriesRightPlateLocked){
-        state.isSeriesRightPlateLocked = false
-        //console.log("fz2 < 20 and locked")
-      } else if( fz2 > 4 && state.isSeriesRightPlateLocked){
-        //console.log("Write fz2")
-        let d = state.seriesRightPlate[state.seriesRightLinesCounter].data
-        d.push(entry)
-        state.seriesRightPlate[state.seriesRightLinesCounter].data = d
-      }
-    },
-    setMaxFootLeftPlate(state,rows){
-      let entry = rows[rowsNames[state.leftForcePlateChannel]] 
-      let fz1 = rows[2]
+          // Tell that the right foot is pressed
+          state.rightIsPressed = true
+          state.nOfSteps += 1
+          state.stepsCounter +=1
+
+          //console.log("In locked and a new step starts")
+          state.isStepFullRight = false
+          state.isSeriesRightPlateLocked = false
+          let s = state.seriesRightPlate
+          s.push({  
+            data: [],
+          })
+          state.seriesRightPlate = s
+
+          // Get the max value from the right feet
+          //console.log(state.seriesRightPlate[state.seriesRightLinesCounter])
+          state.rightMaxValue = Math.max.apply(null,state.seriesRightPlate[state.seriesRightLinesCounter].data) || 0
+          //console.log("Right Max: "+state.rightMaxValue)
+
+          state.seriesRightLinesCounter +=1
+
+          if(state.seriesRightLinesCounter > Number(state.nOfLines)){
+
+            // Calcuate first all the length of the data
+            // Then calculate the average of the lengths and
+            // get those that are above average
+            let arrayLengths = state.seriesRightPlate.filter(i=>i&&i.data.length && i.data.length > 0).map(e=>e.data.length)
+            let averageArrayLength = ArrayAverage(arrayLengths)
+            arrayLengths = state.seriesRightPlate.filter(i=>i&&i.data.length && i.data.length > averageArrayLength).map(e=>e.data.length)
     
-      if(fz1 > 200 && !state.leftFootIsPressed){
-        state.leftFootIsPressed = true
-        state.maxLeftPlate = -1
-        state.nOfSteps +=1
-
-        var now = new Date().getTime()
-        //console.log(now)
-        if(state.stepTime != -1){
-          //console.log(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
-          state.stepsPerMinute = 1/(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
-          state.stepsAsymmetry = clamp(((2*(state.stepsPerMinute - state.stepsPerMinuteTarget))/(state.stepsPerMinuteTarget + state.stepsPerMinute))*100,-100,100)
-          console.log(state.stepsAsymmetry)
+    
+            //console.log(arrayLengths)
+            let minArrayLength = Math.min.apply(null,arrayLengths)
+            //console.log(minArrayLength,averageArrayLength)
+    
+            let arraysToProceed = state.seriesRightPlate.filter(i=>i&&i.data.length && i.data.length > averageArrayLength).map(e=>e.data.slice(0,minArrayLength))
+            ///console.log(arraysToProceed)
+    
+            const avgEmAll = arrays => _.zip.apply(null, arrays).map(avg)
+            const sum = (y, z) => Number(y) + Number(z)
+            const avg = x => x.reduce(sum) / x.length
+            //console.log(avgEmAll(arraysToProceed))
+    
+            let d =[]
+            d.push({  
+              data: [],
+            })
+            state.seriesRightPlate = [{
+              data: []
+            }]
+            state.seriesRightLinesCounter = 0 
+            state.seriesRightPlate[state.seriesRightLinesCounter].data = avgEmAll(arraysToProceed)
+            state.seriesRightLinesCounter +=1
+            state.isStepFullRight = false
+            state.isSeriesLeftPlateLocked = false
+            let s = state.seriesRightPlate
+            s.push({  
+              data: [],
+            })
+            state.seriesRightPlate = s
+          }
         }
-        state.stepTime = now
-      } else if (fz1 < 200 && state.leftFootIsPressed){
-        state.leftFootIsPressed = false
-      } else if(fz1 > 200 && state.leftFootIsPressed){
-        if(state.maxLeftPlate < entry){
-          state.maxLeftPlate = entry
+
+        if(fz2 > threshold && state.isStepFullRight){
+          //console.log("In locked and writing data")
+          let d = state.seriesRightPlate[state.seriesRightLinesCounter].data
+          d.push(entry)
+          state.seriesRightPlate[state.seriesRightLinesCounter].data = d
+        }
+      } else {
+        if(fz2 > threshold){
+          //console.log("In unlocked an a new step starts")
+          state.isStepFullRight = true
+          state.isSeriesRightPlateLocked = true
+          let d = state.seriesRightPlate[state.seriesRightLinesCounter].data
+          d.push(entry)
+          state.seriesRightPlate[state.seriesRightLinesCounter].data = d
         }
       }
-      if(state.maxLeftPlate!=-1 && state.maxRightPlate!=-1){
-        let upp = 2*(state.maxRightPlate - state.maxLeftPlate)
-        let down = (state.maxRightPlate + state.maxLeftPlate)
-        let percent = (upp/down)*100
-        state.footAsymmetry = clamp(percent,-100,100)
-        //console.log("Max Right: "+state.maxRightPlate)
-        //console.log("Max Left: "+state.maxLeftPlate)
-        //console.log(state.footAsymmetry)
-      } 
-    },
-    setMaxFootRightPlate(state,rows){
-      let entry = rows[rowsNames[state.rightForcePlateChannel]]
-      let fz2 = rows[8]
-
-      if(fz2 > 200 && !state.rightFootIsPressed){
-        state.rightFootIsPressed = true
-        state.maxRightPlate = -1
-        state.nOfSteps +=1
-
-        var now = new Date().getTime()
-        //console.log(now)
-        if(state.stepTime != -1){
-          //console.log(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
-          state.stepsPerMinute = 1/(((now - state.stepTime) % (1000 * 60 * 60)) / (1000 * 60))
-          console.log(state.stepsPerMinute)
-          state.stepsAsymmetry = clamp(((2*(state.stepsPerMinute - state.stepsPerMinuteTarget))/(state.stepsPerMinuteTarget + state.stepsPerMinute))*100,-100,100)
-          console.log(state.stepsAsymmetry)
-        }
-      } else if (fz2 < 200 && state.rightFootIsPressed){
-        state.rightFootIsPressed = false
-      } else if(fz2 > 200 && state.rightFootIsPressed){
-        if(state.maxRightPlate < entry){
-          state.maxRightPlate = entry
-        }
-      }
-      
-      if(state.maxLeftPlate!=-1 && state.maxRightPlate!=-1){
-        let upp = 2*(state.maxRightPlate - state.maxLeftPlate)
-        let down = (state.maxRightPlate + state.maxLeftPlate)
-        let percent = (upp/down)*100
-        state.footAsymmetry = clamp(percent,-100,100)
-        //console.log("Max Right: "+state.maxRightPlate)
-        //console.log("Max Left: "+state.maxLeftPlate)
-        //console.log(state.footAsymmetry)
-      } 
     },
     setSeries(state, rows) {
       state.series = [{
         data: [{ x: 'Left Foot', y: rows[rowsNames[state.leftForcePlateChannel]] }, { x: 'Right Foot', y: rows[rowsNames[state.rightForcePlateChannel]] }],
       }]
+    },
+    checkIfBothFeetsArePressed(state){
+      if(state.leftIsPressed && state.rightIsPressed && state.leftMaxValue > 0 && state.rightMaxValue > 0){
+        state.footAsymmetry = ((2*(state.leftMaxValue - state.rightMaxValue))/(state.leftMaxValue + state.rightMaxValue))*100
+        state.leftIsPressed = false
+        state.rightIsPressed = false
+      }
+    },
+    checkTimeInterval(state) {
+      if (state.startTime === -1) {
+        state.startTime = moment(new Date())
+        console.log(state.startTime)
+      }
+      
+      let nowTime = moment()
+      if (nowTime.diff(state.startTime, "seconds") >= state.stepsTimeInteval) {
+        
+
+        // Calculate steps per minute
+        state.stepsPerMinute = (state.stepsCounter * 60) / state.stepsTimeInteval
+        state.stepsCounter = 0
+        state.startTime = -1
+        
+        // Calculate steps asymettry
+        state.stepsAsymmetry = ((2 * (state.stepsPerMinute - state.stepsPerMinuteTarget))/ (state.stepsPerMinuteTarget + state.stepsPerMinute))*100
+        console.log(state.stepsAsymmetry)
+        state.stepsAsymmetry = Math.min(Math.max(parseInt(state.stepsAsymmetry), -100), 100);
+      }
     },
     setForce(state, force) {
       state.force = force
@@ -221,9 +321,6 @@ export default new Vuex.Store({
     },
     setStepsPerMinuteTarget(state,stepsPerMinute) {
       state.stepsPerMinuteTarget = stepsPerMinute
-    },
-    setStepsPerMinute(state,stepsPerMinute) {
-      state.stepsPerMinute = stepsPerMin = stepsPerMinute
     },
     setAxesMax(state, axesMax) {
       state.axesMax = axesMax
@@ -240,6 +337,18 @@ export default new Vuex.Store({
     setPrevRightForcePlateAnnotationY(state, prevRightForcePlateAnnotationY) {
       state.prevRightForcePlateAnnotationY = prevRightForcePlateAnnotationY
     },
+    setStepsTimeInterval(state,stepsTimeInteval){
+      state.stepsTimeInteval = stepsTimeInteval
+    },
+    setFrequency(state,frequency){
+      state.frequency = frequency
+    },
+    setThreshold(state,threshold){
+      state.threshold = threshold
+    },
+    setNofLines(state,nOfLines){
+      state.nOfLines = nOfLines
+    },
     resetState(state){
       state.series = [{
         data: [{ x: 'Left Foot', y: 0 }, { x: 'Right Foot', y: 0 }],
@@ -250,10 +359,6 @@ export default new Vuex.Store({
       state.seriesRightPlate = [{
         data: []
       }]
-      state.isSeriesRightPlateLocked = false
-      state.isSeriesLeftPlateLocked = false
-      state.seriesLeftLinesCounter = 0
-      state.seriesRightLinesCounter = 0
       state.force = 0
       state.nOfSteps = 0
       state.axesMax = 100
@@ -261,11 +366,18 @@ export default new Vuex.Store({
       state.rightForcePlateAnnotationY = 0
       state.prevLeftForcePlateAnnotationY = 0
       state.prevRightForcePlateAnnotationY = 0
+      state.isStepFullLeft = false
+      state.isSeriesLeftPlateLocked = true
+      state.seriesLeftLinesCounter = 0
+      state.isStepFullRight = false
+      state.isSeriesRightPlateLocked = true
+      state.seriesRightLinesCounter = 0
+      state.force = 0
+      state.stepsPerMinuteTarget = 60
     }
   },
   actions:{}
 })
 
-function clamp(number, min, max) {
-  return Math.max(min, Math.min(number, max));
-}
+
+const ArrayAverage = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;

@@ -16,6 +16,10 @@ module.exports = class {
     this.nOfStepsLineChart = 0
     this.nOfStepsSpeedMeter= 0
     this.stepsPerMinuteTarget = 0
+    this.stepsTimeInteval = 0
+    this.frequency = 100
+    this.threshold = -1
+    this.nOfLines =  12
     this.dataType = "Normalized"
     this.cw = null 
     this.cpw = null
@@ -113,11 +117,19 @@ module.exports = class {
       
     // Session Events
     ipcMain.on('START_SESSION', (_, d) => {
-      const { weight, dataType,stepsPerMinuteTarget } = d 
+      const { 
+        weight, dataType,stepsPerMinuteTarget,stepsTimeInteval,
+        frequency,threshold,nOfLines
+      } = d 
+      console.log(nOfLines)
       this.isSessionRunning = true
       this.weight = weight
       this.dataType = dataType
       this.stepsPerMinuteTarget = stepsPerMinuteTarget
+      this.stepsTimeInteval = stepsTimeInteval
+      this.frequency = frequency
+      this.threshold = threshold
+      this.nOfLines = nOfLines
     })
     ipcMain.on('STOP_SESSION', () => {
       this.isSessionRunning = false
@@ -129,8 +141,11 @@ module.exports = class {
         e.reply("SESSION_RESPONSE_BARPLOT",{
           rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length] : this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
           force: Math.floor(Math.random() * 100) + 1,
-          nOfSteps: this.nOfStepsBarPlot,
           isSessionRunning: this.isSessionRunning,
+          stepsTimeInterval: this.stepsTimeInteval,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
         })
         this.nOfStepsBarPlot = this.nOfStepsBarPlot + SKIP_ENTRIES_BARPLOT
       } else {
@@ -138,8 +153,11 @@ module.exports = class {
         e.reply("SESSION_RESPONSE_BARPLOT",{
           rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length] : this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
           force: Math.floor(Math.random() * 100) + 1,
-          nOfSteps: this.nOfStepsBarPlot,
           isSessionRunning: this.isSessionRunning,
+          stepsTimeInterval: this.stepsTimeInteval,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
         })
       }
     })
@@ -148,19 +166,27 @@ module.exports = class {
     ipcMain.on("SESSION_RUNNING_SPEEDMETER", (e, d) => {
       if (this.isSessionRunning) {
         e.reply("SESSION_RESPONSE_SPEEDMETER", {
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsSpeedMeter + SKIP_ENTRIES_SPEEDMETER) % this.rows.length] : this.rows[(this.nOfStepsSpeedMeter + SKIP_ENTRIES_SPEEDMETER) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsSpeedMeter) % this.rows.length] : this.rows[(this.nOfStepsSpeedMeter) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
           force: Math.floor(Math.random() * 100) + 1,
           isSessionRunning: this.isSessionRunning,
-          stepsPerMinuteTarget: this.stepsPerMinuteTarget
+          stepsPerMinuteTarget: this.stepsPerMinuteTarget,
+          stepsTimeInterval: this.stepsTimeInteval,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
         })
         this.nOfStepsSpeedMeter = this.nOfStepsSpeedMeter + SKIP_ENTRIES_SPEEDMETER
       } else {
         this.nOfStepsSpeedMeter = 0
         e.reply("SESSION_RESPONSE_SPEEDMETER", {
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsSpeedMeter + SKIP_ENTRIES_SPEEDMETER) % this.rows.length] : this.rows[(this.nOfStepsSpeedMeter + SKIP_ENTRIES_SPEEDMETER) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsSpeedMeter) % this.rows.length] : this.rows[(this.nOfStepsSpeedMeter) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
           force: Math.floor(Math.random() * 100) + 1,
           isSessionRunning: this.isSessionRunning,
-          stepsPerMinuteTarget: this.stepsPerMinuteTarget
+          stepsPerMinuteTarget: this.stepsPerMinuteTarget,
+          stepsTimeInterval: this.stepsTimeInteval,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
         })
       }
     })
@@ -168,27 +194,27 @@ module.exports = class {
     // LineChart Events
     ipcMain.on("SESSION_RUNNING_LINECHART",(e,d)=>{
       if(this.isSessionRunning){
-        if(this.nOfStepsLineChart == 0){
-          e.reply("SESSION_RESPONSE_LINECHART",{
-            rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
-            isSessionRunning: this.isSessionRunning,
-            nOfSteps: this.nOfStepsLineChart
-          })
-          this.nOfStepsLineChart = this.nOfStepsLineChart + SKIP_ENTRIES_LINECHART
-        } else {
-          e.reply("SESSION_RESPONSE_LINECHART",{
-            rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart+SKIP_ENTRIES_LINECHART) % this.rows.length] : this.rows[(this.nOfStepsLineChart+SKIP_ENTRIES_LINECHART) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
-            isSessionRunning: this.isSessionRunning,
-            nOfSteps: this.nOfStepsLineChart
-          })
-          this.nOfStepsLineChart = this.nOfStepsLineChart + SKIP_ENTRIES_LINECHART
-        }
+        const fz1 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][2] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100)[2]
+        const fz2 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][8] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100)[8]
+        console.log(this.nOfStepsLineChart,fz1,fz2,this.frequency,this.threshold,this.nOfLines)
+        e.reply("SESSION_RESPONSE_LINECHART",{
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
+          isSessionRunning: this.isSessionRunning,
+          stepsTimeInterval: this.stepsTimeInteval,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
+        })
+        this.nOfStepsLineChart = this.nOfStepsLineChart + SKIP_ENTRIES_LINECHART
       } else {
         this.nOfStepsLineChart = 0
         e.reply("SESSION_RESPONSE_LINECHART",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart+SKIP_ENTRIES_LINECHART) % this.rows.length] : this.rows[(this.nOfStepsLineChart+SKIP_ENTRIES_LINECHART) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
           isSessionRunning: this.isSessionRunning,
-          nOfSteps: this.nOfStepsLineChart
+          stepsTimeInterval: this.stepsTimeInteval,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
         })
       }
     })
