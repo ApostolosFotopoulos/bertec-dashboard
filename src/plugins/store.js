@@ -22,6 +22,13 @@ export default new Vuex.Store({
     seriesLeftPlate:[{
       data: []
     }],
+    seriesFinalLeftPlate:[{
+      data:[]
+    }],
+    seriesFinalRightPlate:[{
+      data:[]
+    }],
+    shouldUpdateAxes:false,
     isStepFullLeft:false,
     isSeriesLeftPlateLocked:true,
     seriesLeftLinesCounter:0,
@@ -110,6 +117,8 @@ export default new Vuex.Store({
           state.isStepFullLeft = false
           state.isSeriesLeftPlateLocked = false
           let s = state.seriesLeftPlate
+          console.log(s)
+          state. seriesFinalLeftPlate = s
           s.push({  
             data: [],
           })
@@ -118,6 +127,13 @@ export default new Vuex.Store({
           // Get the max value from the left feet
           //console.log(state.seriesLeftPlate[state.seriesLeftLinesCounter])
           state.leftMaxValue = Math.max.apply(null,state.seriesLeftPlate[state.seriesLeftLinesCounter].data)  || 0
+
+          // Αxes have the same max
+          if(state.leftMaxValue > state.axesMax){
+            console.log("SHOULD UPDATE LEFT MAX")
+            state.axesMax = state.leftMaxValue 
+            state.shouldUpdateAxes = true
+          }
           //console.log("Left Max: "+state.leftMaxValue)
           state.seriesLeftLinesCounter +=1
 
@@ -156,6 +172,7 @@ export default new Vuex.Store({
             state.isStepFullLeft = false
             state.isSeriesLeftPlateLocked = false
             let s = state.seriesLeftPlate
+            state. seriesFinalLeftPlate = s
             s.push({  
               data: [],
             })
@@ -209,6 +226,7 @@ export default new Vuex.Store({
           state.isStepFullRight = false
           state.isSeriesRightPlateLocked = false
           let s = state.seriesRightPlate
+          state.seriesFinalRightPlate = s
           s.push({  
             data: [],
           })
@@ -217,6 +235,12 @@ export default new Vuex.Store({
           // Get the max value from the right feet
           //console.log(state.seriesRightPlate[state.seriesRightLinesCounter])
           state.rightMaxValue = Math.max.apply(null,state.seriesRightPlate[state.seriesRightLinesCounter].data) || 0
+
+           // Αxes have the same max
+          if(state.rightMaxValue > state.axesMax){
+            state.axesMax = state.rightMaxValue 
+            state.shouldUpdateAxes = true
+          }
           //console.log("Right Max: "+state.rightMaxValue)
 
           state.seriesRightLinesCounter +=1
@@ -256,6 +280,7 @@ export default new Vuex.Store({
             state.isStepFullRight = false
             state.isSeriesLeftPlateLocked = false
             let s = state.seriesRightPlate
+            state.seriesRightPlate = s
             s.push({  
               data: [],
             })
@@ -286,10 +311,26 @@ export default new Vuex.Store({
       }]
     },
     checkIfBothFeetsArePressed(state){
+
+      if (state.startTime === -1) {
+        state.startTime = moment(new Date())
+        console.log(state.startTime)
+      }
+      
+
       if(state.leftIsPressed && state.rightIsPressed && state.leftMaxValue > 0 && state.rightMaxValue > 0){
         state.footAsymmetry = ((2*(state.leftMaxValue - state.rightMaxValue))/(state.leftMaxValue + state.rightMaxValue))*100
         state.leftIsPressed = false
         state.rightIsPressed = false
+
+        let nowTime = moment()
+        console.log(nowTime.diff(state.startTime, "milliseconds"))
+        state.stepsPerMinute = (2* 60000) / (nowTime.diff(state.startTime, "milliseconds"))
+        state.startTime = -1
+
+        state.stepsAsymmetry = ((2 * (state.stepsPerMinute - state.stepsPerMinuteTarget))/ (state.stepsPerMinuteTarget + state.stepsPerMinute))*100
+        console.log(state.stepsAsymmetry)
+        state.stepsAsymmetry = Math.min(Math.max(parseInt(state.stepsAsymmetry), -100), 100);
       }
     },
     checkTimeInterval(state) {
@@ -347,7 +388,10 @@ export default new Vuex.Store({
       state.threshold = threshold
     },
     setNofLines(state,nOfLines){
-      state.nOfLines = nOfLines
+      state.nOfLines = nOfLines 
+    },
+    setShouldUpdateAxes(state,shouldUpdateAxes){
+      state.shouldUpdateAxes = shouldUpdateAxes
     },
     resetState(state){
       state.series = [{
@@ -359,9 +403,16 @@ export default new Vuex.Store({
       state.seriesRightPlate = [{
         data: []
       }]
+      state.seriesFinalLeftPlate = [{
+        data:[]
+      }],
+      state.seriesFinalRightPlate = [{
+        data:[]
+      }],
       state.force = 0
       state.nOfSteps = 0
       state.axesMax = 100
+      state.shouldUpdateAxes = true
       state.leftForcePlateAnnotationY = 0
       state.rightForcePlateAnnotationY = 0
       state.prevLeftForcePlateAnnotationY = 0

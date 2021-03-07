@@ -65,7 +65,7 @@ export default {
       this.$store.commit('setThreshold',Number(responseData.threshold))
       this.$store.commit('setNofLines',Number(responseData.nOfLines))
       this.$store.commit('checkIfBothFeetsArePressed')
-      this.$store.commit('checkTimeInterval')
+      //this.$store.commit('checkTimeInterval')
     }
   }
 };

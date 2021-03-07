@@ -222,7 +222,7 @@ module.exports = class {
 
   async fetchDataFromCSV() {
     try {
-      const csvString = await fs.readFile(path.resolve(__dirname,"../test/data/run_2belts.csv"));
+      const csvString = await fs.readFile(path.resolve(__dirname,"../test/data/walk_2belts.csv"));
       let rows = (await csv.parse(csvString)).filter((_,idx)=> idx!=0);
       return rows
     } catch (e) {

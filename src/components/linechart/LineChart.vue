@@ -3,12 +3,12 @@
     <v-row class="mt-2">
       <v-col cols="6">
         <div class="pa-3">
-          <VueApexCharts height="650" ref="chartLeftPlate" class="text-center" type="line" :options="lineChartOptions" :series="$store.state.seriesLeftPlate"/>
+          <VueApexCharts height="650" ref="chartLeftPlate" class="text-center" type="line" :options="redLineOptions" :series="$store.state.seriesFinalLeftPlate"/>
         </div>
       </v-col>
       <v-col cols="6">
         <div class="pa-3">
-          <VueApexCharts height="650" ref="chartRightPlate" class="text-center" type="line" :options="lineChartOptions" :series="$store.state.seriesRightPlate"/>
+          <VueApexCharts height="650" ref="chartRightPlate" class="text-center" type="line" :options="greenLineOptions" :series="$store.state.seriesFinalRightPlate"/>
         </div>
       </v-col>
     </v-row>
@@ -25,7 +25,7 @@ export default {
   },
   data(){
     return{
-      lineChartOptions: {
+      redLineOptions: {
         forceNiceScale: true,
         ...defaultLineChartOptions,
         yaxis: {
@@ -41,8 +41,10 @@ export default {
               return val.toFixed(0)
             }
           },
+          max: this.$store.state.axesMax
         },
         xaxis:{
+          max: this.$store.state.frequency,
           dataLabels:{
             show:false,
             enabled:false,
@@ -52,14 +54,49 @@ export default {
           }
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesLeftPlate.length - 1)){
+          if(seriesIndex == (this.$store.state.seriesFinalLeftPlate.length - 2)){
             return "#d32d41"
           } else {
             return "gray"
           }
         }]
       },
-
+      greenLineOptions: {
+        forceNiceScale: true,
+        ...defaultLineChartOptions,
+        yaxis: {
+          max: this.$store.state.axesMax,
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
+          labels:{
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              return val.toFixed(0)
+            }
+          },
+        },
+        xaxis:{
+          max: this.$store.state.frequency,
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
+          labels:{
+            show:false,
+          }
+        },
+        colors:[({ value, seriesIndex, w })=>{
+          if(seriesIndex == (this.$store.state.seriesFinalRightPlate.length - 2)){
+            return "#6ab187"
+          } else {
+            return "gray"
+          }
+        }]
+      },
     }
   },
   beforeMount(){
@@ -67,14 +104,13 @@ export default {
     ipcRenderer.on('SESSION_RESPONSE_LINECHART',(_,responseData)=>{
       if(responseData.isSessionRunning){
         self.setupStoreVariables(responseData)
-        if(!self.$store.state.isSeriesLeftPlateLocked){
-          self.updateLeftChart()
-        }
-        if(!self.$store.state.isSeriesRightPlateLocked){
-          self.updateRightChart()
-        }
       } else {
         self.$store.commit("resetState")
+      }
+      if(self.$store.state.shouldUpdateAxes){
+        this.$store.commit('setShouldUpdateAxes',false)
+        this.updateLeftChart();
+        this.updateRightChart();
       }
     })
   },
@@ -91,8 +127,9 @@ export default {
     },
     updateLeftChart(){
       this.$refs.chartLeftPlate.updateOptions({
+        forceNiceScale: true,
+        ...defaultLineChartOptions,
         yaxis: {
-          forceNiceScale: true,
           dataLabels:{
             show:false,
             enabled:false,
@@ -105,8 +142,10 @@ export default {
               return val.toFixed(0)
             }
           },
+          max: this.$store.state.axesMax
         },
         xaxis:{
+          max: this.$store.state.frequency,
           dataLabels:{
             show:false,
             enabled:false,
@@ -116,7 +155,7 @@ export default {
           }
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesLeftPlate.length-2)){
+          if(seriesIndex == (this.$store.state.seriesFinalLeftPlate.length - 2)){
             return "#d32d41"
           } else {
             return "gray"
@@ -126,8 +165,14 @@ export default {
     },
     updateRightChart(){
       this.$refs.chartRightPlate.updateOptions({
+        forceNiceScale: true,
+        ...defaultLineChartOptions,
         yaxis: {
-          forceNiceScale: true,
+          max: this.$store.state.axesMax,
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
           labels:{
             style:{
               colors:['#fff']
@@ -138,12 +183,17 @@ export default {
           },
         },
         xaxis:{
+          max: this.$store.state.frequency,
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
           labels:{
             show:false,
           }
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesRightPlate.length - 2)){
+          if(seriesIndex == (this.$store.state.seriesFinalRightPlate.length - 2)){
             return "#6ab187"
           } else {
             return "gray"
