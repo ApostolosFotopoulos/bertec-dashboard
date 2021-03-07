@@ -18,10 +18,11 @@
     "animations": {
       "enabled": false
     },
-    "type": "line"
+    "type": "line",
+    "foreColor": "#fff"
   },
   "xaxis": {
-    "forceNiceScale": false,
+    "forceNiceScale": true,
     "labels":{
       "style":{
         "colors":["#fff","#fff"]

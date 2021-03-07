@@ -194,8 +194,8 @@ module.exports = class {
     // LineChart Events
     ipcMain.on("SESSION_RUNNING_LINECHART",(e,d)=>{
       if(this.isSessionRunning){
-        const fz1 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][2] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100)[2]
-        const fz2 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][8] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100)[8]
+        const fz1 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][2] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i,idx) => (Number(i) / this.weight) * 100)[2]
+        const fz2 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][8] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i, idx) => (Number(i) / this.weight) * 100)[8]
         console.log(this.nOfStepsLineChart,fz1,fz2,this.frequency,this.threshold,this.nOfLines)
         e.reply("SESSION_RESPONSE_LINECHART",{
           rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
@@ -222,7 +222,7 @@ module.exports = class {
 
   async fetchDataFromCSV() {
     try {
-      const csvString = await fs.readFile(path.resolve(__dirname,"../test/data/walk_2belts.csv"));
+      const csvString = await fs.readFile(path.resolve(__dirname,"../test/data/run_2belts.csv"));
       let rows = (await csv.parse(csvString)).filter((_,idx)=> idx!=0);
       return rows
     } catch (e) {

@@ -26,7 +26,6 @@ export default {
   data(){
     return{
       redLineOptions: {
-        forceNiceScale: true,
         ...defaultLineChartOptions,
         yaxis: {
           dataLabels:{
@@ -41,17 +40,23 @@ export default {
               return val.toFixed(0)
             }
           },
-          max: this.$store.state.axesMax
         },
         xaxis:{
-          max: this.$store.state.frequency,
           dataLabels:{
             show:false,
             enabled:false,
           },
           labels:{
-            show:false,
-          }
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              if (val.toFixed(0)%10 == 0){
+                return val.toFixed(0)
+              }
+            },
+            show:true,
+          },
         },
         colors:[({ value, seriesIndex, w })=>{
           if(seriesIndex == (this.$store.state.seriesFinalLeftPlate.length - 2)){
@@ -80,14 +85,22 @@ export default {
           },
         },
         xaxis:{
-          max: this.$store.state.frequency,
           dataLabels:{
             show:false,
             enabled:false,
           },
           labels:{
-            show:false,
-          }
+            style:{
+              colors:['#fff']
+            },
+            show:true,
+            formatter: (val)=>{
+              if (val.toFixed(0)%10 == 0){
+                return val.toFixed(0)
+              }
+            },
+          },
+          
         },
         colors:[({ value, seriesIndex, w })=>{
           if(seriesIndex == (this.$store.state.seriesFinalRightPlate.length - 2)){
@@ -127,7 +140,6 @@ export default {
     },
     updateLeftChart(){
       this.$refs.chartLeftPlate.updateOptions({
-        forceNiceScale: true,
         ...defaultLineChartOptions,
         yaxis: {
           dataLabels:{
@@ -145,14 +157,21 @@ export default {
           max: this.$store.state.axesMax
         },
         xaxis:{
-          max: this.$store.state.frequency,
           dataLabels:{
             show:false,
             enabled:false,
           },
           labels:{
-            show:false,
-          }
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              if (val.toFixed(0)%10 == 0){
+                return val.toFixed(0)
+              } 
+            },
+            show:true,
+          },
         },
         colors:[({ value, seriesIndex, w })=>{
           if(seriesIndex == (this.$store.state.seriesFinalLeftPlate.length - 2)){
@@ -165,7 +184,6 @@ export default {
     },
     updateRightChart(){
       this.$refs.chartRightPlate.updateOptions({
-        forceNiceScale: true,
         ...defaultLineChartOptions,
         yaxis: {
           max: this.$store.state.axesMax,
@@ -183,14 +201,21 @@ export default {
           },
         },
         xaxis:{
-          max: this.$store.state.frequency,
           dataLabels:{
             show:false,
             enabled:false,
           },
           labels:{
-            show:false,
-          }
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              if (val.toFixed(0)%10 == 0){
+                return val.toFixed(0)
+              } 
+            },
+            show:true,
+          },
         },
         colors:[({ value, seriesIndex, w })=>{
           if(seriesIndex == (this.$store.state.seriesFinalRightPlate.length - 2)){

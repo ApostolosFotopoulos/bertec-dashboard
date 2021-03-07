@@ -11,7 +11,7 @@ export default new Vuex.Store({
     selectedProtocol: "Walking",
     selectedDataType: "Normalized",
     duration: 60,
-    weight: 500,
+    weight: 700,
     filePath: "",
     isSessionRunning: false,
     leftForcePlateChannel: "FZ1",
@@ -40,7 +40,8 @@ export default new Vuex.Store({
     seriesRightLinesCounter:0,
     force: 0,
     nOfSteps: 0,
-    axesMax: 100,
+    axesMax: 0,
+    xAxesMax: 0,
     leftForcePlateAnnotationY: 0,
     rightForcePlateAnnotationY: 0,
     prevLeftForcePlateAnnotationY: 0,
@@ -50,7 +51,7 @@ export default new Vuex.Store({
     stepsTimeInteval:10,
     frequency:100,
     threshold:-1,
-    nOfLines:3  ,
+    nOfLines:10  ,
     footAsymmetry:0,
     stepsAsymmetry:0,
     leftIsPressed:false,
@@ -117,7 +118,7 @@ export default new Vuex.Store({
           state.isStepFullLeft = false
           state.isSeriesLeftPlateLocked = false
           let s = state.seriesLeftPlate
-          console.log(s)
+          //console.log(s)
           state. seriesFinalLeftPlate = s
           s.push({  
             data: [],
@@ -130,7 +131,7 @@ export default new Vuex.Store({
 
           // Αxes have the same max
           if(state.leftMaxValue > state.axesMax){
-            console.log("SHOULD UPDATE LEFT MAX")
+            //console.log("SHOULD UPDATE LEFT MAX")
             state.axesMax = state.leftMaxValue 
             state.shouldUpdateAxes = true
           }
@@ -238,7 +239,7 @@ export default new Vuex.Store({
 
            // Αxes have the same max
           if(state.rightMaxValue > state.axesMax){
-            state.axesMax = state.rightMaxValue 
+            state.axesMax = state.rightMaxValue
             state.shouldUpdateAxes = true
           }
           //console.log("Right Max: "+state.rightMaxValue)
@@ -314,7 +315,7 @@ export default new Vuex.Store({
 
       if (state.startTime === -1) {
         state.startTime = moment(new Date())
-        console.log(state.startTime)
+        //console.log(state.startTime)
       }
       
 
@@ -324,19 +325,19 @@ export default new Vuex.Store({
         state.rightIsPressed = false
 
         let nowTime = moment()
-        console.log(nowTime.diff(state.startTime, "milliseconds"))
+        //console.log(nowTime.diff(state.startTime, "milliseconds"))
         state.stepsPerMinute = (2* 60000) / (nowTime.diff(state.startTime, "milliseconds"))
         state.startTime = -1
 
         state.stepsAsymmetry = ((2 * (state.stepsPerMinute - state.stepsPerMinuteTarget))/ (state.stepsPerMinuteTarget + state.stepsPerMinute))*100
-        console.log(state.stepsAsymmetry)
+        //console.log(state.stepsAsymmetry)
         state.stepsAsymmetry = Math.min(Math.max(parseInt(state.stepsAsymmetry), -100), 100);
       }
     },
     checkTimeInterval(state) {
       if (state.startTime === -1) {
         state.startTime = moment(new Date())
-        console.log(state.startTime)
+        //console.log(state.startTime)
       }
       
       let nowTime = moment()
@@ -350,7 +351,7 @@ export default new Vuex.Store({
         
         // Calculate steps asymettry
         state.stepsAsymmetry = ((2 * (state.stepsPerMinute - state.stepsPerMinuteTarget))/ (state.stepsPerMinuteTarget + state.stepsPerMinute))*100
-        console.log(state.stepsAsymmetry)
+        //console.log(state.stepsAsymmetry)
         state.stepsAsymmetry = Math.min(Math.max(parseInt(state.stepsAsymmetry), -100), 100);
       }
     },
@@ -411,7 +412,8 @@ export default new Vuex.Store({
       }],
       state.force = 0
       state.nOfSteps = 0
-      state.axesMax = 100
+      state.axesMax = 0
+      state.xAxesMax = 0
       state.shouldUpdateAxes = true
       state.leftForcePlateAnnotationY = 0
       state.rightForcePlateAnnotationY = 0
@@ -424,7 +426,11 @@ export default new Vuex.Store({
       state.isSeriesRightPlateLocked = true
       state.seriesRightLinesCounter = 0
       state.force = 0
-      state.stepsPerMinuteTarget = 60
+      state.footAsymmetry = 0
+      state.stepsAsymmetry = 0
+      state.startTime =  -1,
+      state.stepsCounter = 0
+      state.stepsPerMinute = 0
     }
   },
   actions:{}
