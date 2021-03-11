@@ -12,8 +12,8 @@ module.exports = class {
   constructor() {
     this.isSessionRunning = false
     this.weight = 0
-    this.nOfStepsBarPlot = 0
     this.nOfStepsLineChart = 0
+    this.nOfCOPChart = 0
     this.nOfStepsSpeedMeter= 0
     this.stepsPerMinuteTarget = 0
     this.stepsTimeInteval = 0
@@ -135,33 +135,6 @@ module.exports = class {
       this.isSessionRunning = false
     })
 
-     // BarPlot Events
-    ipcMain.on("SESSION_RUNNING_BARPLOT",(e,d)=>{
-      if(this.isSessionRunning){
-        e.reply("SESSION_RESPONSE_BARPLOT",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length] : this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
-          force: Math.floor(Math.random() * 100) + 1,
-          isSessionRunning: this.isSessionRunning,
-          stepsTimeInterval: this.stepsTimeInteval,
-          frequency: this.frequency,
-          threshold: this.threshold,
-          nOfLines: this.nOfLines,
-        })
-        this.nOfStepsBarPlot = this.nOfStepsBarPlot + SKIP_ENTRIES_BARPLOT
-      } else {
-        this.nOfStepsBarPlot = 0
-        e.reply("SESSION_RESPONSE_BARPLOT",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length] : this.rows[(this.nOfStepsBarPlot+SKIP_ENTRIES_BARPLOT) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
-          force: Math.floor(Math.random() * 100) + 1,
-          isSessionRunning: this.isSessionRunning,
-          stepsTimeInterval: this.stepsTimeInteval,
-          frequency: this.frequency,
-          threshold: this.threshold,
-          nOfLines: this.nOfLines,
-        })
-      }
-    })
-
     //SpeedMeter Events
     ipcMain.on("SESSION_RUNNING_SPEEDMETER", (e, d) => {
       if (this.isSessionRunning) {
@@ -194,11 +167,8 @@ module.exports = class {
     // LineChart Events
     ipcMain.on("SESSION_RUNNING_LINECHART",(e,d)=>{
       if(this.isSessionRunning){
-        const fz1 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][2] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i,idx) => (Number(i) / this.weight) * 100)[2]
-        const fz2 = this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length][8] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i, idx) => (Number(i) / this.weight) * 100)[8]
-        console.log(this.nOfStepsLineChart,fz1,fz2,this.frequency,this.threshold,this.nOfLines)
         e.reply("SESSION_RESPONSE_LINECHART",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i,idx) => (idx > 11 )?Number(i):(Number(i) / this.weight) * 100),
           isSessionRunning: this.isSessionRunning,
           stepsTimeInterval: this.stepsTimeInteval,
           frequency: this.frequency,
@@ -209,7 +179,7 @@ module.exports = class {
       } else {
         this.nOfStepsLineChart = 0
         e.reply("SESSION_RESPONSE_LINECHART",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i,idx) =>(idx > 11 )?Number(i):(Number(i) / this.weight) * 100),
           isSessionRunning: this.isSessionRunning,
           stepsTimeInterval: this.stepsTimeInteval,
           frequency: this.frequency,
@@ -218,11 +188,35 @@ module.exports = class {
         })
       }
     })
+
+    ipcMain.on("SESSION_RUNNING_COP",(e,d)=>{
+      if(this.isSessionRunning){
+        e.reply("SESSION_RESPONSE_COP",{
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfCOPChart) % this.rows.length] : this.rows[(this.nOfCOPChart) % this.rows.length].map((i,idx) => (idx > 11 )?Number(i):(Number(i) / this.weight) * 100),
+          isSessionRunning: this.isSessionRunning,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
+        })
+        this.nOfCOPChart = this.nOfCOPChart + SKIP_ENTRIES_LINECHART
+      } else {
+        this.nOfCOPChart = 0
+        e.reply("SESSION_RESPONSE_COP",{
+          rows: this.dataType === "Absolute" ? this.rows[(this.nOfCOPChart) % this.rows.length] : this.rows[(this.nOfCOPChart) % this.rows.length].map((i,idx) => (idx > 11 )?Number(i):(Number(i) / this.weight) * 100),
+          isSessionRunning: this.isSessionRunning,
+          frequency: this.frequency,
+          threshold: this.threshold,
+          nOfLines: this.nOfLines,
+        })
+      }
+    })
   }
+
+  
 
   async fetchDataFromCSV() {
     try {
-      const csvString = await fs.readFile(path.resolve(__dirname,"../test/data/run_2belts.csv"));
+      const csvString = await fs.readFile(path.resolve(__dirname,"../test/data/walk_2belts.csv"));
       let rows = (await csv.parse(csvString)).filter((_,idx)=> idx!=0);
       return rows
     } catch (e) {

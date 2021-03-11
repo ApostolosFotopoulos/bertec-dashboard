@@ -60,6 +60,14 @@ export default new Vuex.Store({
     rightMaxValue: 0,
     startTime: -1,
     stepsCounter:0,
+
+    // COP
+    leftPlatePoints:[{
+      data: []
+    }],
+    rightPlatePoints:[{
+      data: []
+    }]
   },
   mutations: {
     setSelectedProtocol(state, protocol) {
@@ -82,17 +90,74 @@ export default new Vuex.Store({
     },
     setLeftForcePlateChannel(state, channel) {
       state.leftForcePlateChannel = channel
-      state.seriesLeftPlate = [{
-        data: []
-      }]
       state.seriesLeftLinesCounter = 0
     },
     setRightForcePlateChannel(state, channel) {
       state.rightForcePlateChannel = channel
-      state.seriesRightPlate = [{
-        data: []
-      }]
       state.seriesRightLinesCounter = 0
+    },
+    setLeftPlatePoints(state,rows){
+      let copx1 = rows[rowsNames["COPX1"]]
+      let copy1 = rows[rowsNames["COPY1"]]
+
+      // Determine the  
+      let fz1 = Number(rows[2])
+      let threshold
+
+      if(Number(state.threshold) !=-1 && state.threshold!=""){
+        threshold = Number(state.threshold)
+      } else {
+        threshold = Number( 0.05 * state.weight)
+      }
+
+      //console.log(threshold,state.nOfLines)
+      //console.log(state.seriesLeftPlate)
+      if(state.isSeriesLeftPlateLocked){
+        if(fz1 < threshold){
+
+
+          //console.log("In locked and a new step starts")
+          state.isStepFullLeft = false
+          state.isSeriesLeftPlateLocked = false
+          let s = state.seriesLeftPlate
+          //console.log(s)
+          state.seriesFinalLeftPlate = s
+          s.push({  
+            data: [],
+          })
+          state.seriesLeftPlate = s
+
+          //console.log("Left Max: "+state.leftMaxValue)
+          state.seriesLeftLinesCounter +=1
+          console.log(state.seriesLeftLinesCounter,state.nOfLines)
+          if(state.seriesLeftLinesCounter > Number(state.nOfLines)){
+            console.log('MAXX REACHED')
+            state.seriesLeftPlate = [{
+              data: []
+            }]
+            state.seriesLeftLinesCounter = 0 
+            state.StepFullLeft = false
+            state.isSeriesLeftPlateLocked = false
+            console.log(state.seriesLeftPlate)
+          }
+        }
+
+        if(fz1 > threshold && state.isStepFullLeft){
+          //console.log("In locked and writing data")
+          let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
+          d.push([copx1,copy1])
+          state.seriesLeftPlate[state.seriesLeftLinesCounter].data = d
+        }
+      } else {
+        if(fz1 > threshold){
+          //console.log("In unlocked an a new step starts")
+          state.isStepFullLeft = true
+          state.isSeriesLeftPlateLocked = true
+          let d = state.seriesLeftPlate[state.seriesLeftLinesCounter].data
+          d.push([copx1,copy1])
+          state.seriesLeftPlate[state.seriesLeftLinesCounter].data = d
+        }
+      }
     },
     setSeriesLeftPlate(state,rows){
       let entry = rows[rowsNames[state.leftForcePlateChannel]] 

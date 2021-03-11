@@ -5,7 +5,7 @@
         <h3>Left Force Plate</h3>
         <v-select
           class="mt-3"
-          @change="(v)=>$store.commit('setLeftForcePlateChannel',v)"
+          @change="(v)=>{$store.commit('resetState');$store.commit('setLeftForcePlateChannel',v)}"
           :value="this.$store.state.leftForcePlateChannel"
           :items="leftForcePlateChannels"
           label="Channels"
@@ -16,7 +16,7 @@
         <h3>Right Force Plate</h3>
         <v-select
           class="mt-3"
-          @change="(v)=>$store.commit('setRightForcePlateChannel',v)"
+          @change="(v)=>{$store.commit('resetState');$store.commit('setRightForcePlateChannel',v)}"
           :value="this.$store.state.rightForcePlateChannel"
           :items="rightForcePlateChannels"
           label="Channels"

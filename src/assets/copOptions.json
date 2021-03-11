@@ -1,0 +1,53 @@
+{
+  "dataLabels":{
+    "style":{
+      "fontSize": "18px"
+    }
+  },
+  "grid": {
+    "padding": {
+      "top": 0,
+      "right": 10,
+      "bottom": 0,
+      "left": 10
+    }
+  },
+  "chart": {
+    "toolbar":{
+        "show":false
+    },  
+    "type": "bar",
+    "stacked": false
+  },
+  "xaxis": {
+    "labels":{
+      "style":{
+        "colors":["#fff","#fff"]
+      }
+    },
+    "type": "category"
+  },
+  "yaxis":{
+    "labels":{
+      "style":{
+        "colors":["#fff"]
+      }
+    },
+    "max":100
+  },
+  "tooltip": {
+    "theme": "dark"
+  },
+  "fill":{
+    "type":"solid",
+    "colors":["#d32d41","#6ab187"]
+  },
+  "legend": {
+    "labels": {
+      "colors":["#d32d41","#6ab187"]
+    },
+    "markers": {
+      "fillColors":["#d32d41","#6ab187"]
+    }
+  }
+}
