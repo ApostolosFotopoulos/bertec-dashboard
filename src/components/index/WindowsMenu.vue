@@ -1,0 +1,79 @@
+<template>
+  <v-row>
+    <v-col>
+      <v-checkbox
+        v-model="isChartChecked"
+        label="Display Speed Meters"
+        color="#6ab187"
+        hide-details
+        :disabled="!$store.state.options.isSessionRunning"
+        @change="chartCheckboxHandler"
+      ></v-checkbox>
+    </v-col>
+    <v-col>
+      <v-checkbox
+        v-model="isCopChecked"
+        label="Display Center of Pressure"
+        color="#6ab187"
+        hide-details
+        :disabled="!$store.state.options.isSessionRunning"
+        @change="copCheckboxHandler"
+      ></v-checkbox>
+    </v-col>
+    <v-col>
+      <v-checkbox
+        v-model="isLineChartChecked"
+        label="Display Line Chart"
+        color="#6ab187"
+        hide-details
+        :disabled="!$store.state.options.isSessionRunning"
+        @change="lineChartCheckboxHandler"
+      ></v-checkbox>
+    </v-col>
+  </v-row>
+</template>
+
+<script>
+const { ipcRenderer } = window.require('electron')
+
+export default {
+  data(){
+    return{
+      isChartChecked: false,
+      isCopChecked: false,
+      isLineChartChecked:false,
+    }
+  },
+  mounted(){
+    ipcRenderer.on('WINDOWS_STATUS_RESPONSE',(_,responseData)=>{
+      const { chartWindowVisible, copWindowVisible,lineChartWindowVisible } = responseData
+      this.isChartChecked = chartWindowVisible
+      this.isCopChecked = copWindowVisible
+      this.isLineChartChecked = lineChartWindowVisible
+    })
+  },
+  methods:{
+    chartCheckboxHandler(){
+      if(this.isChartChecked){
+        ipcRenderer.send('OPEN_SPEEDMETER_WINDOW');
+      } else {
+        ipcRenderer.send('CLOSE_SPEEDMETER_WINDOW');
+      }
+    },
+    copCheckboxHandler(){
+      if(this.isCopChecked){
+        ipcRenderer.send('OPEN_COP_WINDOW');
+      } else {
+        ipcRenderer.send('CLOSE_COP_WINDOW');
+      }
+    },
+    lineChartCheckboxHandler(){
+      if(this.isLineChartChecked){
+        ipcRenderer.send('OPEN_LINECHART_WINDOW');
+      } else {
+        ipcRenderer.send('CLOSE_LINECHART_WINDOW');
+      }
+    }
+  }
+}
+</script>

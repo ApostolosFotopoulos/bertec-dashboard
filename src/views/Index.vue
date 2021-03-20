@@ -1,27 +1,37 @@
 <template>
-  <v-container >
-    <h1 class="pa-2">Dashboard - Overview</h1>
-    <hr class="hr">
+  <v-container>
+    <v-row class="mt-4 mb-3">
+      <v-col>
+        <h1>Dashboard - Overview</h1>
+        <hr class="hr">
+      </v-col>
+    </v-row>
     <SaveFile/>
-    <OptionsMenu/>
+    <SessionRunning/>
+    <PersonalInfo/>
+    <Settings/>
+    <WindowsMenu/>
   </v-container>
 </template>
 
 <script>
 const { ipcRenderer } = window.require('electron')
 import SaveFile from '../components/index/SaveFile.vue'
-import Messages from '../components/index/Messages.vue'
-import OptionsMenu from '../components/index/OptionsMenu.vue'
+import SessionRunning from '../components/index/SessionRunning.vue'
+import PersonalInfo from '../components/index/PersonalInfo.vue'
+import Settings from '../components/index/Settings.vue'
+import WindowsMenu from '../components/index/WindowsMenu.vue'
 
-export default {
+export default{
   components:{
     SaveFile,
-    Messages,
-    OptionsMenu
+    SessionRunning,
+    PersonalInfo,
+    Settings,
+    WindowsMenu
   },
-  beforeMount(){
-    setInterval(()=>{ ipcRenderer.send("SESSION_RUN")},1)
-    setInterval(()=>{ ipcRenderer.send('WINDOWS_STATUS') },100)
+  mounted(){
+    setInterval(()=>{ ipcRenderer.send('WINDOWS_STATUS') },10)
   }
 }
 </script>

@@ -6,9 +6,8 @@ SerialPort.list().then(function(data){
 })
 
 // Open the port and listen for data
-const port = new SerialPort('/dev/tty.Bluetooth-Incoming-Port')
+const port = new SerialPort('/dev/tty.usbmodem14101')
 
-// Read data 
 port.on('data',function(data){
-  console.log("Data: "+data);
+  console.log(data.toString().substring(1,3))
 })

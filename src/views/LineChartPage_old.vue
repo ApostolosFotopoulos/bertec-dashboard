@@ -1,27 +1,25 @@
 <template>
   <v-container>
     <LineChart/>
-    <v-row>
+    <v-row  class="mt-5">
       <v-col cols="2" offset="10" align="right">
         <v-btn @click="$store.commit('resetLineChartState')" class="resetButton  v-input__control">Reset</v-btn>
       </v-col>
     </v-row>
-    <Channels/>
   </v-container>
 </template>
 
 <script>
 const { ipcRenderer } = window.require('electron')
-import LineChart from '../components/linechart/LineChart.vue'
-import Channels from '../components/linechart/Channels.vue'
+import LineChart from '../components/linechart/LineChart_old.vue'
+
 export default {
   components:{
     LineChart,
-    Channels
   },
-  mounted() {
+  beforeMount(){
     setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_LINECHART') },1)
-  },
+  }
 }
 </script>
 

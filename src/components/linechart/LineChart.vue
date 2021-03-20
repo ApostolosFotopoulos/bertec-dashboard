@@ -1,15 +1,11 @@
 <template>
-  <v-card elevation="10" color="#25282F">
-    <v-row class="mt-2">
-      <v-col cols="6">
-        <div class="pa-3">
-          <VueApexCharts height="650" ref="chartLeftPlate" class="text-center" type="line" :options="redLineOptions" :series="$store.state.seriesFinalLeftPlate"/>
-        </div>
+  <v-card elevation="10" color="#25282F" class="mt-5">
+    <v-row>
+      <v-col>
+        <VueApexCharts height="650" ref="leftPlateChart" class="text-center" type="line" :options="leftFootChart" :series="$store.state.lineChart.leftPlateFinalSeries"/>
       </v-col>
-      <v-col cols="6">
-        <div class="pa-3">
-          <VueApexCharts height="650" ref="chartRightPlate" class="text-center" type="line" :options="greenLineOptions" :series="$store.state.seriesFinalRightPlate"/>
-        </div>
+      <v-col>
+        <VueApexCharts height="650" ref="rightPlateChart" class="text-center" type="line" :options="rightFootChart" :series="$store.state.lineChart.rightPlateFinalSeries"/>
       </v-col>
     </v-row>
   </v-card>
@@ -18,14 +14,15 @@
 <script>
 import VueApexCharts from 'vue-apexcharts'
 const { ipcRenderer } = window.require('electron')
-const defaultLineChartOptions = require("../../assets/lineChartOptions.json")
+const defaultLineChartOptions = require("../../../assets/options/lineChart.json")
+
 export default {
   components:{
     VueApexCharts
   },
   data(){
     return{
-      redLineOptions: {
+      leftFootChart:{
         ...defaultLineChartOptions,
         yaxis: {
           dataLabels:{
@@ -59,15 +56,14 @@ export default {
           },
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesFinalLeftPlate.length - 2)){
+          if(seriesIndex == (this.$store.state.lineChart.leftPlateFinalSeries.length - 2 )){
             return "#d32d41"
           } else {
             return "gray"
           }
         }]
       },
-      greenLineOptions: {
-        forceNiceScale: true,
+      rightFootChart:{
         ...defaultLineChartOptions,
         yaxis: {
           max: this.$store.state.axesMax,
@@ -103,44 +99,90 @@ export default {
           
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesFinalRightPlate.length - 2)){
+          if(seriesIndex == (this.$store.state.lineChart.rightPlateFinalSeries.length - 2)){
             return "#6ab187"
           } else {
             return "gray"
           }
         }]
-      },
+      }
     }
   },
-  beforeMount(){
-    var self = this
+  mounted(){
+    var _this = this
     ipcRenderer.on('SESSION_RESPONSE_LINECHART',(_,responseData)=>{
       if(responseData.isSessionRunning){
-        self.setupStoreVariables(responseData)
+        _this.updateVariables(responseData)
       } else {
-        self.$store.commit("resetState")
+        _this.$store.commit('resetLineChartState')
       }
-      if(self.$store.state.shouldUpdateAxes){
-        this.$store.commit('setShouldUpdateAxes',false)
-        this.updateLeftChart();
-        this.updateRightChart();
-      }
-    })
+    }) 
   },
   methods:{
-    setupStoreVariables(responseData){
-      console.log(responseData.rows)
-      this.$store.commit('setSeriesLeftPlate',responseData.rows)
-      this.$store.commit('setSeriesRightPlate',responseData.rows)
-      this.$store.commit('setStepsPerMinuteTarget',Number(responseData.stepsPerMinuteTarget))
-      this.$store.commit('setStepsTimeInterval',Number(responseData.stepsTimeInterval))
-      this.$store.commit('setFrequency',Number(responseData.frequency))
-      this.$store.commit('setThreshold',Number(responseData.threshold))
-      this.$store.commit('setNofLines',Number(responseData.nOfLines))
-      this.$store.commit('checkIfBothFeetsArePressed')
+    updateVariables(responseData){
+      this.$store.commit('setWeight',responseData.weight)
+      this.$store.commit('setForce',responseData.force)
+      this.$store.commit('setStepsPerMinuteTarget',responseData.stepsPerMinuteTarget)
+      this.$store.commit('setFrequency',responseData.frequency)
+      this.$store.commit('setThreshold',responseData.threshold)
+      this.$store.commit('setNofLines',responseData.nOfLines)
+      this.$store.commit('setLeftPlateAtLineChart',responseData.rows)
+      this.$store.commit('setRightPlateAtLineChart',responseData.rows) 
+      if(this.$store.state.lineChart.shouldUpdateLeft){
+        this.updateLeftChart()
+        this.$store.commit('setShouldUpdateLeft',false)
+      }
+      if(this.$store.state.lineChart.shouldUpdateRight){
+        this.updateRightChart()
+        this.$store.commit('setShouldUpdateRight',false)
+      }
     },
     updateLeftChart(){
-      this.$refs.chartLeftPlate.updateOptions({
+      if(this.$store.state.linechart.yAxisMaxValue != -1 ){
+        this.$refs.leftPlateChart.updateOptions({
+          ...defaultLineChartOptions,
+          yaxis: {
+            max:this.$store.state.linechart.yAxisMaxValue,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                return val.toFixed(0)
+              }
+            },
+          },
+          xaxis:{
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                } 
+              },
+              show:true,
+            },
+          },
+          colors:[({ value, seriesIndex, w })=>{
+            if(seriesIndex == (this.$store.state.lineChart.leftPlateFinalSeries.length - 2)){
+              return "#d32d41"
+            } else {
+              return "gray"
+            }
+          }]
+        })
+      } else {
+        this.$refs.leftPlateChart.updateOptions({
         ...defaultLineChartOptions,
         yaxis: {
           dataLabels:{
@@ -155,7 +197,6 @@ export default {
               return val.toFixed(0)
             }
           },
-          max: this.$store.state.axesMax
         },
         xaxis:{
           dataLabels:{
@@ -175,57 +216,102 @@ export default {
           },
         },
         colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesFinalLeftPlate.length - 2)){
+          if(seriesIndex == (this.$store.state.lineChart.leftPlateFinalSeries.length - 2)){
             return "#d32d41"
           } else {
             return "gray"
           }
         }]
       })
+      }
     },
     updateRightChart(){
-      this.$refs.chartRightPlate.updateOptions({
-        ...defaultLineChartOptions,
-        yaxis: {
-          max: this.$store.state.axesMax,
-          dataLabels:{
-            show:false,
-            enabled:false,
-          },
-          labels:{
-            style:{
-              colors:['#fff']
+      if(this.$store.state.linechart.yAxisMaxValue != -1 ){
+        this.$refs.rightPlateChart.updateOptions({  
+          ...defaultLineChartOptions,
+          yaxis: {
+            max:this.$store.state.linechart.yAxisMaxValue,
+            dataLabels:{
+              show:false,
+              enabled:false,
             },
-            formatter: (val)=>{
-              return val.toFixed(0)
-            }
-          },
-        },
-        xaxis:{
-          dataLabels:{
-            show:false,
-            enabled:false,
-          },
-          labels:{
-            style:{
-              colors:['#fff']
-            },
-            formatter: (val)=>{
-              if (val.toFixed(0)%10 == 0){
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
                 return val.toFixed(0)
-              } 
+              }
             },
-            show:true,
           },
-        },
-        colors:[({ value, seriesIndex, w })=>{
-          if(seriesIndex == (this.$store.state.seriesFinalRightPlate.length - 2)){
-            return "#6ab187"
-          } else {
-            return "gray"
-          }
-        }]
-      })
+          xaxis:{
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                } 
+              },
+              show:true,
+            },
+          },
+          colors:[({ value, seriesIndex, w })=>{
+            if(seriesIndex == (this.$store.state.lineChart.rightPlateFinalSeries.length - 2)){
+              return "#6ab187"
+            } else {
+              return "gray"
+            }
+          }]
+        })
+      } else {
+        this.$refs.rightPlateChart.updateOptions({  
+          ...defaultLineChartOptions,
+          yaxis: {
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                return val.toFixed(0)
+              }
+            },
+          },
+          xaxis:{
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                } 
+              },
+              show:true,
+            },
+          },
+          colors:[({ value, seriesIndex, w })=>{
+            if(seriesIndex == (this.$store.state.lineChart.rightPlateFinalSeries.length - 2)){
+              return "#6ab187"
+            } else {
+              return "gray"
+            }
+          }]
+        })
+      }
     }
   }
 }

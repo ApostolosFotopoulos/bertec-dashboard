@@ -1,37 +1,28 @@
 <template>
   <v-container>
-    <v-row class="mt-2">
-      <v-col>
-        <SpeedMeterCharts/>
-      </v-col>
-    </v-row>
-    <v-row  class="mt-5">
+    <SpeedMetersCharts/>
+    <v-container>
+    <v-row>
       <v-col cols="2" offset="10" align="right">
-        <v-btn @click="$store.commit('resetState')" class="resetButton  v-input__control">Reset</v-btn>
+        <v-btn @click="$store.commit('resetSpeedmeterState')" class="resetButton  v-input__control">Reset</v-btn>
       </v-col>
     </v-row>
-    <v-row class="mt-2">
-      <v-col>
-        <MoreStatistics/>
-      </v-col>
-    </v-row>
+    </v-container>
+    <Statistics/>
   </v-container>
 </template>
 
-
 <script>
 const { ipcRenderer } = window.require('electron')
-import SpeedMeterCharts from '../components/speedmeter/SpeedMeterCharts.vue'
-import Channels from '../components/speedmeter/Channels.vue'
-import MoreStatistics from '../components/speedmeter/MoreStatistics.vue'
+import SpeedMetersCharts from '../components/speedmeter/SpeedMetersCharts.vue'
+import Statistics from '../components/speedmeter/Statistics.vue'
 
 export default {
   components:{
-    SpeedMeterCharts,
-    Channels,
-    MoreStatistics,
+    SpeedMetersCharts,
+    Statistics
   },
-  beforeMount(){
+  mounted(){
     setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_SPEEDMETER') },1)
   }
 }
