@@ -61,7 +61,15 @@ export default new Vuex.Store({
       rightSteps:0,
     },
     copChart: {
-      
+      series: [{
+        data:[]
+      }],
+      finalSeries: [{
+        data: []
+      }],
+      nRows: 0,
+      isLeftPlateLocked: false,
+      isRightPlateLocked: false,
     }
   },
   mutations: {
@@ -450,6 +458,56 @@ export default new Vuex.Store({
     },
     setShouldUpdateRight(state,shouldUpdateRight){
       state.lineChart.shouldUpdateRight = shouldUpdateRight
+    },
+
+    // COP
+    resetCOPChartState(state) {
+      
+    },
+    setLeftAndRightPlateAtCOP(state, rows) {
+      let fz1 = Number(rows[2])
+      let fz2 = Number(rows[8])
+      let copx1 = rows[rowsNames["COPX1"]]
+      let copy1 = rows[rowsNames["COPY1"]]
+      let copx2 = rows[rowsNames["COPX2"]]
+      let copy2 = rows[rowsNames["COPY2"]]
+      let threshold
+
+      // If there is a threshold given the use that as 
+      // threshold for the step
+      if (state.options.threshold != -1) {
+        threshold = Number(state.options.threshold)
+      } else {
+        threshold = Number(0.2 * state.options.weight)
+      }
+      
+      // Left foot
+      if (state.copChart.isLeftPlateLocked) {
+        if (fz1 > threshold) {
+          
+        }
+        if (fz1 < threshold) {
+          
+        }
+      } else {
+        if (fz1 > threshold) {
+
+        }
+      }
+
+      // Right foot
+      if (state.copChart.isRightPlateLocked) {
+        if (fz2 > threshold) {
+          
+        }
+        if (fz2 < threshold) {
+
+        }
+      } else {
+        if (fz2 > threshold) {
+
+        }
+      }
     }
   },
   actions:{}
