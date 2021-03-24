@@ -126,227 +126,213 @@ namespace BertecExampleNET
          int timestampStepping = 0;
 
          BertecDeviceNET.ClockSourceFlags extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_INTERNAL;
-         Console.WriteLine(args);
-      
-         BertecDeviceNET.BertecDevice hand;
-         try
-         {
-            hand = new BertecDeviceNET.BertecDevice();
-            Console.Write("Initialized the bertec Device...");
-         }
-         catch (System.Exception ex)
-         {
-            Console.Write(ex);
-            Console.Write("Unable to initialize the Bertec Device Library (possible missing FTD2XX install).");
-            return;
-         }
          if (args.Length < 1)
          {
             ShowHelp();
             return;
          }
 
-         // bool nextIsParm=false;
-         // string parm="", command="";
-         // foreach (string item in args)
-         // {
-         //    if (nextIsParm)
-         //    {
-         //       parm = item;
-         //       nextIsParm = false;
-         //    }
-         //    else if (item.StartsWith("-"))
-         //    {
-         //       command = item.Substring(1);
-         //       if (command == "f" || command == "t" || command == "l" || command == "s" || command == "x")
-         //       {
-         //          nextIsParm = true;
-         //          continue;
-         //       }
-         //    }
+         bool nextIsParm=false;
+         string parm="", command="";
+         foreach (string item in args)
+         {
+            if (nextIsParm)
+            {
+               parm = item;
+               nextIsParm = false;
+            }
+            else if (item.StartsWith("-"))
+            {
+               command = item.Substring(1);
+               if (command == "f" || command == "t" || command == "l" || command == "s" || command == "x")
+               {
+                  nextIsParm = true;
+                  continue;
+               }
+            }
 
-         //    switch (command)
-         //    {
-         //       case "f":
-         //          if (parm.Length > 0)
-         //             filename = parm;
-         //          break;
-         //       case "t":
-         //          if (parm.Length > 0)
-         //             runTimeMSeconds = 1000 * System.Convert.ToInt32(parm);
-         //          break;
-         //       case "l":
-         //          if (parm.Length > 0)
-         //             limitChannels = System.Convert.ToInt32(parm);
-         //          break;
-         //       case "c":
-         //          useCallbacks = true;
-         //          usePolling = false;
-         //          break;
-         //       case "p":
-         //          useCallbacks = false;
-         //          usePolling = true;
-         //          break;
-         //       case "a":
-         //          useAutozeroing = true;
-         //          break;
-         //       case "z":
-         //          startWithZeroLoad = true;
-         //          break;
-         //       case "y":
-         //          includesyncaux = true;
-         //          break;
-         //       case "x":
-         //          if (parm.Length > 0)
-         //             timestampStepping = System.Convert.ToInt32(parm);
-         //          break;
-         //       case "e":
-         //          if (parm.Length > 0)
-         //          {
-         //             if (parm == "RISE")
-         //                extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_EXT_RISE;
-         //             else if (parm == "FALL")
-         //                extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_EXT_FALL;
-         //             else if (parm == "BOTH")
-         //                extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_EXT_BOTH;
-         //             else
-         //                extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_INTERNAL;
-         //          }
-         //          break;
-         //    }
+            switch (command)
+            {
+               case "f":
+                  if (parm.Length > 0)
+                     filename = parm;
+                  break;
+               case "t":
+                  if (parm.Length > 0)
+                     runTimeMSeconds = 1000 * System.Convert.ToInt32(parm);
+                  break;
+               case "l":
+                  if (parm.Length > 0)
+                     limitChannels = System.Convert.ToInt32(parm);
+                  break;
+               case "c":
+                  useCallbacks = true;
+                  usePolling = false;
+                  break;
+               case "p":
+                  useCallbacks = false;
+                  usePolling = true;
+                  break;
+               case "a":
+                  useAutozeroing = true;
+                  break;
+               case "z":
+                  startWithZeroLoad = true;
+                  break;
+               case "y":
+                  includesyncaux = true;
+                  break;
+               case "x":
+                  if (parm.Length > 0)
+                     timestampStepping = System.Convert.ToInt32(parm);
+                  break;
+               case "e":
+                  if (parm.Length > 0)
+                  {
+                     if (parm == "RISE")
+                        extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_EXT_RISE;
+                     else if (parm == "FALL")
+                        extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_EXT_FALL;
+                     else if (parm == "BOTH")
+                        extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_EXT_BOTH;
+                     else
+                        extClock = BertecDeviceNET.ClockSourceFlags.CLOCK_SOURCE_INTERNAL;
+                  }
+                  break;
+            }
 
-         //    parm = "";
-         // }
+            parm = "";
+         }
 
-         // if ((runTimeMSeconds < 1) || (usePolling == useCallbacks) || (filename.Length < 1))
-         // {
-         //    ShowHelp();
-         //    return;
-         // }
+         if ((runTimeMSeconds < 1) || (usePolling == useCallbacks) || (filename.Length < 1))
+         {
+            ShowHelp();
+            return;
+         }
 
-         // // We create the handler class here, even if not doing callbacks, in order to use the pFile member.
-         // CallbackDataHandlerClass callbackClass = new CallbackDataHandlerClass();
-         // callbackClass.iLimitNChannels = limitChannels;
-         // callbackClass.includesyncaux = includesyncaux;
+         // We create the handler class here, even if not doing callbacks, in order to use the pFile member.
+         CallbackDataHandlerClass callbackClass = new CallbackDataHandlerClass();
+         callbackClass.iLimitNChannels = limitChannels;
+         callbackClass.includesyncaux = includesyncaux;
 
-         // callbackClass.pFile = File.CreateText(filename);
+         callbackClass.pFile = File.CreateText(filename);
 
-         // // This will actually connect to the devices and work with them. The BertecDeviceNET.BertecDevice
-         // // object gives you all the functionality you need.
-         // BertecDeviceNET.BertecDevice hand;
-         // try
-         // {
-         //    hand = new BertecDeviceNET.BertecDevice();
-         // }
-         // catch (System.Exception ex)
-         // {
-         //    Console.Write("Unable to initialize the Bertec Device Library (possible missing FTD2XX install).");
-         //    return;
-         // }
-         // callbackClass.hand = hand;
+         // This will actually connect to the devices and work with them. The BertecDeviceNET.BertecDevice
+         // object gives you all the functionality you need.
+         BertecDeviceNET.BertecDevice hand;
+         try
+         {
+            hand = new BertecDeviceNET.BertecDevice();
+         }
+         catch (System.Exception ex)
+         {
+            Console.Write("Unable to initialize the Bertec Device Library (possible missing FTD2XX install).");
+            return;
+         }
+         callbackClass.hand = hand;
 
-         // if (timestampStepping>0)
-         // {
-         //    Console.Write("Using timestamp callbacks with a step value of {0}.\n", timestampStepping);
-         //    callbackClass.timestampStepping = timestampStepping;
-         //    hand.OnDeviceTimestamp += callbackClass.DeviceTimestamp;
-         // }
+         if (timestampStepping>0)
+         {
+            Console.Write("Using timestamp callbacks with a step value of {0}.\n", timestampStepping);
+            callbackClass.timestampStepping = timestampStepping;
+            hand.OnDeviceTimestamp += callbackClass.DeviceTimestamp;
+         }
 
-         // hand.AutoZeroing = useAutozeroing;
+         hand.AutoZeroing = useAutozeroing;
 
-         // hand.Start();
-         // // At this point the SDK will attempt to find any connected USB force devices and start reading data from them.
-         // // Data will buffer as soon as it becomes available, will can be read by data polling or callback functionality.
+         hand.Start();
+         // At this point the SDK will attempt to find any connected USB force devices and start reading data from them.
+         // Data will buffer as soon as it becomes available, will can be read by data polling or callback functionality.
 
-         // Console.Write("Waiting for devices..");
+         Console.Write("Waiting for devices..");
 
-         // // This simply waits until the stats returns a state of READY. This block through bertec_SetExternalClockMode call
-         // // could also be made into a callback handler tied to bertec_RegisterStatusCallback .
-         // while (hand.Status != BertecDeviceNET.StatusErrors.DEVICES_READY)
-         // {
-         //    // Waiting for devices...
-         //    Console.Write(".");
-         //    System.Threading.Thread.Sleep(100);
-         //    if (hand.DeviceCount > 0)
-         //       break;   // also can check like this (but we prefer status callbacks since we can get instant results)
-         // }
-         // Console.WriteLine(" done");
+         // This simply waits until the stats returns a state of READY. This block through bertec_SetExternalClockMode call
+         // could also be made into a callback handler tied to bertec_RegisterStatusCallback .
+         while (hand.Status != BertecDeviceNET.StatusErrors.DEVICES_READY)
+         {
+            // Waiting for devices...
+            Console.Write(".");
+            System.Threading.Thread.Sleep(100);
+            if (hand.DeviceCount > 0)
+               break;   // also can check like this (but we prefer status callbacks since we can get instant results)
+         }
+         Console.WriteLine(" done");
 
-         // for (int i = 0; i < hand.DeviceCount; ++i)
-         // {
-         //    Console.WriteLine("Plate serial {0}", hand.DeviceSerialNumber(i));
-         // }
+         for (int i = 0; i < hand.DeviceCount; ++i)
+         {
+            Console.WriteLine("Plate serial {0}", hand.DeviceSerialNumber(i));
+         }
 
-         // // When starting with a zero load, we need to zero after we start; if you call stop after zeroing, it will reset
-         // // the zero load values.
-         // if (startWithZeroLoad)
-         // {
-         //    Console.Write("Zeroing Load...");
-         //    hand.ZeroNow();
-         //    while (hand.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND)
-         //    {
-         //       Console.Write(".");
-         //       System.Threading.Thread.Sleep(100);
-         //    }
-         //    Console.WriteLine(" done");
-         // }
+         // When starting with a zero load, we need to zero after we start; if you call stop after zeroing, it will reset
+         // the zero load values.
+         if (startWithZeroLoad)
+         {
+            Console.Write("Zeroing Load...");
+            hand.ZeroNow();
+            while (hand.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND)
+            {
+               Console.Write(".");
+               System.Threading.Thread.Sleep(100);
+            }
+            Console.WriteLine(" done");
+         }
 
-         // // Set the external clock mode, if any. If the device does not support external clocking modes, then this
-         // // function call will return UNSUPPORED_COMMAND.
-         // hand.SetExternalClockMode(0, extClock);
+         // Set the external clock mode, if any. If the device does not support external clocking modes, then this
+         // function call will return UNSUPPORED_COMMAND.
+         hand.SetExternalClockMode(0, extClock);
 
-         // // Since all of the above can result in data actually being captured before any real reading of the data
-         // // is done (either by polling or setting up callbacks), clearing the buffer is suggested. Clearing the 
-         // // buffer is even more important when using external clocking modes since data could have been captured
-         // // before the external clock mode was set.
+         // Since all of the above can result in data actually being captured before any real reading of the data
+         // is done (either by polling or setting up callbacks), clearing the buffer is suggested. Clearing the 
+         // buffer is even more important when using external clocking modes since data could have been captured
+         // before the external clock mode was set.
 
-         // hand.ClearBufferedData();
+         hand.ClearBufferedData();
 
-         // // When using callbacks (.NET events), we can simply use the Sleep function call to suspend our main thread
-         // // while the callback thread does all the work for us. 
-         // // Also note that callbacks SHOULD be set up before calling Start() so that they are available
-         // // for use as soon as data is present. In your own code you can use a program-specific flag to determine
-         // // if data should be retained or discarded. Callbacks are also the method of choice when using a GUI
-         // // system or any other main-thread blocking functionality (ex: heavy database usage or network functionality).
-         // if (useCallbacks)
-         // {
-         //    Console.WriteLine("Using callbacks to gather data.");
-         //    hand.OnData += callbackClass.OnDataCallback;
-         //    hand.OnStatus += callbackClass.StatusEvent;
+         // When using callbacks (.NET events), we can simply use the Sleep function call to suspend our main thread
+         // while the callback thread does all the work for us. 
+         // Also note that callbacks SHOULD be set up before calling Start() so that they are available
+         // for use as soon as data is present. In your own code you can use a program-specific flag to determine
+         // if data should be retained or discarded. Callbacks are also the method of choice when using a GUI
+         // system or any other main-thread blocking functionality (ex: heavy database usage or network functionality).
+         if (useCallbacks)
+         {
+            Console.WriteLine("Using callbacks to gather data.");
+            hand.OnData += callbackClass.OnDataCallback;
+            hand.OnStatus += callbackClass.StatusEvent;
 
-         //    System.Threading.Thread.Sleep(runTimeMSeconds); // in your code, you could do real work here.
-         // }
+            System.Threading.Thread.Sleep(runTimeMSeconds); // in your code, you could do real work here.
+         }
          
-         // // When polling, this is slightly more work since we need to go and check the timer ourselves.
-         // if (usePolling)
-         // {
-         //    Console.WriteLine("Using polling to gather data.");
-         //    BertecDeviceNET.DataFrame[] dataFrames = new BertecDeviceNET.DataFrame[0];
+         // When polling, this is slightly more work since we need to go and check the timer ourselves.
+         if (usePolling)
+         {
+            Console.WriteLine("Using polling to gather data.");
+            BertecDeviceNET.DataFrame[] dataFrames = new BertecDeviceNET.DataFrame[0];
 
-         //    int startTime = Environment.TickCount;
+            int startTime = Environment.TickCount;
 
-         //    while ((Environment.TickCount - startTime) < runTimeMSeconds)
-         //    {
-         //       while (hand.BufferedDataAvailable > 0)
-         //       {
-         //          hand.ReadBufferedData(ref dataFrames);
-         //          callbackClass.OnDataCallback(dataFrames);  // call the same code as the callback would do
-         //       };
+            while (true)
+            {
+               while (hand.BufferedDataAvailable > 0)
+               {
+                  hand.ReadBufferedData(ref dataFrames);
+                  callbackClass.OnDataCallback(dataFrames);  // call the same code as the callback would do
+               };
 
-         //       System.Threading.Thread.Sleep(100);  // if your main process is in a tight loop like this one, you can overrun the device by continually polling when there is no data there
-         //    }
-         // }
+               System.Threading.Thread.Sleep(100);  // if your main process is in a tight loop like this one, you can overrun the device by continually polling when there is no data there
+            }
+         }
 
-         // hand.Stop();
-         // Console.WriteLine("Data gather complete, shutting down.");
+         hand.Stop();
+         Console.WriteLine("Data gather complete, shutting down.");
 
-         // // And we close the file.
-         // callbackClass.pFile.Close();
-         // callbackClass.pFile = null;
+         // And we close the file.
+         callbackClass.pFile.Close();
+         callbackClass.pFile = null;
 
-         // // Always a good idea to call Dispose on any item that has it. Otherwise, wrapper the block with using().
-         // hand.Dispose();
-         // hand = null;
+         // Always a good idea to call Dispose on any item that has it. Otherwise, wrapper the block with using().
+         hand.Dispose();
+         hand = null;
       
       }
 
