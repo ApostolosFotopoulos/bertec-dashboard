@@ -23,7 +23,7 @@ export default {
     Statistics
   },
   mounted(){
-    setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_SPEEDMETER') },1)
+    //setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_SPEEDMETER') },1)
   }
 }
 </script>

@@ -9,7 +9,7 @@ const { ipcRenderer } = window.require('electron')
 import CopChart from '../components/cop/CopChart.vue'
 export default {
   mounted(){
-    setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_COP') },1)
+    //setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_COP') },1)
   },
   components:{
     CopChart
