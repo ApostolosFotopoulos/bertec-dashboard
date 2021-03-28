@@ -2,11 +2,25 @@
   <v-card elevation="10" color="#25282F" class="mt-5">
     <v-row>
       <v-col>
-        <VueApexCharts height="650" ref="leftPlateChart" class="text-center" type="line" :options="leftFootChart" :series="$store.state.lineChart.leftPlateFinalSeries"/>
+        <VueApexCharts 
+          height="650" 
+          ref="leftPlateChart" 
+          class="text-center" 
+          type="line" 
+          :options="leftFootChart" 
+          :series="$store.state.lineChart.leftPlateFinalSeries"
+        />
       </v-col>
       <v-col>
-        <VueApexCharts height="650" ref="rightPlateChart" class="text-center" type="line" :options="rightFootChart" :series="$store.state.lineChart.rightPlateFinalSeries"/>
-      </v-col>
+        <VueApexCharts 
+          height="650" 
+          ref="rightPlateChart" 
+          class="text-center" 
+          type="line" 
+          :options="rightFootChart" 
+          :series="$store.state.lineChart.rightPlateFinalSeries"
+        />
+      </v-col> 
     </v-row>
   </v-card>
 </template>
@@ -138,11 +152,11 @@ export default {
       }
     },
     updateLeftChart(){
-      if(this.$store.state.linechart.yAxisMaxValue != -1 ){
+      if(Number(this.$store.state.lineChart.yAxisMaxValue) != -1 ){
         this.$refs.leftPlateChart.updateOptions({
           ...defaultLineChartOptions,
           yaxis: {
-            max:this.$store.state.linechart.yAxisMaxValue,
+            max:Number(this.$store.state.lineChart.yAxisMaxValue),
             dataLabels:{
               show:false,
               enabled:false,
@@ -226,11 +240,11 @@ export default {
       }
     },
     updateRightChart(){
-      if(this.$store.state.linechart.yAxisMaxValue != -1 ){
+      if(Number(this.$store.state.lineChart.yAxisMaxValue) != -1 ){
         this.$refs.rightPlateChart.updateOptions({  
           ...defaultLineChartOptions,
           yaxis: {
-            max:this.$store.state.linechart.yAxisMaxValue,
+            max:Number(this.$store.state.lineChart.yAxisMaxValue),
             dataLabels:{
               show:false,
               enabled:false,
