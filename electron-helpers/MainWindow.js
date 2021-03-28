@@ -1,9 +1,10 @@
 const { BrowserWindow ,ipcMain, dialog } = require('electron')
 const SecondaryWindow = require('./SecondaryWindow')
-const TCPListener = require("./TCPListener")
 const csv = require('async-csv')
 const fs = require('fs').promises
 const path = require('path')
+const events = require("events");
+var net = require("net");
 
 // Global Variables
 const SKIP_ENTRIES_SPEEDMETER = 1
@@ -37,8 +38,12 @@ module.exports = class {
     this.window = null
 
     // TCP / Event Listeners
-    this.listener = new TCPListener()
-    this.eventListener = this.listener.listen()
+    this.port = 12345
+    this.ip =  "0.0.0.0"
+    this.server = new net.Server()
+    this.server.listen(this.port, () => {
+      console.log("TCPListener is active....")
+    })
   }
 
   async createWindow() {
@@ -73,6 +78,7 @@ module.exports = class {
         if(this.cw.window){ this.cw.window.close() }
         if(this.linechartw.window){ this.linechartw.window.close() }
         if(this.cpw.window){ this.cpw.window.close() }
+        if(this.window){ this.window.close() }
       })
     } catch (e) {
       console.log(e)
@@ -133,7 +139,7 @@ module.exports = class {
         weight, dataType,stepsPerMinuteTarget,
         frequency,threshold,nOfLines
       } = d
-      
+
       console.log(d)
       // Setup the default setting to start the session
       this.isSessionRunning = true
@@ -144,6 +150,7 @@ module.exports = class {
       this.threshold = threshold
       this.nOfLines = nOfLines
     })
+
     ipcMain.on('STOP_SESSION', () => {
 
       // Reset the settings
@@ -153,28 +160,83 @@ module.exports = class {
       this.nOfCOPChart = 0
     })
 
-    //SpeedMeter Events
-    ipcMain.on("SESSION_RUNNING_SPEEDMETER", (e) => {
-      if (this.isSessionRunning) {
-        e.reply("SESSION_RESPONSE_SPEEDMETER", {
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsSpeedMeter) % this.rows.length] : this.rows[(this.nOfStepsSpeedMeter) % this.rows.length].map(i => (Number(i) / this.weight) * 100),
-          force: Math.floor(Math.random() * 100) + 1,
-          isSessionRunning: this.isSessionRunning,
-          stepsPerMinuteTarget: this.stepsPerMinuteTarget,
-          frequency: this.frequency,
-          threshold: this.threshold,
-          nOfLines: this.nOfLines,
-          weight: this.weight,
-        })
-        this.nOfStepsSpeedMeter = this.nOfStepsSpeedMeter + SKIP_ENTRIES_SPEEDMETER
-      } else {
-        this.nOfStepsSpeedMeter = 0
-        e.reply("SESSION_RESPONSE_SPEEDMETER", {
-          rows: [],
-          force: 0,
-          isSessionRunning: this.isSessionRunning,
-        })
-      }
+    // Listen for TCP Packets to forward them to the dashboard
+    this.server.on("connection", (socket) => {
+      socket.on("data", (packet) => {
+        // Retrieve the packet and break to each section
+        let packetArray = packet
+          .toString()
+          .replace(/(\r\n|\n|\r)/gm, "")
+          .split(",")
+          .map(i => Number(i));
+
+        // Send the data to the linechart window
+        if (this.linechartw && this.linechartw.window) {
+          if (this.isSessionRunning) {
+            this.linechartw.window.webContents.send("SESSION_RESPONSE_LINECHART", {
+              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
+              isSessionRunning: this.isSessionRunning,
+              stepsPerMinuteTarget: this.stepsPerMinuteTarget,
+              frequency: this.frequency,
+              threshold: this.threshold,
+              nOfLines: this.nOfLines,
+              weight: this.weight,
+            });
+          } else {
+            this.linechartw.window.webContents.send("SESSION_RESPONSE_LINECHART", {
+              rows: [],
+              isSessionRunning: this.isSessionRunning,
+            });
+          }
+        }
+
+        // Send the data to the COP window
+        if (this.cpw && this.cpw.window) {
+          if (this.isSessionRunning) {
+          
+          } else {
+            
+          }
+          this.cpw.window.webContents.send("SESSION_RESPONSE_COP", {});
+        }
+
+        // Send the data to the speedmeter window
+        if (this.cw && this.cw.window) {
+          if (this.isSessionRunning) {
+            this.cw.window.webContents.send("SESSION_RESPONSE_SPEEDMETER", {
+              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
+              force: Math.floor(Math.random() * 100) + 1,
+              isSessionRunning: this.isSessionRunning,
+              stepsPerMinuteTarget: this.stepsPerMinuteTarget,
+              frequency: this.frequency,
+              threshold: this.threshold,
+              nOfLines: this.nOfLines,
+              weight: this.weight,
+            });
+          } else {
+            this.cw.window.webContents.send("SESSION_RESPONSE_SPEEDMETER", {
+              rows: [],
+              force: 0,
+              isSessionRunning: this.isSessionRunning,
+            });
+          }
+        }
+        
+        // Send the details the main window with the options
+        if(this.window){
+          if (this.isSessionRunning) {
+            this.window.webContents.send("SESSION_RESPONSE_OPTIONS", {
+              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
+              isSessionRunning: this.isSessionRunning,
+            });
+          } else {
+            this.window.webContents.send("SESSION_RESPONSE_OPTIONS", {
+              rows: [],
+              isSessionRunning: this.isSessionRunning,
+            });
+          }
+        }
+      })
     })
   
     // LineChart Events
