@@ -18,6 +18,10 @@ export default new Vuex.Store({
       threshold: -1,
       nOfLines: 10,
       isSessionRunning: false,
+      leftPlateChannel: "FZ1",
+      leftPlateValue:0,
+      rightPlateChannel: "FZ2",
+      rightPlateValue:0,
     },
     lineChart: {
       leftPlateSeries: [{
@@ -103,6 +107,18 @@ export default new Vuex.Store({
     },
     setSessionRunning(state, isSessionRunning) {
       state.options.isSessionRunning = isSessionRunning
+    },
+    setLeftPlateChannelAtOptions(state,channel){
+      state.options.leftPlateChannel = channel
+    },
+    setRightPlateChannelAtOptions(state, channel) {
+      state.options.rightPlateChannel = channel
+    },
+    setLeftPlateValue(state,value){
+      state.options.leftPlateValue = value.toFixed(2)
+    },
+    setRightPlateValue(state,value){
+      state.options.rightPlateValue = value.toFixed(2)
     },
 
     // Speedmeter
