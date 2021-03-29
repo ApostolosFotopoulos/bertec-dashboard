@@ -34,6 +34,8 @@ namespace BertecForcePlatesFetchData{
     public TcpClient client;
     public NetworkStream stream;
     public StreamWriter writer;
+    public int dataCollected = 0;
+    public int counter = 0;
       
 
     public void createTCPClient(){
@@ -72,12 +74,20 @@ namespace BertecForcePlatesFetchData{
           
           // Copx2 Copy2 Copxy2
           d = d + "0;0;0\r\n";
-          Console.Write(d);
+          //Console.Write(d);
 
-          // Write to TCP buffer
-          writer.Flush();
-          writer.WriteLine(d);
-          writer.Flush();
+          // Write to TCP buffe
+          if(dataCollected == 10){
+            dataCollected = 0;
+            //Console.Write(d);
+            writer.Flush();
+            writer.WriteLine(d);
+            writer.Flush();
+            Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
+            Console.WriteLine(counter);
+            counter+=1;
+          }
+          dataCollected += 1;
         }
       }
 
@@ -226,6 +236,7 @@ namespace BertecForcePlatesFetchData{
 
       // Clear the buffered data
       handler.ClearBufferedData();
+
 
       // Setup the callback for the data streaming
       handler.OnData += callback.onDataCallback;
