@@ -166,9 +166,12 @@ module.exports = class {
         // Retrieve the packet and break to each section
         let packetArray = packet
           .toString()
-          .replace(/(\r\n|\n|\r)/gm, "")
-          .split(",")
+          .replaceAll(/(\r\n|\n|\r)/gm, "")
+          .replaceAll(",",".")
+          .split(";")
           .map(i => Number(i));
+
+        console.log(packetArray)
 
         // Send the data to the linechart window
         if (this.linechartw && this.linechartw.window) {
