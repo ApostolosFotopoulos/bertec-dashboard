@@ -31,25 +31,104 @@ namespace BertecForcePlatesFetchData{
     public BertecDeviceNET.BertecDevice handler = null;
     public int timestampStepping = 0;
     private Int64 timestampValue = 0;
+    public TcpClient client;
+    public NetworkStream stream;
+    public StreamWriter writer;
+      
 
-    public void onDataCallback(BertecDeviceNET.DataFrame[] dataFrames){
-      if (dataFrames.Length > 0){
-        BertecDeviceNET.DataFrame devData = dataFrames[0]; // for multiple devices you would iterate through the device array.
-        int channelCount = devData.forceData.Length;
-        
-        if (channelCount > 0){
-          string d = "";
-  
-          Console.Write(",{0},{1}", devData.syncData, devData.auxData);
-          d = d + ((double)devData.timestamp / 8.0);
-          d = d + ", " + devData.syncData + ", "+ devData.auxData;
+    public void createTCPClient(){
+      int port = 12345;
+      this.client = new TcpClient("localhost",port);
+      this.stream  = this.client.GetStream();
+      this.writer = new StreamWriter(this.stream);
+      Console.WriteLine("TCP Client is configured...");
+    }
+
+    public void onDataCallback(BertecDeviceNET.DataFrame[] dataFrames){ 
+      // Only one force plate is connected
+      if(dataFrames.Length == 1){
+        BertecDeviceNET.DataFrame firstForcePlate = dataFrames[0];
+        string d = "";
+
+        int channelCount = firstForcePlate.forceData.Length;
+        if(channelCount > 0){
+
+          // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
           for (int col = 0; col < channelCount; ++col){
-            d = d + ", " + devData.forceData[col];
-            Console.Write(",{0}", devData.forceData[col]);
+            d = d + Math.Abs(firstForcePlate.forceData[col]).ToString()+";";
           }
-          d = d +"\r\n";
-          Console.Write("\r\n");
+
+          //Fx2	Fy2	Fz2	Mx2	My2	Mz2	
+          d = d + "0;0;0;0;0;0;";
+
+          // Copx1
+          d = d + (firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+          
+          // Copy1
+          d = d + (firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+          
+          // Copxy1
+          d = d + (Math.Sqrt( Math.Pow(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1],2)+ Math.Pow(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1],2))).ToString()+";";
+          
+          // Copx2 Copy2 Copxy2
+          d = d + "0;0;0\r\n";
+          Console.Write(d);
+
+          // Write to TCP buffer
+          writer.Flush();
+          writer.WriteLine(d);
+          writer.Flush();
         }
+      }
+
+      // Both force plates are connected
+      if(dataFrames.Length == 2){
+        BertecDeviceNET.DataFrame firstForcePlate = dataFrames[0];
+        BertecDeviceNET.DataFrame secForcePlate = dataFrames[1];
+        string d = "";
+
+        int channelCountFirst = firstForcePlate.forceData.Length;
+        if(channelCountFirst > 0){
+          // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
+          for (int col = 0; col < channelCountFirst; ++col){
+            //Console.Write("{0};", Math.Abs(firstForcePlate.forceData[col]));
+            d = d + Math.Abs(firstForcePlate.forceData[col]).ToString()+";";
+          }
+        }
+
+        int channelCountSec = secForcePlate.forceData.Length;
+        if(channelCountSec > 0){
+          // Fx2	Fy2	Fz2	Mx2	My2	Mz2	
+          for (int col = 0; col < channelCountSec; ++col){
+            //Console.Write("{0};", Math.Abs(secForcePlate.forceData[col]));
+            d = d + Math.Abs(secForcePlate.forceData[col]).ToString()+";";
+          }
+        }
+
+        // Copx1
+        d = d + (firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+        
+        // Copy1
+        d = d + (firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+        
+        // Copxy1
+        d = d + (Math.Sqrt( Math.Pow(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1],2)+ Math.Pow(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1],2))).ToString()+";";
+
+        // Copx2
+        d = d + (secForcePlate.forceData[(int)Channel.MY2]/secForcePlate.forceData[(int)Channel.FZ2]).ToString()+";";
+
+        // Copy2
+        d = d + (secForcePlate.forceData[(int)Channel.MX2]/secForcePlate.forceData[(int)Channel.FZ2]).ToString()+";";
+
+        // Copxy2
+        d = d + (Math.Sqrt( Math.Pow(secForcePlate.forceData[(int)Channel.MY2]/secForcePlate.forceData[(int)Channel.FZ2],2)+ Math.Pow(secForcePlate.forceData[(int)Channel.MX2]/secForcePlate.forceData[(int)Channel.FZ2],2))).ToString()+";";
+      
+        Console.Write(d);
+
+        // Write to TCP buffer
+        writer.Flush();
+        writer.WriteLine(d);
+        writer.Flush();
       }
     }
     public void statusEvent(BertecDeviceNET.StatusErrors status){
@@ -64,10 +143,7 @@ namespace BertecForcePlatesFetchData{
   class BertecForcePlatesFetchData{
     static void Main(string[] args){
       int timestampStepping = 0;
-      bool isTesting = true;
-
-      // Create the dataframe to save the data
-      BertecDeviceNET.DataFrame[] dataFrames = new BertecDeviceNET.DataFrame[0];
+      //bool isTesting = true;
 
       // Create the callback handler that triggers when data arrives
       CallbackHandler callback = new CallbackHandler();
@@ -83,14 +159,10 @@ namespace BertecForcePlatesFetchData{
       }
 
       // Create the TCP Client
-      int port = 12345;
-      TcpClient client = new TcpClient("localhost",port);
-      NetworkStream stream = client.GetStream();
-      StreamWriter writer = new StreamWriter(stream) { AutoFlush = true };
-      Console.WriteLine("TCP Connection successfully established...");
+      callback.createTCPClient();
 
       
-      //--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
+      /*//--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
 
       // Read all the data
       bool isFirstLine = true;
@@ -118,7 +190,14 @@ namespace BertecForcePlatesFetchData{
       }
 
       //--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
-    
+      */
+       // After the connection link the connection handler wtih callback handler
+      callback.handler = handler;
+
+      // Start the handler
+      handler.AutoZeroing = true;
+      handler.Start();
+
       // Wait for the devices to connect 
       Console.Write("Waiting for devices..");
 
@@ -131,15 +210,18 @@ namespace BertecForcePlatesFetchData{
         }
       }
 
-      // After the connection link the connection handler wtih callback handler
-      callback.handler = handler;
-
-      // Start the handler
-      handler.Start();
+      // Zeroing the load 
+      Console.Write("Zeroing Load...");
+      handler.ZeroNow();
+      while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
+        Console.Write(".");
+        System.Threading.Thread.Sleep(100);
+      }
+      Console.WriteLine("\nDone");
 
       // Inform about the devices that are connected
       for (int i = 0; i < handler.DeviceCount; ++i){
-        Console.WriteLine("Plate {0} connected",handler.DeviceSerialNumber(i));
+        Console.WriteLine("\nPlate {0} connected",handler.DeviceSerialNumber(i));
       }
 
       // Clear the buffered data
@@ -150,59 +232,10 @@ namespace BertecForcePlatesFetchData{
       handler.OnStatus += callback.statusEvent;
       handler.OnDeviceTimestamp += callback.deviceTimestamp;
       callback.timestampStepping = timestampStepping;
+  
 
-      // Read the data and call the callback to print them
-      while(true){
-        while (handler.BufferedDataAvailable > 0){
-          handler.ReadBufferedData(ref dataFrames);
-          //callback.onDataCallback(dataFrames); 
-
-          if (dataFrames.Length > 1){
-           // When there are two force plates
-           
-          } else if(dataFrames.Length > 0){
-
-            // When there is only one force plate
-            BertecDeviceNET.DataFrame devData = dataFrames[0]; // for multiple devices you would iterate through the device array.
-            int channelCount = devData.forceData.Length;
-            
-            if (channelCount > 0){
-              string d = "";
-
-              // Fx1	Fy1	Fz1	Mx1	My1	Mz1	Fx2	Fy2	Fz2	Mx2	My2	Mz2
-              for (int col = 0; col < channelCount; ++col){
-                d = d + devData.forceData[col]+",";
-                Console.Write(",{0}", Math.Abs(devData.forceData[col]));
-              }
-              
-              // Copx1
-              d = d + (devData.forceData[(int)Channel.MY1]/devData.forceData[(int)Channel.FZ1]).ToString()+",";
-              // Copy1
-              d = d + (devData.forceData[(int)Channel.MX1]/devData.forceData[(int)Channel.FZ1]).ToString()+",";
-              // Copxy1
-              d = d + (Math.Sqrt( Math.Pow(devData.forceData[(int)Channel.MY1]/devData.forceData[(int)Channel.FZ1],2)+ Math.Pow(devData.forceData[(int)Channel.MX1]/devData.forceData[(int)Channel.FZ1],2))).ToString()+",";
-
-              // Copx2
-              d = d + (devData.forceData[(int)Channel.MY2]/devData.forceData[(int)Channel.FZ2]).ToString()+",";
-              // Copy2
-              d = d + (devData.forceData[(int)Channel.MX2]/devData.forceData[(int)Channel.FZ2]).ToString()+",";
-              // Copxy2
-              d = d + (Math.Sqrt( Math.Pow(devData.forceData[(int)Channel.MY2]/devData.forceData[(int)Channel.FZ2],2) + Math.Pow(devData.forceData[(int)Channel.MX2]/devData.forceData[(int)Channel.FZ2],2))).ToString();
-
-              d = d +"\r\n";
-
-              // Here goes the code for TCP echo
-              writer.WriteLine(d);
-            }
-          }
-        }
-        System.Threading.Thread.Sleep(100);
-      }
-
-      // Stop the connection handler and finish the data fetching
-      //handler.Stop();
-      //handler.Dispose();
-      //handler = null;
+      // Wait until the session is stopped
+      while(true);
     }
   }
 }
