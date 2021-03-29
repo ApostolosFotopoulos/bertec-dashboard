@@ -171,8 +171,6 @@ module.exports = class {
           .split(";")
           .map(i => Number(i));
 
-        console.log(packetArray)
-
         // Send the data to the linechart window
         if (this.linechartw && this.linechartw.window) {
           if (this.isSessionRunning) {
