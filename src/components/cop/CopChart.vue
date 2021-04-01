@@ -2,16 +2,32 @@
   <v-card elevation="10" color="#25282F">
     <v-row>
       <v-col>
-        <VueApexCharts height="800" class="text-center" type="scatter" :options="copChartOptions" :series="$store.state.seriesLeftPlate"/>
+        <VueApexCharts 
+          height="800" 
+          class="text-center" 
+          type="scatter"
+          ref="leftPlateChart"  
+          :options="leftFootChart" 
+          :series="$store.state.copChart.leftPlateFinalSeries"
+        />
+      </v-col>
+      <v-col>
+        <VueApexCharts 
+          height="800" 
+          ref="rightPlateChart"
+          class="text-center" 
+          type="scatter" 
+          :options="rightFootChart" 
+          :series="$store.state.copChart.rightPlateFinalSeries"
+        />
       </v-col>
     </v-row>
   </v-card>
 </template>
 
 <script>
-//<VueApexCharts height="800" class="text-center" type="scatter" :options="redLineOptions" :series="$store.state.seriesLeftPlate"/>
 const { ipcRenderer } = window.require('electron')
-const defaultOptions = require("../../../assets/options/lineChart.json")
+const defaultOptions = require("../../../assets/options/copChart.json")
 
 import VueApexCharts from 'vue-apexcharts'
 export default {
@@ -20,8 +36,89 @@ export default {
   },
   data(){
     return{
-      copChartOptions:{
+      leftFootChart:{
         ...defaultOptions,
+        yaxis: {
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
+          labels:{
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              return val.toFixed(0)
+            }
+          },
+        },
+        xaxis:{
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
+          labels:{
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              if (val.toFixed(0)%10 == 0){
+                return val.toFixed(0)
+              }
+            },
+            show:true,
+          },
+        },
+        colors:[({ value, seriesIndex, w })=>{
+          if(seriesIndex == (this.$store.state.copChart.leftPlateFinalSeries.length-2)){
+            return "#d32d41"
+          } else {
+            return "gray"
+          }
+        }]
+      },
+      rightFootChart:{
+        ...defaultOptions,
+        yaxis: {
+          max: this.$store.state.axesMax,
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
+          labels:{
+            style:{
+              colors:['#fff']
+            },
+            formatter: (val)=>{
+              return val.toFixed(0)
+            }
+          },
+        },
+        xaxis:{
+          dataLabels:{
+            show:false,
+            enabled:false,
+          },
+          labels:{
+            style:{
+              colors:['#fff']
+            },
+            show:true,
+            formatter: (val)=>{
+              if (val.toFixed(0)%10 == 0){
+                return val.toFixed(0)
+              }
+            },
+          },
+          
+        },
+        colors:[({ value, seriesIndex, w })=>{
+          if(seriesIndex == (this.$store.state.copChart.rightPlateFinalSeries.length - 2)){
+            return "#6ab187"
+          } else {
+            return "gray"
+          }
+        }]
       }
     }
   },
@@ -31,7 +128,7 @@ export default {
       if(responseData.isSessionRunning){
         _this.updateVariables(responseData)
       } else {
-        //_this.$store.commit('resetLineChartState')
+        _this.$store.commit('resetCOPChartState')
       }
     }) 
   },
@@ -43,8 +140,9 @@ export default {
       this.$store.commit('setFrequency',responseData.frequency)
       this.$store.commit('setThreshold',responseData.threshold)
       this.$store.commit('setNofLines',responseData.nOfLines)
-      this.$store.commit('setLeftAndRightPlateAtCOP',responseData.rows)
-    }
+      this.$store.commit('setLeftPlateAtCOP',responseData.rows)
+      this.$store.commit('setRightPlateAtCOP',responseData.rows)
+    },
   }
 }
 </script>
