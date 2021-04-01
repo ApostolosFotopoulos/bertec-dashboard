@@ -77,8 +77,6 @@ module.exports = class {
       this.window.on('closed', () => {
         if(this.cw.window){ this.cw.window.close() }
         if(this.linechartw.window){ this.linechartw.window.close() }
-        if(this.cpw.window){ this.cpw.window.close() }
-        if(this.window){ this.window.close() }
       })
     } catch (e) {
       console.log(e)
