@@ -144,11 +144,11 @@ export default {
       this.$store.commit('setRightPlateAtLineChart',responseData.rows) 
       if(this.$store.state.lineChart.shouldUpdateLeft){
         this.updateLeftChart()
-        this.$store.commit('setShouldUpdateLeft',false)
+        this.$store.commit('setShouldUpdateLeftAtLineChart',false)
       }
       if(this.$store.state.lineChart.shouldUpdateRight){
         this.updateRightChart()
-        this.$store.commit('setShouldUpdateRight',false)
+        this.$store.commit('setShouldUpdateRightAtLineChart',false)
       }
     },
     updateLeftChart(){
