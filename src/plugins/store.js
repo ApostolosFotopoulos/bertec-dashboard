@@ -65,15 +65,24 @@ export default new Vuex.Store({
       rightSteps:0,
     },
     copChart: {
-      series: [{
-        data:[]
-      }],
-      finalSeries: [{
+      leftPlateSeries: [{
         data: []
       }],
-      nRows: 0,
+      leftPlateFinalSeries: [{
+        data: []
+      }],
+      righPlateSeries: [{
+        data: []
+      }],
+      rightPlateFinalSeries: [{
+        data: []
+      }],
       isLeftPlateLocked: false,
       isRightPlateLocked: false,
+      leftPlateRows: 0,
+      rightPlateRows: 0,
+      leftSteps: 0,
+      rightSteps: 0,
     }
   },
   mutations: {
@@ -469,62 +478,173 @@ export default new Vuex.Store({
       state.lineChart.leftPlateRows = 0
       state.lineChart.yAxisMaxValue = -1
     },
-    setShouldUpdateLeft(state,shouldUpdateLeft){
+    setShouldUpdateLeftAtLineChart(state,shouldUpdateLeft){
       state.lineChart.shouldUpdateLeft = shouldUpdateLeft
     },
-    setShouldUpdateRight(state,shouldUpdateRight){
+    setShouldUpdateRightAtLineChart(state,shouldUpdateRight){
       state.lineChart.shouldUpdateRight = shouldUpdateRight
     },
 
     // COP
     resetCOPChartState(state) {
-      
+      state.copChart.leftPlateSeries = [{
+        data: []
+      }]
+      state.copChart.leftPlateFinalSeries = [{
+        data: []
+      }]
+      state.copChart.righPlateSeries = [{
+        data: []
+      }]
+      state.copChart.rightPlateFinalSeries = [{
+        data: []
+      }]
+      state.copChart.isLeftPlateLocked = false
+      state.copChart.isRightPlateLocked = false
+      state.copChart.leftPlateRows = 0 
+      state.copChart.rightPlateRows = 0
+      state.copChart.shouldUpdateLeft = false
+      state.copChart.shouldUpdateRight = false
+      state.copChart.leftSteps = 0
+      state.copChart.rightSteps = 0
     },
-    setLeftAndRightPlateAtCOP(state, rows) {
+    setLeftPlateAtCOP(state,rows) {
       let fz1 = Number(rows[2])
-      let fz2 = Number(rows[8])
       let copx1 = rows[rowsNames["COPX1"]]
       let copy1 = rows[rowsNames["COPY1"]]
+      let threshold
+
+      if (state.options.threshold != -1) {
+        threshold = Number(state.options.threshold)
+      } else {
+        threshold = Number(0.05 * state.options.weight)
+      }
+
+      if (state.copChart.isLeftPlateLocked) {
+        if (fz1 > threshold) {
+          // Update the left plate series with the new value that is over the
+          // threshold
+          state.copChart.leftSteps += 1
+          let d = state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data
+          d.push([copx1, copy1])
+          state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = d
+        }
+        if (fz1 < threshold) {
+          state.copChart.isLeftPlateLocked = false
+
+          // Include as a step if it is larger than 20% of the frequency
+          if (state.copChart.leftSteps > 0.2 * state.options.frequency) {
+
+            // Then add the series to the final series and
+            // also prepare the state for the next series
+            let s = state.copChart.leftPlateSeries
+            state.copChart.leftPlateFinalSeries = s
+            s.push({
+              data: []
+            })
+            state.copChart.leftPlateSeries = s
+            state.copChart.leftPlateRows += 1
+          } else {
+
+            // If there is no step then reset the data array for the next data
+            state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = []
+          }
+          state.copChart.leftSteps = 0
+        }
+      } else {
+        if (fz1 > threshold) {
+
+          // If the number of lines is over the predefined limit
+          // then clean the chart to retrieve the next lines
+          if (state.copChart.leftPlateRows > Number(state.options.nOfLines)) {
+            state.copChart.leftPlateSeries = [{
+              data: []
+            }]
+            state.copChart.leftPlateFinalSeries = [{
+              data: []
+            }]
+            state.copChart.leftSteps = 0
+            state.copChart.leftPlateRows = 0
+          }
+
+          // Update the left plate series with the new value that is over the
+          // threshold and activate the step process
+          state.copChart.isLeftPlateLocked = true
+          let d = state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data
+          d.push([copx1, copy1])
+          state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = d
+        }
+      }
+      //console.log(state.copChart.leftPlateFinalSeries)
+    },
+    setRightPlateAtCOP(state, rows) {
+      let fz2 = Number(rows[8])
       let copx2 = rows[rowsNames["COPX2"]]
       let copy2 = rows[rowsNames["COPY2"]]
       let threshold
 
-      // If there is a threshold given the use that as 
-      // threshold for the step
       if (state.options.threshold != -1) {
         threshold = Number(state.options.threshold)
       } else {
         threshold = Number(0.2 * state.options.weight)
       }
-      
-      // Left foot
-      if (state.copChart.isLeftPlateLocked) {
-        if (fz1 > threshold) {
-          
-        }
-        if (fz1 < threshold) {
-          
-        }
-      } else {
-        if (fz1 > threshold) {
 
-        }
-      }
-
-      // Right foot
       if (state.copChart.isRightPlateLocked) {
         if (fz2 > threshold) {
-          
+          // Update the left plate series with the new value that is over the
+          // threshold
+          state.copChart.rightSteps += 1
+          let d = state.copChart.righPlateSeries[state.copChart.rightPlateRows].data
+          d.push([copx2, copy2])
+          state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = d
         }
         if (fz2 < threshold) {
+          state.copChart.isRightPlateLocked = false
 
-        }
+          // Include as a step if it is larger than 20% of the frequency
+          if (state.copChart.rightSteps > 0.2 * state.options.frequency) {
+
+            // Then add the series to the final series and
+            // also prepare the state for the next series
+            let s = state.copChart.righPlateSeries
+            state.copChart.rightPlateFinalSeries = s
+            s.push({
+              data: []
+            })
+            state.copChart.righPlateSeries = s
+            state.copChart.rightPlateRows += 1
+          } else {
+
+            // If there is no step then reset the data array for the next data
+            state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = []
+          }
+          state.copChart.rightSteps = 0
+        } 
       } else {
         if (fz2 > threshold) {
+          
+          // If the number of lines is over the predefined limit
+          // then clean the chart to retrieve the next lines
+          if (state.copChart.rightPlateRows > Number(state.options.nOfLines)) {
+            state.copChart.righPlateSeries = [{
+              data: []
+            }]
+            state.copChart.rightPlateFinalSeries = [{
+              data: []
+            }]
+            state.copChart.rightSteps = 0
+            state.copChart.rightPlateRows = 0
+          }
 
+          // Update the left plate series with the new value that is over the
+          // threshold and activate the step process
+          state.copChart.isRightPlateLocked = true
+          let d = state.copChart.righPlateSeries[state.copChart.rightPlateRows].data
+          d.push([copx2, copy2])
+          state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = d
         }
       }
-    }
+    },
   },
   actions:{}
 })
