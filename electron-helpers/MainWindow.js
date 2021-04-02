@@ -192,7 +192,7 @@ module.exports = class {
         // Send the data to the COP window
         if (this.cpw && this.cpw.window) {
           if (this.isSessionRunning) {
-            this.linechartw.window.webContents.send("SESSION_RESPONSE_COP", {
+            this.cpw.window.webContents.send("SESSION_RESPONSE_COP", {
               rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
               isSessionRunning: this.isSessionRunning,
               stepsPerMinuteTarget: this.stepsPerMinuteTarget,
@@ -202,7 +202,7 @@ module.exports = class {
               weight: this.weight,
             });
           } else {
-            this.linechartw.window.webContents.send("SESSION_RESPONSE_COP", {
+            this.cpw.window.webContents.send("SESSION_RESPONSE_COP", {
               rows: [],
               isSessionRunning: this.isSessionRunning,
             });
