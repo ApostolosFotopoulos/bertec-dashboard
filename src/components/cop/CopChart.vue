@@ -39,6 +39,8 @@ export default {
       leftFootChart:{
         ...defaultOptions,
         yaxis: {
+          min:0,
+          max: 1200,
           dataLabels:{
             show:false,
             enabled:false,
@@ -53,6 +55,8 @@ export default {
           },
         },
         xaxis:{
+          min:0,
+          max: 600,
           dataLabels:{
             show:false,
             enabled:false,
@@ -75,12 +79,16 @@ export default {
           } else {
             return "gray"
           }
-        }]
+        }],
+        markers: {
+          size: 4,
+        }
       },
       rightFootChart:{
         ...defaultOptions,
         yaxis: {
-          max: this.$store.state.axesMax,
+          min:0,
+          max: 1200,
           dataLabels:{
             show:false,
             enabled:false,
@@ -95,6 +103,8 @@ export default {
           },
         },
         xaxis:{
+          min:0,
+          max: 600,
           dataLabels:{
             show:false,
             enabled:false,
@@ -118,7 +128,10 @@ export default {
           } else {
             return "gray"
           }
-        }]
+        }],
+        markers: {
+          size: 4,
+        }
       }
     }
   },
