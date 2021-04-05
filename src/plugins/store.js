@@ -11,7 +11,7 @@ export default new Vuex.Store({
       filePath: "",
       mode: "Walking",
       timeout: 60,
-      weight: 700,
+      weight: 100,
       dataType: "Normalized",
       stepsPerMinuteTarget: 150,
       frequency: 100,

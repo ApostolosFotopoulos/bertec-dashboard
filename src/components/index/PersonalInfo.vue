@@ -31,7 +31,7 @@
     <v-col>
       <v-btn 
         class="getWeight v-input__control"
-        :disabled="$store.state.options.isSessionRunning"
+        @click="setWeight"
       >
         Get Weight
       </v-btn>
@@ -40,10 +40,20 @@
 </template>
 
 <script>
+
+import rowsNames from '../../../assets/store/rowsNames.json'
+const { ipcRenderer } = window.require('electron')
+
 export default {
   data(){
     return{
       dataType:["Absolute","Normalized"],
+    }
+  },
+  methods:{
+    setWeight(){
+      console.log("WEIGHT: "+this.$store.state.options.leftPlateValue);
+      this.$store.commit('setWeight',this.$store.state.options.leftPlateValue);
     }
   }
 }

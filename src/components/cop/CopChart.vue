@@ -1,9 +1,9 @@
 <template>
   <v-card elevation="10" color="#25282F">
     <v-row>
-      <v-col>
+      <v-col cols="5">
         <VueApexCharts 
-          height="800" 
+          height="900px" 
           class="text-center" 
           type="scatter"
           ref="leftPlateChart"  
@@ -11,9 +11,12 @@
           :series="$store.state.copChart.leftPlateFinalSeries"
         />
       </v-col>
-      <v-col>
+      <v-col cols="2" class="mt-5">
+        <v-btn @click="$store.commit('resetCOPChartState')" class="resetButton  v-input__control">Reset</v-btn>
+      </v-col>
+      <v-col cols="5">
         <VueApexCharts 
-          height="800" 
+          height="900px" 
           ref="rightPlateChart"
           class="text-center" 
           type="scatter" 
@@ -39,8 +42,9 @@ export default {
       leftFootChart:{
         ...defaultOptions,
         yaxis: {
-          min:0,
-          max: 1200,
+          min:-300,
+          max: 300,
+          tickAmount:6,
           dataLabels:{
             show:false,
             enabled:false,
@@ -55,8 +59,10 @@ export default {
           },
         },
         xaxis:{
-          min:0,
-          max: 600,
+          min:-200,
+          max: 200,
+          tickAmount:32,
+          tickPlacement: 'between',
           dataLabels:{
             show:false,
             enabled:false,
@@ -82,13 +88,38 @@ export default {
         }],
         markers: {
           size: 4,
+        },
+        annotations:{
+          yaxis:[{
+            y:300,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          },{
+            y:-300,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          }],
+          xaxis:[{
+            x:-200,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          },{
+            x:200,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          }]
         }
       },
       rightFootChart:{
         ...defaultOptions,
         yaxis: {
-          min:0,
-          max: 1200,
+          min:-300,
+          max: 300,
+          tickAmount:6,
           dataLabels:{
             show:false,
             enabled:false,
@@ -103,8 +134,10 @@ export default {
           },
         },
         xaxis:{
-          min:0,
-          max: 600,
+          min:-200,
+          max: 200,
+          tickAmount:32,
+          tickPlacement: 'between',
           dataLabels:{
             show:false,
             enabled:false,
@@ -131,6 +164,30 @@ export default {
         }],
         markers: {
           size: 4,
+        },
+        annotations:{
+          yaxis:[{
+            y:300,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          },{
+            y:-300,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          }],
+          xaxis:[{
+            x:-200,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          },{
+            x:200,
+            borderWidth:5,
+            strokeDashArray: 0,
+            borderColor:"rgb(224, 224, 224)",
+          }]
         }
       }
     }
@@ -147,6 +204,7 @@ export default {
   },
   methods:{
     updateVariables(responseData){
+      console.log(responseData.rows)
       this.$store.commit('setWeight',responseData.weight)
       this.$store.commit('setForce',responseData.force)
       this.$store.commit('setStepsPerMinuteTarget',responseData.stepsPerMinuteTarget)
@@ -159,3 +217,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.resetButton{
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #6ab187 !important;
+}
+</style>
