@@ -6,7 +6,6 @@
         :value="$store.state.options.leftPlateChannel"
         :items="leftForcePlateChannels"
         label="Left Plate Channel"
-        :disabled="!$store.state.options.isSessionRunning"
         solo
       ></v-select>
     </v-col>
@@ -24,7 +23,6 @@
         :value="$store.state.options.rightPlateChannel"
         :items="rightForcePlateChannels"
         label="Right Plate Channel"
-        :disabled="!$store.state.options.isSessionRunning"
         solo
       ></v-select>
     </v-col>
@@ -53,13 +51,8 @@ export default{
   mounted(){
     var _this = this
     ipcRenderer.on('SESSION_RESPONSE_OPTIONS',(_,responseData)=>{
-      if(responseData.isSessionRunning){
-        _this.$store.commit('setLeftPlateValue',responseData.rows[rowsNames[_this.$store.state.options.leftPlateChannel]])
-        _this.$store.commit('setRightPlateValue',responseData.rows[rowsNames[_this.$store.state.options.rightPlateChannel]])
-      } else {
-        _this.$store.commit('setLeftPlateValue',0)
-        _this.$store.commit('setRightPlateValue',0)
-      }
+      _this.$store.commit('setLeftPlateValue',responseData.rows[rowsNames[_this.$store.state.options.leftPlateChannel]])
+      _this.$store.commit('setRightPlateValue',responseData.rows[rowsNames[_this.$store.state.options.rightPlateChannel]])
     }) 
   },
 }

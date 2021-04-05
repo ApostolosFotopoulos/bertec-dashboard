@@ -64,10 +64,12 @@ namespace BertecForcePlatesFetchData{
           d = d + "0;0;0;0;0;0;";
 
           // Copx1
-          d = d + (firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+          Double copx1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1]);
+          d = d + copx1.ToString()+";";
           
           // Copy1
-          d = d + (firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+          Double copy1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1]);
+          d = d + copy1.ToString()+";";
           
           // Copxy1
           d = d + (Math.Sqrt( Math.Pow(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1],2)+ Math.Pow(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1],2))).ToString()+";";
@@ -80,11 +82,13 @@ namespace BertecForcePlatesFetchData{
           if(dataCollected == 10){
             dataCollected = 0;
             //Console.Write(d);
+
             writer.Flush();
             writer.WriteLine(d);
             writer.Flush();
             Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
             Console.WriteLine(counter);
+            Console.WriteLine(copx1.ToString());
             counter+=1;
           }
           dataCollected += 1;

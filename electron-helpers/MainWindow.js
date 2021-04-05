@@ -141,7 +141,7 @@ module.exports = class {
       console.log(d)
       // Setup the default setting to start the session
       this.isSessionRunning = true
-      this.weight = weight
+      this.weight = Number(weight);
       this.dataType = dataType
       this.stepsPerMinuteTarget = stepsPerMinuteTarget
       this.frequency = frequency
@@ -233,17 +233,10 @@ module.exports = class {
         
         // Send the details the main window with the options
         if(this.window){
-          if (this.isSessionRunning) {
-            this.window.webContents.send("SESSION_RESPONSE_OPTIONS", {
-              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
-              isSessionRunning: this.isSessionRunning,
-            });
-          } else {
-            this.window.webContents.send("SESSION_RESPONSE_OPTIONS", {
-              rows: [],
-              isSessionRunning: this.isSessionRunning,
-            });
-          }
+          this.window.webContents.send("SESSION_RESPONSE_OPTIONS", {
+            rows: packetArray,
+            isSessionRunning: this.isSessionRunning,
+          });
         }
       })
     })
