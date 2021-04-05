@@ -10,7 +10,7 @@ const routes = [{
 },{
 	path: "/cop",
 	name: "Cop",
-	component: ()=> import("../views/Cop.vue")
+	component: ()=> import("../views/CopChartPage.vue")
 },{
 	path: "/linechart",
 	name: "LineChartPage",

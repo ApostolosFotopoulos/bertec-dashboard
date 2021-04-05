@@ -3,7 +3,7 @@
     <v-col>
       <v-checkbox
         v-model="isChartChecked"
-        label="Display Speed Meters"
+        label="Speed Meters"
         color="#6ab187"
         hide-details
         :disabled="!$store.state.options.isSessionRunning"
@@ -13,7 +13,7 @@
     <v-col>
       <v-checkbox
         v-model="isCopChecked"
-        label="Display Center of Pressure"
+        label="Centers of Pressure"
         color="#6ab187"
         hide-details
         :disabled="!$store.state.options.isSessionRunning"
@@ -23,7 +23,7 @@
     <v-col>
       <v-checkbox
         v-model="isLineChartChecked"
-        label="Display Line Chart"
+        label="Line Charts"
         color="#6ab187"
         hide-details
         :disabled="!$store.state.options.isSessionRunning"
