@@ -6,7 +6,7 @@
         label="Where to save the data"
         type="text"
         solo
-        disabled
+        readonly
       />
     </v-col>
     <v-col cols="2">
@@ -24,11 +24,15 @@ export default {
     }
   },
   mounted(){
+    var _this = this
     ipcRenderer.on('FILE_SAVE_RESPONSE',(_,responseData)=>{
       const { filePath } = responseData
-      this.$store.commit('setFilePath',filePath)
-      this.buttonDisabled = !this.buttonDisabled
+      _this.$store.commit('setFilePath',filePath)
+      _this.buttonDisabled = !_this.buttonDisabled
     });
+    ipcRenderer.on('SESSION_RESPONSE_OPTIONS',(_,responseData)=>{
+      _this.$store.commit('setFilePath',responseData.filePath)
+    }) 
   }, 
   methods:{
     saveFile(){

@@ -133,20 +133,12 @@ module.exports = class {
       
     // Session Events
     ipcMain.on('START_SESSION', (_, d) => {
-      const { 
-        weight, dataType,stepsPerMinuteTarget,
-        frequency,threshold,nOfLines
-      } = d
+      const { weight } = d
 
       console.log(d)
       // Setup the default setting to start the session
       this.isSessionRunning = true
       this.weight = Number(weight);
-      this.dataType = dataType
-      this.stepsPerMinuteTarget = stepsPerMinuteTarget
-      this.frequency = frequency
-      this.threshold = threshold
-      this.nOfLines = nOfLines
     })
 
     ipcMain.on('STOP_SESSION', () => {
@@ -173,18 +165,15 @@ module.exports = class {
         if (this.linechartw && this.linechartw.window) {
           if (this.isSessionRunning) {
             this.linechartw.window.webContents.send("SESSION_RESPONSE_LINECHART", {
-              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
+              rows: packetArray,
               isSessionRunning: this.isSessionRunning,
-              stepsPerMinuteTarget: this.stepsPerMinuteTarget,
-              frequency: this.frequency,
-              threshold: this.threshold,
-              nOfLines: this.nOfLines,
               weight: this.weight,
             });
           } else {
             this.linechartw.window.webContents.send("SESSION_RESPONSE_LINECHART", {
-              rows: [],
+              rows: packetArray,
               isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
             });
           }
         }
@@ -193,18 +182,15 @@ module.exports = class {
         if (this.cpw && this.cpw.window) {
           if (this.isSessionRunning) {
             this.cpw.window.webContents.send("SESSION_RESPONSE_COP", {
-              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
+              rows: packetArray,
               isSessionRunning: this.isSessionRunning,
-              stepsPerMinuteTarget: this.stepsPerMinuteTarget,
-              frequency: this.frequency,
-              threshold: this.threshold,
-              nOfLines: this.nOfLines,
               weight: this.weight,
             });
           } else {
             this.cpw.window.webContents.send("SESSION_RESPONSE_COP", {
               rows: [],
               isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
             });
           }
         }
@@ -213,13 +199,9 @@ module.exports = class {
         if (this.cw && this.cw.window) {
           if (this.isSessionRunning) {
             this.cw.window.webContents.send("SESSION_RESPONSE_SPEEDMETER", {
-              rows: this.dataType === "Absolute" ? packetArray : packetArray.map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
-              force: Math.floor(Math.random() * 100) + 1,
+              rows: packetArray,
+              force: Math.random().toFixed(2),
               isSessionRunning: this.isSessionRunning,
-              stepsPerMinuteTarget: this.stepsPerMinuteTarget,
-              frequency: this.frequency,
-              threshold: this.threshold,
-              nOfLines: this.nOfLines,
               weight: this.weight,
             });
           } else {
@@ -227,6 +209,7 @@ module.exports = class {
               rows: [],
               force: 0,
               isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
             });
           }
         }
@@ -236,22 +219,43 @@ module.exports = class {
           this.window.webContents.send("SESSION_RESPONSE_OPTIONS", {
             rows: packetArray,
             isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            filePath: this.filePath,
           });
         }
       })
     })
   
+
+    // SpeedMeter Events
+    ipcMain.on("SESSION_RUNNING_SPEEDMETER", (e, d) => {
+      if (this.isSessionRunning) {
+        e.reply("SESSION_RESPONSE_SPEEDMETER", {
+          rows: this.rows[(this.nOfCOPChart) % this.rows.length].map(i=>Number(i)),
+          isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+          force: Math.random().toFixed(2),
+        })
+        this.nOfCOPChart = this.nOfCOPChart + SKIP_ENTRIES_LINECHART
+      } else {
+        this.nOfCOPChart = 0
+        e.reply("SESSION_RESPONSE_LINECHART", {
+          rows: [],
+          force: 0,
+          isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+        })
+      }
+    })
+
     // LineChart Events
     ipcMain.on("SESSION_RUNNING_LINECHART",(e,d)=>{
       if(this.isSessionRunning){
         e.reply("SESSION_RESPONSE_LINECHART",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfStepsLineChart) % this.rows.length] : this.rows[(this.nOfStepsLineChart) % this.rows.length].map((i, idx) => (idx > 11) ? Number(i) : (Number(i) / this.weight) * 100),
+          rows: this.rows[(this.nOfStepsLineChart) % this.rows.length].map(i => Number(i)),
           isSessionRunning: this.isSessionRunning,
-          stepsPerMinuteTarget: this.stepsPerMinuteTarget,
-          frequency: this.frequency,
-          threshold: this.threshold,
-          nOfLines: this.nOfLines,
           weight: this.weight,
+          force: Math.random().toFixed(2)
         })
         this.nOfStepsLineChart = this.nOfStepsLineChart + SKIP_ENTRIES_LINECHART
       } else {
@@ -259,6 +263,8 @@ module.exports = class {
         e.reply("SESSION_RESPONSE_LINECHART",{
           rows: [],
           isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+          force: 0,
         })
       }
     })
@@ -267,12 +273,8 @@ module.exports = class {
     ipcMain.on("SESSION_RUNNING_COP",(e,d)=>{
       if(this.isSessionRunning){
         e.reply("SESSION_RESPONSE_COP",{
-          rows: this.dataType === "Absolute" ? this.rows[(this.nOfCOPChart) % this.rows.length] : this.rows[(this.nOfCOPChart) % this.rows.length].map((i,idx) => (idx > 11 )?Number(i):(Number(i) / this.weight) * 100),
+          rows: this.rows[(this.nOfCOPChart) % this.rows.length].map(i => Number(i)),
           isSessionRunning: this.isSessionRunning,
-          stepsPerMinuteTarget: this.stepsPerMinuteTarget,
-          frequency: this.frequency,
-          threshold: this.threshold,
-          nOfLines: this.nOfLines,
           weight: this.weight,
         })
         this.nOfCOPChart = this.nOfCOPChart + SKIP_ENTRIES_COPCHART
@@ -281,6 +283,7 @@ module.exports = class {
         e.reply("SESSION_RESPONSE_COP",{
           rows: [],
           isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
         })
       }
     })

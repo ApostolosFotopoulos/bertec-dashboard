@@ -1,18 +1,6 @@
 <template>
   <v-row>
-    <v-col>
-      <v-select
-        @change="(v)=>{
-          $store.commit('setDataType',v)
-        }"
-        :disabled="$store.state.options.isSessionRunning"
-        :value="$store.state.options.dataType"
-        :items="dataType"
-        label="Data Type"
-        solo
-      ></v-select>
-    </v-col>
-    <v-col>
+    <v-col offset="6" cols="3">
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-text-field
@@ -28,10 +16,11 @@
         <span>Weight</span>
       </v-tooltip>
     </v-col>
-    <v-col>
+    <v-col cols="3">
       <v-btn 
         class="getWeight v-input__control"
         @click="setWeight"
+        :disabled="$store.state.options.isSessionRunning"
       >
         Get Weight
       </v-btn>
@@ -40,20 +29,17 @@
 </template>
 
 <script>
-
-import rowsNames from '../../../assets/store/rowsNames.json'
 const { ipcRenderer } = window.require('electron')
-
 export default {
-  data(){
-    return{
-      dataType:["Absolute","Normalized"],
-    }
+  mounted(){
+    var _this = this
+    ipcRenderer.on('SESSION_RESPONSE_OPTIONS',(_,responseData)=>{
+      _this.$store.commit('setWeight',responseData.weight)
+    }) 
   },
   methods:{
     setWeight(){
-      console.log("WEIGHT: "+this.$store.state.options.leftPlateValue);
-      this.$store.commit('setWeight',this.$store.state.options.leftPlateValue);
+      this.$store.commit('setWeight',Number(this.$store.state.options.leftPlateValue));
     }
   }
 }

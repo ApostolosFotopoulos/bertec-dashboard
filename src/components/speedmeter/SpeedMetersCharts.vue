@@ -63,10 +63,6 @@ export default {
     updateVariables(responseData){
       this.$store.commit('setWeight',responseData.weight)
       this.$store.commit('setForce',responseData.force)
-      this.$store.commit('setStepsPerMinuteTarget',responseData.stepsPerMinuteTarget)
-      this.$store.commit('setFrequency',responseData.frequency)
-      this.$store.commit('setThreshold',responseData.threshold)
-      this.$store.commit('setNofLines',responseData.nOfLines)
       this.$store.commit('setLeftPlateAtSpeedmeter',responseData.rows)
       this.$store.commit('setRightPlateAtSpeedmeter',responseData.rows) 
       this.$store.commit('calculatefootAsymmetries') 

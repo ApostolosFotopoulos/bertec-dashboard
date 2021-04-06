@@ -3,23 +3,33 @@
     <v-row class="mt-4 mb-3">
       <v-col>
         <h1>Dashboard - Overview</h1>
+      </v-col>
+    </v-row>
+    <v-row class="mt-0">
+      <v-col>
+        <h3>File</h3>
         <hr class="hr">
       </v-col>
     </v-row>
     <SaveFile/>
-    <SessionRunning/>
-    <PersonalInfo/>
-    <Settings/>
-    <v-row>
+    <v-row class="mt-0">
       <v-col>
-        <h3>Status</h3>
+        <h3>Session</h3>
+        <hr class="hr">
+      </v-col>
+    </v-row>
+    <SessionRunning/>
+    <v-row class="mt-0">
+      <v-col>
+        <h3>Status - Weight</h3>
         <hr class="hr">
       </v-col>
     </v-row>
     <Status/>
-    <v-row>
+    <PersonalInfo/>
+    <v-row class="mt-0">
       <v-col>
-        <h3>Options</h3>
+        <h3>Graphics</h3>
         <hr class="hr">
       </v-col>
     </v-row>

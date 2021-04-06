@@ -3,9 +3,9 @@
     <v-row>
       <v-col>
         <VueApexCharts 
-          height="650" 
           ref="leftPlateChart" 
           class="text-center" 
+          :height="height"
           type="line" 
           :options="leftFootChart" 
           :series="$store.state.lineChart.leftPlateFinalSeries"
@@ -13,9 +13,9 @@
       </v-col>
       <v-col>
         <VueApexCharts 
-          height="650" 
           ref="rightPlateChart" 
-          class="text-center" 
+          class="text-center"
+          :height="height"
           type="line" 
           :options="rightFootChart" 
           :series="$store.state.lineChart.rightPlateFinalSeries"
@@ -34,8 +34,15 @@ export default {
   components:{
     VueApexCharts
   },
+  created() {
+    window.addEventListener("resize", this.resizeHandler);
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.resizeHandler);
+  },
   data(){
     return{
+      height: 0.8 * window.innerHeight,
       leftFootChart:{
         ...defaultLineChartOptions,
         yaxis: {
@@ -133,13 +140,12 @@ export default {
     }) 
   },
   methods:{
+    resizeHandler(e){
+      this.height = 0.8 * window.innerHeight
+    },
     updateVariables(responseData){
       this.$store.commit('setWeight',responseData.weight)
       this.$store.commit('setForce',responseData.force)
-      this.$store.commit('setStepsPerMinuteTarget',responseData.stepsPerMinuteTarget)
-      this.$store.commit('setFrequency',responseData.frequency)
-      this.$store.commit('setThreshold',responseData.threshold)
-      this.$store.commit('setNofLines',responseData.nOfLines)
       this.$store.commit('setLeftPlateAtLineChart',responseData.rows)
       this.$store.commit('setRightPlateAtLineChart',responseData.rows) 
       if(this.$store.state.lineChart.shouldUpdateLeft){
@@ -330,3 +336,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.card-style{
+  height: 100%;
+
+}
+</style>

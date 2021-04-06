@@ -3,7 +3,7 @@
     <v-row>
       <v-col cols="5">
         <VueApexCharts 
-          height="900px" 
+          :height="height" 
           class="text-center" 
           type="scatter"
           ref="leftPlateChart"  
@@ -13,10 +13,25 @@
       </v-col>
       <v-col cols="2" class="mt-5">
         <v-btn @click="$store.commit('resetCOPChartState')" class="resetButton  v-input__control">Reset</v-btn>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            v-bind="attrs"
+            v-on="on"
+            class="mt-3"
+            @change="(v)=>$store.commit('setNofGroupPoints',Number(v))"
+            :value="$store.state.copChart.nOfGroupPoints"
+            label="Number of Group Points"
+            solo
+            min="1"
+          />
+          </template>
+          <span>Number of Group Points</span>
+        </v-tooltip>
       </v-col>
       <v-col cols="5">
         <VueApexCharts 
-          height="900px" 
+          :height="height"
           ref="rightPlateChart"
           class="text-center" 
           type="scatter" 
@@ -37,8 +52,15 @@ export default {
   components:{
     VueApexCharts
   },
+  created() {
+    window.addEventListener("resize", this.resizeHandler);
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.resizeHandler);
+  },
   data(){
     return{
+      height: 0.8 * window.innerHeight,
       leftFootChart:{
         ...defaultOptions,
         yaxis: {
@@ -203,14 +225,12 @@ export default {
     }) 
   },
   methods:{
+    resizeHandler(e){
+      this.height = 0.8 * window.innerHeight
+    },
     updateVariables(responseData){
       console.log(responseData.rows)
       this.$store.commit('setWeight',responseData.weight)
-      this.$store.commit('setForce',responseData.force)
-      this.$store.commit('setStepsPerMinuteTarget',responseData.stepsPerMinuteTarget)
-      this.$store.commit('setFrequency',responseData.frequency)
-      this.$store.commit('setThreshold',responseData.threshold)
-      this.$store.commit('setNofLines',responseData.nOfLines)
       this.$store.commit('setLeftPlateAtCOP',responseData.rows)
       this.$store.commit('setRightPlateAtCOP',responseData.rows)
     },

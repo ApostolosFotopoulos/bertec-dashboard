@@ -1,6 +1,18 @@
 <template>
   <v-row>
     <v-col>
+      <v-select
+        @change="(v)=>{
+          $store.commit('setDataType',v)
+        }"
+        :disabled="$store.state.options.isSessionRunning"
+        :value="$store.state.options.dataType"
+        :items="dataType"
+        label="Data Type"
+        solo
+      ></v-select>
+    </v-col>
+    <v-col>
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-text-field

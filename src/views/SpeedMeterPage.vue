@@ -1,14 +1,30 @@
 <template>
   <v-container>
     <SpeedMetersCharts/>
-    <v-container>
-    <v-row>
-      <v-col cols="2" offset="10" align="right">
-        <v-btn @click="$store.commit('resetSpeedmeterState')" class="resetButton  v-input__control">Reset</v-btn>
-      </v-col>
-    </v-row>
-    </v-container>
     <Statistics/>
+    <v-container>
+      <v-row>
+        <v-col cols="3" offset="7">
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-bind="attrs"
+                v-on="on"
+                @change="(v)=>$store.commit('setStepsPerMinuteTargetAtSpeedmeter',Number(v))"
+                :value="$store.state.speedmeter.stepsPerMinuteTarget"
+                label="Steps/Minute"
+                solo
+                min="0"
+              />
+            </template>
+            <span>Steps/Minute</span>
+          </v-tooltip>
+        </v-col>
+        <v-col cols="2" align="right">
+          <v-btn @click="$store.commit('resetSpeedmeterState')" class="resetButton  v-input__control">Reset</v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
   </v-container>
 </template>
 

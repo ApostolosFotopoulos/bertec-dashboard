@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import _ from 'lodash'
-import moment from 'moment'
+import moment, { max } from 'moment'
 import rowsNames from '../../assets/store/rowsNames.json'
 Vue.use(Vuex)
 
@@ -11,13 +11,9 @@ export default new Vuex.Store({
       filePath: "",
       mode: "Walking",
       timeout: 60,
-      weight: 100,
-      dataType: "Normalized",
-      stepsPerMinuteTarget: 150,
-      frequency: 100,
-      threshold: -1,
-      nOfLines: 10,
+      weight: 700,
       isSessionRunning: false,
+      frequency:100,
       leftPlateChannel: "FZ1",
       leftPlateValue:0,
       rightPlateChannel: "FZ2",
@@ -47,6 +43,9 @@ export default new Vuex.Store({
       shouldUpdateLeft:false,
       shouldUpdateRight:false,
       yAxisMaxValue: -1,
+      threshold: -1,
+      nOfLines: 10,
+      dataType: "Normalized"
     },
     speedmeter: {
       force: 0,
@@ -62,7 +61,8 @@ export default new Vuex.Store({
       rightMaxValue:0,
       start: null,
       leftSteps: 0,
-      rightSteps:0,
+      rightSteps: 0,
+      stepsPerMinuteTarget:150,
     },
     copChart: {
       leftPlateSeries: [{
@@ -83,6 +83,7 @@ export default new Vuex.Store({
       rightPlateRows: 0,
       leftSteps: 0,
       rightSteps: 0,
+      nOfGroupPoints: 10,
     }
   },
   mutations: {
@@ -98,21 +99,6 @@ export default new Vuex.Store({
     },
     setWeight(state, weight) {
       state.options.weight = weight
-    },
-    setDataType(state, dataType) {
-      state.options.dataType = dataType
-    },
-    setStepsPerMinuteTarget(state, stepsPerMinute) {
-      state.options.stepsPerMinuteTarget = stepsPerMinute
-    },
-    setFrequency(state, frequency) {
-      state.options.frequency = frequency
-    },
-    setThreshold(state, threshold) {
-      state.options.threshold = threshold
-    },
-    setNofLines(state, nOfLines) {
-      state.options.nOfLines = nOfLines
     },
     setSessionRunning(state, isSessionRunning) {
       state.options.isSessionRunning = isSessionRunning
@@ -148,17 +134,12 @@ export default new Vuex.Store({
     setForce(state,force) {
       state.speedmeter.force = force
     },
+    setStepsPerMinuteTargetAtSpeedmeter(state, stepsPerMinute) {
+      state.speedmeter.stepsPerMinuteTarget = stepsPerMinute
+    },
     setLeftPlateAtSpeedmeter(state, rows) {
       let fz1 = Number(rows[2])
-      let threshold
-
-      // If there is a threshold given the use that as 
-      // threshold for the step
-      if (state.options.threshold != -1) {
-        threshold = Number(state.options.threshold)
-      } else {
-        threshold = Number(0.05 * state.options.weight)
-      }
+      let threshold = Number(0.05 * state.options.weight)
 
       // When the force is larger than the threshold 
       // then we have a step since the force is lower than that
@@ -190,15 +171,7 @@ export default new Vuex.Store({
     },
     setRightPlateAtSpeedmeter(state, rows) {
       let fz2 = Number(rows[8])
-      let threshold
-
-      // If there is a threshold given the use that as 
-      // threshold for the step
-      if (state.options.threshold != -1) {
-        threshold = Number(state.options.threshold)
-      } else {
-        threshold = Number(0.05 * state.options.weight)
-      }
+      let threshold = Number(0.05 * state.options.weight)
 
       // When the force is larger than the threshold 
       // then we have a step since the force is lower than that
@@ -242,7 +215,7 @@ export default new Vuex.Store({
         state.speedmeter.footAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.footAsymmetry), -100), 100);
         
         state.speedmeter.stepsPerMinute = (2 * 60000) / (now.diff(state.speedmeter.start, "milliseconds"))
-        state.speedmeter.stepsAsymmetry = ((2 * (state.speedmeter.stepsPerMinute - state.options.stepsPerMinuteTarget)) / (state.options.stepsPerMinuteTarget + state.speedmeter.stepsPerMinute)) * 100
+        state.speedmeter.stepsAsymmetry = ((2 * (state.speedmeter.stepsPerMinute - state.speedmeter.stepsPerMinuteTarget)) / (state.speedmeter.stepsPerMinuteTarget + state.speedmeter.stepsPerMinute)) * 100
         state.speedmeter.stepsAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.stepsAsymmetry), -100), 100);
         
         // Reset the variables
@@ -276,18 +249,19 @@ export default new Vuex.Store({
       state.lineChart.rightPlateRows = 0
       state.lineChart.yAxisMaxValue = -1
     },
+    setDataTypeAtLineChart(state, dataType) {
+      state.lineChart.dataType = dataType
+    },
+    setThresholdAtLineChart(state, threshold) {
+      state.lineChart.threshold = Number(threshold)
+    },
+    setNofLinesAtLineChart(state, nOfLines) {
+      state.lineChart.nOfLines = Number(nOfLines)
+    },
     setLeftPlateAtLineChart(state, rows) {
       let fz1 = Number(rows[2])
       let entry = rows[rowsNames[state.lineChart.leftPlateChannel]] 
-      let threshold
-
-      // If there is a threshold given the use that as 
-      // threshold for the step
-      if (state.options.threshold != -1) {
-        threshold = Number(state.options.threshold)
-      } else {
-        threshold = Number(0.05 * state.options.weight)
-      }
+      let threshold = Number(0.05 * state.options.weight)
 
       // When COP is included in the channels dont set max limit
       if(state.lineChart.rightPlateChannel.includes("COP") || state.lineChart.leftPlateChannel.includes("COP")){
@@ -303,7 +277,15 @@ export default new Vuex.Store({
           // threshold
           state.lineChart.leftSteps+=1
           let d = state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data
-          d.push(entry)
+          if (state.lineChart.dataType === "Normalized") {
+            if (state.lineChart.leftPlateChannel.includes("COP")) {
+              d.push(entry)
+            } else {
+              d.push(entry / state.options.weight)
+            }
+          } else {
+            d.push(entry)
+          }
           state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data = d
         }
 
@@ -314,9 +296,9 @@ export default new Vuex.Store({
           if (state.lineChart.leftSteps > 0.2 * state.options.frequency) {
 
             // Check if there is another max for the y axis
-            let maxVal = Math.max(...state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data).toFixed(0)
-            if(!state.lineChart.rightPlateChannel.includes("COP") && !state.lineChart.leftPlateChannel.includes("COP") && maxVal > state.lineChart.yAxisMaxValue){
-              state.lineChart.yAxisMaxValue = maxVal
+            let maxVal = Math.max(...state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data)
+            if (!state.lineChart.rightPlateChannel.includes("COP") && !state.lineChart.leftPlateChannel.includes("COP") && Number(maxVal) > Number(state.lineChart.yAxisMaxValue)) {
+              state.lineChart.yAxisMaxValue = maxVal + (state.options.dataType == "Absolute" ? 10 : 1)
               state.lineChart.shouldUpdateLeft = true
               state.lineChart.shouldUpdateRight = true
             }
@@ -342,7 +324,7 @@ export default new Vuex.Store({
 
            // If the number of lines is over the predefined limit
           // then clean the chart to retrieve the next lines
-          if(state.lineChart.leftPlateRows > Number(state.options.nOfLines)){
+          if (state.lineChart.leftPlateRows > Number(state.lineChart.nOfLines)){
             state.lineChart.shouldUpdateLeft = true
             state.lineChart.leftPlateSeries = [{
               data: []
@@ -358,7 +340,15 @@ export default new Vuex.Store({
           // threshold and activate the step process
           state.lineChart.isLeftPlateLocked = true
           let d = state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data
-          d.push(entry)
+          if (state.lineChart.dataType == "Normalized") {
+            if (state.lineChart.leftPlateChannel.includes("COP")) {
+              d.push(entry)
+            } else {
+              d.push(entry / state.options.weight)
+            }
+          } else {
+            d.push(entry)
+          }
           state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data = d
         }
       }
@@ -366,15 +356,7 @@ export default new Vuex.Store({
     setRightPlateAtLineChart(state, rows) {
       let fz2 = Number(rows[8])
       let entry = rows[rowsNames[state.lineChart.rightPlateChannel]] 
-      let threshold
-
-      // If there is a threshold given the use that as 
-      // threshold for the step
-      if (state.options.threshold != -1) {
-        threshold = Number(state.options.threshold)
-      } else {
-        threshold = Number(0.05 * state.options.weight)
-      }
+      let threshold = Number(0.05 * state.options.weight)
 
       // When COP is included in the channels dont set max limit
       if(state.lineChart.rightPlateChannel.includes("COP") || state.lineChart.leftPlateChannel.includes("COP")){
@@ -391,7 +373,15 @@ export default new Vuex.Store({
           // threshold
           state.lineChart.rightSteps+=1
           let d = state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data
-          d.push(entry)
+          if (state.lineChart.dataType === "Normalized") {
+            if (state.lineChart.rightPlateChannel.includes("COP")) {
+              d.push(entry)
+            } else {
+              d.push(entry / state.options.weight)
+            }
+          } else {
+            d.push(entry)
+          }
           state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data = d
         }
 
@@ -402,9 +392,9 @@ export default new Vuex.Store({
           if (state.lineChart.rightSteps > 0.2 * state.options.frequency) {
 
             // Check if there is another max for the y axis
-            let maxVal = Math.max(...state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data).toFixed(0)
-            if(!state.lineChart.rightPlateChannel.includes("COP") && !state.lineChart.leftPlateChannel.includes("COP") && maxVal > state.lineChart.yAxisMaxValue){
-              state.lineChart.yAxisMaxValue = maxVal
+            let maxVal = Math.max(...state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data)
+            if (!state.lineChart.rightPlateChannel.includes("COP") && !state.lineChart.leftPlateChannel.includes("COP") && Number(maxVal) > Number(state.lineChart.yAxisMaxValue)) {
+              state.lineChart.yAxisMaxValue = maxVal + (state.options.dataType == "Absolute"?10:1)
               state.lineChart.shouldUpdateLeft = true
               state.lineChart.shouldUpdateRight = true
             }
@@ -430,7 +420,7 @@ export default new Vuex.Store({
 
           // If the number of lines is over the predefined limit
           // then clean the chart to retrieve the next lines
-          if(state.lineChart.rightPlateRows > Number(state.options.nOfLines)){
+          if(state.lineChart.rightPlateRows > Number(state.lineChart.nOfLines)){
             state.lineChart.shouldUpdateRight = true
             state.lineChart.righPlateSeries = [{
               data: []
@@ -445,7 +435,15 @@ export default new Vuex.Store({
           // threshold and activate the step process
           state.lineChart.isRightPlateLocked = true
           let d = state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data
-          d.push(entry)
+          if (state.lineChart.dataType === "Normalized") {
+            if (state.lineChart.rightPlateChannel.includes("COP")) {
+              d.push(entry)
+            } else {
+              d.push(entry / state.options.weight)
+            }
+          } else {
+            d.push(entry)
+          }
           state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data = d
         }
       }
@@ -508,17 +506,14 @@ export default new Vuex.Store({
       state.copChart.leftSteps = 0
       state.copChart.rightSteps = 0
     },
+    setNofGroupPoints(state, nOfGroupPoints) {
+      state.copChart.nOfGroupPoints = nOfGroupPoints
+    },
     setLeftPlateAtCOP(state,rows) {
       let fz1 = Number(rows[2])
       let copx1 = rows[rowsNames["COPX1"]]
       let copy1 = rows[rowsNames["COPY1"]]
-      let threshold
-
-      if (state.options.threshold != -1) {
-        threshold = Number(state.options.threshold)
-      } else {
-        threshold = Number(0.05 * state.options.weight)
-      }
+      let threshold = Number(0.05 * state.options.weight)
 
       if (state.copChart.isLeftPlateLocked) {
         if (fz1 > threshold) {
@@ -556,7 +551,7 @@ export default new Vuex.Store({
 
           // If the number of lines is over the predefined limit
           // then clean the chart to retrieve the next lines
-          if (state.copChart.leftPlateRows > Number(state.options.nOfLines)) {
+          if (state.copChart.leftPlateRows > Number(state.copChart.nOfGroupPoints)) {
             state.copChart.leftPlateSeries = [{
               data: []
             }]
@@ -581,13 +576,7 @@ export default new Vuex.Store({
       let fz2 = Number(rows[8])
       let copx2 = rows[rowsNames["COPX2"]]
       let copy2 = rows[rowsNames["COPY2"]]
-      let threshold
-
-      if (state.options.threshold != -1) {
-        threshold = Number(state.options.threshold)
-      } else {
-        threshold = Number(0.2 * state.options.weight)
-      }
+      let threshold = Number(0.05 * state.options.weight)
 
       if (state.copChart.isRightPlateLocked) {
         if (fz2 > threshold) {
@@ -625,7 +614,7 @@ export default new Vuex.Store({
           
           // If the number of lines is over the predefined limit
           // then clean the chart to retrieve the next lines
-          if (state.copChart.rightPlateRows > Number(state.options.nOfLines)) {
+          if (state.copChart.rightPlateRows > Number(state.copChart.nOfGroupPoints)) {
             state.copChart.righPlateSeries = [{
               data: []
             }]

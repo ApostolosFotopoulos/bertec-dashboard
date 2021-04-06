@@ -56,12 +56,7 @@ export default {
       } else {
         this.$store.commit('setSessionRunning',true)
         ipcRenderer.send('START_SESSION',{ 
-          weight: this.$store.state.options.weight, 
-          dataType:this.$store.state.options.dataType, 
-          stepsPerMinuteTarget: this.$store.state.options.stepsPerMinuteTarget,
-          frequency: this.$store.state.options.frequency,
-          threshold: this.$store.state.options.threshold,
-          nOfLines: this.$store.state.options.nOfLines,
+          weight: this.$store.state.options.weight,
         })
       }
     },

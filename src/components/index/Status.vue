@@ -13,7 +13,6 @@
       <v-text-field
         :value="$store.state.options.leftPlateValue"
         solo
-        :disabled="!$store.state.options.isSessionRunning"
         readonly
       />
     </v-col>
@@ -30,7 +29,6 @@
       <v-text-field
         :value="$store.state.options.rightPlateValue"
         solo
-        :disabled="!$store.state.options.isSessionRunning"
         readonly
       />
     </v-col>

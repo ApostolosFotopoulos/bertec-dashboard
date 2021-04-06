@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <CopChart/>
+    <CopChart/> 
   </v-container>
 </template>
 
