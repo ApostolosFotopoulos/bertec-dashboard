@@ -44,7 +44,7 @@
             @change="(v)=>$store.commit('setThresholdAtLineChart',Number(v))"
             :value="$store.state.lineChart.threshold"
             label="Threshold"
-            solo
+            outlined
             :disabled="$store.state.options.isSessionRunning"
             min="0"
           />
@@ -61,8 +61,8 @@
             class="mt-3"
             @change="(v)=>$store.commit('setNofLinesAtLineChart',Number(v))"
             :value="$store.state.lineChart.nOfLines"
-            label="Number of Lines"
-            solo
+            label="Display"
+            outlined
             :disabled="$store.state.options.isSessionRunning"
             min="0"
           />

@@ -43,12 +43,13 @@ export default new Vuex.Store({
       shouldUpdateLeft:false,
       shouldUpdateRight:false,
       yAxisMaxValue: -1,
-      threshold: -1,
+      threshold: 5,
       nOfLines: 10,
       dataType: "Normalized"
     },
     speedmeter: {
-      force: 0,
+      forceFZ1: 0,
+      forceFZ2:0,
       nOfSteps: 0,
       stepsPerMinute: 0,
       footAsymmetry: 0,
@@ -131,8 +132,11 @@ export default new Vuex.Store({
       state.speedmeter.rightMaxValue = 0
       state.speedmeter.start = null
     },
-    setForce(state,force) {
-      state.speedmeter.force = force
+    setForceFZ1(state,force) {
+      state.speedmeter.forceFZ1 = force
+    },
+    setForceFZ2(state,force) {
+      state.speedmeter.forceFZ2 = force
     },
     setStepsPerMinuteTargetAtSpeedmeter(state, stepsPerMinute) {
       state.speedmeter.stepsPerMinuteTarget = stepsPerMinute
@@ -261,7 +265,7 @@ export default new Vuex.Store({
     setLeftPlateAtLineChart(state, rows) {
       let fz1 = Number(rows[2])
       let entry = rows[rowsNames[state.lineChart.leftPlateChannel]] 
-      let threshold = Number(0.05 * state.options.weight)
+      let threshold = Number((state.lineChart.threshold/100) * state.options.weight)
 
       // When COP is included in the channels dont set max limit
       if(state.lineChart.rightPlateChannel.includes("COP") || state.lineChart.leftPlateChannel.includes("COP")){
@@ -356,7 +360,7 @@ export default new Vuex.Store({
     setRightPlateAtLineChart(state, rows) {
       let fz2 = Number(rows[8])
       let entry = rows[rowsNames[state.lineChart.rightPlateChannel]] 
-      let threshold = Number(0.05 * state.options.weight)
+      let threshold = Number((state.lineChart.threshold/100) * state.options.weight)
 
       // When COP is included in the channels dont set max limit
       if(state.lineChart.rightPlateChannel.includes("COP") || state.lineChart.leftPlateChannel.includes("COP")){

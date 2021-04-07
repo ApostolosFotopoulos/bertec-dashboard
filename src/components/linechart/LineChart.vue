@@ -1,7 +1,7 @@
 <template>
   <v-card elevation="10" color="#25282F" class="mt-5">
     <v-row>
-      <v-col>
+      <v-col cols="6">
         <VueApexCharts 
           ref="leftPlateChart" 
           class="text-center" 
@@ -11,7 +11,7 @@
           :series="$store.state.lineChart.leftPlateFinalSeries"
         />
       </v-col>
-      <v-col>
+      <v-col cols="6">
         <VueApexCharts 
           ref="rightPlateChart" 
           class="text-center"
