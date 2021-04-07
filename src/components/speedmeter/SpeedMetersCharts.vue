@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import rowNames from '../../../assets/store/rowsNames.json'
 const { ipcRenderer } = window.require('electron')
 import VueSpeedometer from "vue-speedometer"
 
@@ -62,7 +63,8 @@ export default {
   methods:{
     updateVariables(responseData){
       this.$store.commit('setWeight',responseData.weight)
-      this.$store.commit('setForce',responseData.force)
+      this.$store.commit('setForceFZ1',responseData.rows[rowNames["FZ1"]])
+      this.$store.commit('setForceFZ2',responseData.rows[rowNames["FZ1"]])
       this.$store.commit('setLeftPlateAtSpeedmeter',responseData.rows)
       this.$store.commit('setRightPlateAtSpeedmeter',responseData.rows) 
       this.$store.commit('calculatefootAsymmetries') 
