@@ -15,7 +15,7 @@ export default {
     Channels
   },
   mounted() {
-    setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_LINECHART') },1)
+    //setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_LINECHART') },1)
   },
 }
 </script>

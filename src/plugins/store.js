@@ -281,7 +281,7 @@ export default new Vuex.Store({
             if (state.lineChart.leftPlateChannel.includes("COP")) {
               d.push(entry)
             } else {
-              d.push(entry / state.options.weight)
+              d.push(100*(entry / state.options.weight))
             }
           } else {
             d.push(entry)
@@ -344,7 +344,7 @@ export default new Vuex.Store({
             if (state.lineChart.leftPlateChannel.includes("COP")) {
               d.push(entry)
             } else {
-              d.push(entry / state.options.weight)
+              d.push(100*(entry / state.options.weight))
             }
           } else {
             d.push(entry)
@@ -377,7 +377,7 @@ export default new Vuex.Store({
             if (state.lineChart.rightPlateChannel.includes("COP")) {
               d.push(entry)
             } else {
-              d.push(entry / state.options.weight)
+              d.push(100*(entry / state.options.weight))
             }
           } else {
             d.push(entry)
@@ -439,7 +439,7 @@ export default new Vuex.Store({
             if (state.lineChart.rightPlateChannel.includes("COP")) {
               d.push(entry)
             } else {
-              d.push(entry / state.options.weight)
+              d.push(100*(ntry / state.options.weight))
             }
           } else {
             d.push(entry)
