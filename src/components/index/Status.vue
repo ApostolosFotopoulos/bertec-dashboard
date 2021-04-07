@@ -1,5 +1,5 @@
 <template>
-  <v-row>
+  <v-row class="pb-0 mb-0">
     <v-col>
       <v-select
         @change="(v)=>$store.commit('setLeftPlateChannelAtOptions',v)"
@@ -8,6 +8,7 @@
         label="Left Plate Channel"
         solo
       ></v-select>
+      <small class="device-status">	• No Device is Connected</small>
     </v-col>
     <v-col>
       <v-text-field
@@ -24,6 +25,7 @@
         label="Right Plate Channel"
         solo
       ></v-select>
+      <small class="device-status">	• No Device is Connected</small>
     </v-col>
     <v-col>
       <v-text-field
@@ -64,5 +66,11 @@ export default{
 .v-menu__content.theme--dark.menuable__content__active::-webkit-scrollbar-track{
 	background-color: transparent;
   width: 0px;
+}
+</style>
+
+<style scoped>
+.device-status{
+  color:#d32d41;
 }
 </style>
