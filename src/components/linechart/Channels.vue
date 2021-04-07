@@ -43,7 +43,7 @@
             class="mt-3"
             @change="(v)=>$store.commit('setThresholdAtLineChart',Number(v))"
             :value="$store.state.lineChart.threshold"
-            label="Threshold"
+            label="Threshold (%BW) - Standard value = 5"
             outlined
             :disabled="$store.state.options.isSessionRunning"
             min="0"

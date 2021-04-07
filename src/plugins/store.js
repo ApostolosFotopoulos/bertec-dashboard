@@ -33,6 +33,8 @@ export default new Vuex.Store({
         data:[]
       }],
       isLeftPlateLocked: false,
+      isLeftPlateReset: false,
+      isRightPlateReset:false,
       isRightPlateLocked: false,
       leftPlateChannel: "FZ1",
       rightPlateChannel: "FZ2",
@@ -221,14 +223,14 @@ export default new Vuex.Store({
         state.speedmeter.stepsPerMinute = (2 * 60000) / (now.diff(state.speedmeter.start, "milliseconds"))
         state.speedmeter.stepsAsymmetry = ((2 * (state.speedmeter.stepsPerMinute - state.speedmeter.stepsPerMinuteTarget)) / (state.speedmeter.stepsPerMinuteTarget + state.speedmeter.stepsPerMinute)) * 100
         state.speedmeter.stepsAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.stepsAsymmetry), -100), 100);
-        
+      }
+       
         // Reset the variables
         state.speedmeter.rightMaxValue = 0
         state.speedmeter.leftMaxValue = 0
         state.speedmeter.rightFullPressed = false
         state.speedmeter.leftFullPressed = false
         state.speedmeter.start = null
-      }
     },
 
     // Line Chart
@@ -247,6 +249,8 @@ export default new Vuex.Store({
       }]
       state.lineChart.isLeftPlateLocked = false
       state.lineChart.isRightPlateLocked = false
+      state.lineChart.isLeftPlateReset = true
+      state.lineChart.isRightPlateReset = true
       state.lineChart.leftSteps = 0
       state.lineChart.rightSteps = 0 
       state.lineChart.leftPlateRows = 0
@@ -276,7 +280,7 @@ export default new Vuex.Store({
       // then we have a step since the force is lower than that
       // threshold
       if (state.lineChart.isLeftPlateLocked) {
-        if (fz1 > threshold) {
+        if (fz1 > threshold && !state.lineChart.isLeftPlateReset) {
           // Update the left plate series with the new value that is over the
           // threshold
           state.lineChart.leftSteps+=1
@@ -295,6 +299,7 @@ export default new Vuex.Store({
 
         if (fz1 < threshold) {
           state.lineChart.isLeftPlateLocked = false
+          state.lineChart.isLeftPlateReset = false
 
           // Include as a step if it is larger than 20% of the frequency
           if (state.lineChart.leftSteps > 0.2 * state.options.frequency) {
@@ -371,7 +376,7 @@ export default new Vuex.Store({
       // then we have a step since the force is lower than that
       // threshold
       if (state.lineChart.isRightPlateLocked) {
-        if (fz2 > threshold) {
+        if (fz2 > threshold && !state.lineChart.isRightPlateReset) {
 
           // Update the right plate series with the new value that is over the
           // threshold
@@ -391,6 +396,7 @@ export default new Vuex.Store({
 
         if (fz2 < threshold) {
           state.lineChart.isRightPlateLocked = false
+          state.lineChart.isRightPlateReset = false
 
           // Include as a step if it is larger than 20% of the frequency
           if (state.lineChart.rightSteps > 0.2 * state.options.frequency) {
