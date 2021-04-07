@@ -13,8 +13,8 @@
       </v-col>
       <v-col cols="2" class="mt-5">
         <v-btn @click="$store.commit('resetCOPChartState')" class="resetButton  v-input__control">Reset</v-btn>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+        <div class="mt-3">
+          <span>Display: </span>
           <v-text-field
             v-bind="attrs"
             v-on="on"
@@ -25,9 +25,7 @@
             solo
             min="1"
           />
-          </template>
-          <span>Number of Group Points</span>
-        </v-tooltip>
+        </div>
       </v-col>
       <v-col cols="5">
         <VueApexCharts 
