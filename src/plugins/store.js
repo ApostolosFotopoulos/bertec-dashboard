@@ -66,6 +66,7 @@ export default new Vuex.Store({
       leftSteps: 0,
       rightSteps: 0,
       stepsPerMinuteTarget:150,
+      maxHistory:3,
     },
     copChart: {
       leftPlateSeries: [{
@@ -133,6 +134,9 @@ export default new Vuex.Store({
       state.speedmeter.leftMaxValue = 0
       state.speedmeter.rightMaxValue = 0
       state.speedmeter.start = null
+    },
+    setMaxHistory(state,maxHistory){
+      state.speedmeter.maxHistory = maxHistory
     },
     setForceFZ1(state,force) {
       state.speedmeter.forceFZ1 = force
@@ -223,14 +227,14 @@ export default new Vuex.Store({
         state.speedmeter.stepsPerMinute = (2 * 60000) / (now.diff(state.speedmeter.start, "milliseconds"))
         state.speedmeter.stepsAsymmetry = ((2 * (state.speedmeter.stepsPerMinute - state.speedmeter.stepsPerMinuteTarget)) / (state.speedmeter.stepsPerMinuteTarget + state.speedmeter.stepsPerMinute)) * 100
         state.speedmeter.stepsAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.stepsAsymmetry), -100), 100);
-      }
-       
+        
         // Reset the variables
         state.speedmeter.rightMaxValue = 0
         state.speedmeter.leftMaxValue = 0
         state.speedmeter.rightFullPressed = false
         state.speedmeter.leftFullPressed = false
         state.speedmeter.start = null
+      }
     },
 
     // Line Chart

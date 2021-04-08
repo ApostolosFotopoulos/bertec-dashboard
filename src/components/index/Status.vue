@@ -34,6 +34,14 @@
         readonly
       />
     </v-col>
+    <v-col>
+      <v-btn 
+        :class="`${setButtonStyle()} v-input__control`"
+        @click="resetForcePlate"
+      >
+        Reset
+      </v-btn>
+    </v-col>
   </v-row>
 </template>
 
@@ -55,6 +63,21 @@ export default{
       _this.$store.commit('setRightPlateValue',responseData.rows[rowsNames[_this.$store.state.options.rightPlateChannel]])
     }) 
   },
+  methods:{
+    resetForcePlate(){
+      ipcRenderer.send('RESET_FORCE_PLATES') 
+    },
+    setButtonStyle(){
+      if(
+        Number(this.$store.state.options.leftPlateValue) < 4 && Number(this.$store.state.options.leftPlateValue) > -4 && 
+        Number(this.$store.state.options.rightPlateValue) < 4 && Number(this.$store.state.options.rightPlateValue) > -4
+      ){
+        return "resetButton"
+      } else {
+        return "errorButton"
+      }
+    }
+  }
 }
 </script>
 
@@ -72,5 +95,15 @@ export default{
 <style scoped>
 .device-status{
   color:#d32d41;
+}
+.errorButton{
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #d32d41 !important;
+}
+.resetButton{
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #6ab187 !important;
 }
 </style>

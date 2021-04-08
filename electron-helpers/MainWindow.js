@@ -23,6 +23,7 @@ module.exports = class {
     this.frequency = 100
     this.threshold = -1
     this.nOfLines = 10
+    this.socket = null
     this.isSessionRunning = false
 
     // Backend Options
@@ -152,6 +153,7 @@ module.exports = class {
 
     // Listen for TCP Packets to forward them to the dashboard
     this.server.on("connection", (socket) => {
+      this.socket = socket
       socket.on("data", (packet) => {
         // Retrieve the packet and break to each section
         let packetArray = packet
@@ -226,6 +228,10 @@ module.exports = class {
       })
     })
   
+    ipcMain.on("RESET_FORCE_PLATES", (e, d) => {
+      console.log("Tried to reset force plate")
+      this.socket.write("RESET_FORCE_PLATES");
+    })
 
     // SpeedMeter Events
     ipcMain.on("SESSION_RUNNING_SPEEDMETER", (e, d) => {

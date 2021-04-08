@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace BertecForcePlatesFetchData{
   enum Channel{
@@ -31,6 +32,8 @@ namespace BertecForcePlatesFetchData{
     public BertecDeviceNET.BertecDevice handler = null;
     public int timestampStepping = 0;
     private Int64 timestampValue = 0;
+
+    // Data streaming
     public TcpClient client;
     public NetworkStream stream;
     public StreamWriter writer;
@@ -38,12 +41,39 @@ namespace BertecForcePlatesFetchData{
     public int counter = 0;
       
 
-    public void createTCPClient(){
+    public void createTCPClientForDataStreaming(){
       int port = 12345;
       this.client = new TcpClient("localhost",port);
-      this.stream  = this.client.GetStream();
+      Byte[] bytes = new Byte[1024];
+      this.stream = this.client.GetStream();
+      new Thread(() => {
+        while(true){
+         // Get a stream object for reading 				
+          using (this.stream) { 					
+            int length; 					
+            // Read incomming stream into byte arrary. 					
+            while ((length = stream.Read(bytes, 0, bytes.Length)) != 0) { 						
+              var incommingData = new byte[length]; 						
+              Array.Copy(bytes, 0, incommingData, 0, length); 						
+              // Convert byte array to string message. 						
+              string serverMessage = Encoding.ASCII.GetString(incommingData);					
+              Console.WriteLine("SERVER MESSAGE RECEIVED : " + serverMessage);
+
+              if(serverMessage == "RESET_FORCE_PLATES"){
+                Console.Write("Zeroing Load...");
+                handler.ZeroNow();
+                while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
+                  Console.Write(".");
+                  System.Threading.Thread.Sleep(100);
+                }
+                Console.WriteLine("\nDone");
+              }
+            } 				
+          } 	 
+        }
+      }).Start();
       this.writer = new StreamWriter(this.stream);
-      Console.WriteLine("TCP Client is configured...");
+      Console.WriteLine("TCP Client is configured for data streaming...");
     }
 
     public void onDataCallback(BertecDeviceNET.DataFrame[] dataFrames){ 
@@ -86,10 +116,10 @@ namespace BertecForcePlatesFetchData{
             writer.Flush();
             writer.WriteLine(d);
             writer.Flush();
-            Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
-            Console.WriteLine(counter);
-            Console.WriteLine(copx1.ToString());
-            counter+=1;
+            //Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
+            //Console.WriteLine(counter);
+            //Console.WriteLine(copx1.ToString());
+            //counter+=1;
           }
           dataCollected += 1;
         }
@@ -173,7 +203,7 @@ namespace BertecForcePlatesFetchData{
       }
 
       // Create the TCP Client
-      callback.createTCPClient();
+      callback.createTCPClientForDataStreaming();
 
       
       /*//--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
