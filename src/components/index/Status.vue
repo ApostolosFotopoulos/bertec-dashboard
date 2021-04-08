@@ -8,7 +8,9 @@
         label="Left Plate Channel"
         solo
       ></v-select>
-      <small class="device-status">	• No Device is Connected</small>
+      <small :class="`${$store.state.options.deviceLeft!=-1?'device-success':'device-error'}`">
+        {{`${$store.state.options.deviceLeft!=-1? `${$store.state.options.deviceLeft} is Connected` : "• No Device is Connected"}`}}
+      </small>
     </v-col>
     <v-col>
       <v-text-field
@@ -25,7 +27,9 @@
         label="Right Plate Channel"
         solo
       ></v-select>
-      <small class="device-status">	• No Device is Connected</small>
+      <small :class="`${$store.state.options.deviceRight!=-1?'device-success':'device-error'}`">
+        {{`${$store.state.options.deviceRight!=-1? `${$store.state.options.deviceRight} is Connected` : "• No Device is Connected"}`}}
+      </small>
     </v-col>
     <v-col>
       <v-text-field
@@ -62,6 +66,11 @@ export default{
       _this.$store.commit('setLeftPlateValue',responseData.rows[rowsNames[_this.$store.state.options.leftPlateChannel]])
       _this.$store.commit('setRightPlateValue',responseData.rows[rowsNames[_this.$store.state.options.rightPlateChannel]])
     }) 
+    ipcRenderer.on('SESSION_DEVICE_DETAILS',(_,responseData)=>{
+      console.log(responseData)
+      _this.$store.commit('setDeviceLeft',responseData.deviceLeft)
+      _this.$store.commit('setDeviceRight',responseData.deviceRight)
+    }) 
   },
   methods:{
     resetForcePlate(){
@@ -93,8 +102,11 @@ export default{
 </style>
 
 <style scoped>
-.device-status{
+.device-error{
   color:#d32d41;
+}
+.device-success{
+  color: #6ab187;
 }
 .errorButton{
   height: 48px !important;

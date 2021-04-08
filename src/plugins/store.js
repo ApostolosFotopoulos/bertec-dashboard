@@ -18,6 +18,8 @@ export default new Vuex.Store({
       leftPlateValue:0,
       rightPlateChannel: "FZ2",
       rightPlateValue:0,
+      deviceLeft:-1,
+      deviceRight: -1,
     },
     lineChart: {
       leftPlateSeries: [{
@@ -118,6 +120,12 @@ export default new Vuex.Store({
     },
     setRightPlateValue(state,value){
       state.options.rightPlateValue = value.toFixed(2)
+    },
+    setDeviceLeft(state,deviceLeft){
+      state.options.deviceLeft = deviceLeft
+    },
+    setDeviceRight(state,deviceRight){
+      state.options.deviceRight = deviceRight
     },
 
     // Speedmeter

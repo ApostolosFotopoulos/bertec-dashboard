@@ -60,7 +60,7 @@ namespace BertecForcePlatesFetchData{
               Console.WriteLine("SERVER MESSAGE RECEIVED : " + serverMessage);
 
               if(serverMessage == "RESET_FORCE_PLATES"){
-                Console.Write("Zeroing Load...");
+                Console.Write("\nZeroing Load...");
                 handler.ZeroNow();
                 while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
                   Console.Write(".");
@@ -112,6 +112,11 @@ namespace BertecForcePlatesFetchData{
           if(dataCollected == 10){
             dataCollected = 0;
             //Console.Write(d);
+
+            writer.Flush();
+            String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;-1;";
+            writer.WriteLine(forcePlates);
+            writer.Flush();
 
             writer.Flush();
             writer.WriteLine(d);
@@ -202,9 +207,6 @@ namespace BertecForcePlatesFetchData{
         return;
       }
 
-      // Create the TCP Client
-      callback.createTCPClientForDataStreaming();
-
       
       /*//--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
 
@@ -263,10 +265,10 @@ namespace BertecForcePlatesFetchData{
       }
       Console.WriteLine("\nDone");
 
-      // Inform about the devices that are connected
-      for (int i = 0; i < handler.DeviceCount; ++i){
-        Console.WriteLine("\nPlate {0} connected",handler.DeviceSerialNumber(i));
-      }
+      
+      // Create the TCP Client
+      callback.createTCPClientForDataStreaming();
+
 
       // Clear the buffered data
       handler.ClearBufferedData();

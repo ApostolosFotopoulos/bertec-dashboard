@@ -155,14 +155,24 @@ module.exports = class {
     this.server.on("connection", (socket) => {
       this.socket = socket
       socket.on("data", (packet) => {
+
         // Retrieve the packet and break to each section
         let packetArray = packet
           .toString()
           .replaceAll(/(\r\n|\n|\r)/gm, "")
           .replaceAll(",",".")
           .split(";")
-          .map(i => Number(i));
+          .filter((i,idx)=>idx >= 4)
+          .map(i=>Number(i))
 
+        // Retrieve the serial numbers of the devices
+        let details =   packet
+          .toString()
+          .replaceAll(/(\r\n|\n|\r)/gm, "")
+          .replaceAll(",",".")
+          .split(";")
+          .filter((i,idx)=>idx < 4)
+        
         // Send the data to the linechart window
         if (this.linechartw && this.linechartw.window) {
           if (this.isSessionRunning) {
@@ -224,7 +234,14 @@ module.exports = class {
             weight: this.weight,
             filePath: this.filePath,
           });
+
+          // Send the device serial to the dashboard
+          this.window.webContents.send("SESSION_DEVICE_DETAILS", {
+            deviceLeft: Number(details[1]),
+            deviceRight: Number(details[3])
+          });
         }
+      
       })
     })
   
