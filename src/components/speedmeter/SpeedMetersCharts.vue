@@ -2,34 +2,36 @@
   <v-container class="text-center mt-12">
     <v-row>
       <v-col>
-        <div class="pa-5">
-          <h2>Foot Asymmetry</h2>
-        </div>
         <vue-speedometer 
           textColor="#fff" 
           :value="Number($store.state.speedmeter.footAsymmetry.toFixed(2))" 
           needleColor="#cbf3f0" 
           :minValue="-100"
-          :maxValue="100" 
+          :maxValue="100"
           :height="200"
+          class="speedmeter"
           :customSegmentStops="customSegmentStops"
           :segmentColors="segmentColors"
         />
+        <div class="pa-5">
+          <h2>Foot Asymmetry</h2>
+        </div>
       </v-col>
       <v-col>
-        <div class="pa-5">
-          <h2>Steps Asymmetry</h2>
-        </div>
         <vue-speedometer 
           textColor="#fff" 
           :value="Number($store.state.speedmeter.stepsAsymmetry.toFixed(2))" 
-          needleColor="#cbf3f0" 
+          needleColor="#cbf3f0"
+          class="speedmeter" 
           :minValue="-100"
           :maxValue="100" 
           :height="200"
           :customSegmentStops="customSegmentStops"
           :segmentColors="segmentColors"
         />
+        <div class="pa-5">
+          <h2>Steps Asymmetry</h2>
+        </div>
       </v-col>
     </v-row>
   </v-container>
@@ -77,5 +79,8 @@ export default {
 <style>
 .current-value{
   display:none
+}
+.speedmeter{
+  transform: scale(1.3);
 }
 </style>

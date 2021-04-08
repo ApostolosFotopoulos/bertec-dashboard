@@ -64,11 +64,15 @@ export default new Vuex.Store({
       rightFullPressed: false,
       leftMaxValue: 0,
       rightMaxValue:0,
+      leftMaxValueHistory: 0,
+      rightMaxValueHistory:0,
       start: null,
       leftSteps: 0,
       rightSteps: 0,
       stepsPerMinuteTarget:150,
       maxHistory:3,
+      maxHistoryLeftPlate:[],
+      maxHistoryRightPlate:[],
     },
     copChart: {
       leftPlateSeries: [{
@@ -142,9 +146,11 @@ export default new Vuex.Store({
       state.speedmeter.leftMaxValue = 0
       state.speedmeter.rightMaxValue = 0
       state.speedmeter.start = null
+      state.speedmeter.maxHistoryLeftPlate = []
+      state.speedmeter.maxHistoryRightPlate = []
     },
     setMaxHistory(state,maxHistory){
-      state.speedmeter.maxHistory = maxHistory
+      state.speedmeter.maxHistory = Number(maxHistory)
     },
     setForceFZ1(state,force) {
       state.speedmeter.forceFZ1 = force
@@ -167,7 +173,10 @@ export default new Vuex.Store({
         if (fz1 > threshold) {
           if(fz1 > state.speedmeter.leftMaxValue){
             state.speedmeter.leftMaxValue = fz1
-          }
+          } 
+          if(fz1 > state.speedmeter.leftMaxValueHistory){
+            state.speedmeter.leftMaxValueHistory = fz1
+          } 
           state.speedmeter.leftSteps+=1
         }
 
@@ -178,6 +187,18 @@ export default new Vuex.Store({
           if (state.speedmeter.leftSteps > 0.2 * state.options.frequency) {
             state.speedmeter.nOfSteps += 1
             state.speedmeter.leftFullPressed = true
+
+            console.log('adads')
+            
+            // Setup the history of left foot
+            console.log( state.speedmeter.leftMaxValueHistory)
+            if((state.speedmeter.maxHistoryLeftPlate.length >= state.speedmeter.maxHistory) && state.speedmeter.leftMaxValueHistory > 0){
+              state.speedmeter.maxHistoryLeftPlate.shift()
+              state.speedmeter.maxHistoryLeftPlate.push(state.speedmeter.leftMaxValueHistory)
+            } else if(state.speedmeter.leftMaxValueHistory > 0){
+              state.speedmeter.maxHistoryLeftPlate.push(state.speedmeter.leftMaxValueHistory)
+            }
+            state.speedmeter.leftMaxValueHistory = 0
           }
           state.speedmeter.leftSteps = 0
         }
@@ -200,6 +221,9 @@ export default new Vuex.Store({
           if (fz2 > state.speedmeter.rightMaxValue) {
             state.speedmeter.rightMaxValue = fz2
           }
+          if (fz2 > state.speedmeter.rightMaxValueHistory) {
+            state.speedmeter.rightMaxValueHistory = fz2
+          }
           state.speedmeter.rightSteps +=1
         }
 
@@ -210,6 +234,15 @@ export default new Vuex.Store({
           if (state.speedmeter.rightSteps > 0.2 * state.options.frequency) {
             state.speedmeter.nOfSteps += 1
             state.speedmeter.rightFullPressed = true
+
+            // Setup the history of right foot
+            if((state.speedmeter.maxHistoryRightPlate.length >= state.speedmeter.maxHistory) && state.speedmeter.rightMaxValueHistory > 0){
+              state.speedmeter.maxHistoryRightPlate.shift()
+              state.speedmeter.maxHistoryRightPlate.push(state.speedmeter.rightMaxValueHistory)
+            } else if(state.speedmeter.rightMaxValueHistory > 0){
+              state.speedmeter.maxHistoryRightPlate.push(state.speedmeter.rightMaxValueHistory)
+            }
+            state.speedmeter.rightMaxValueHistory = 0
           }
           state.speedmeter.rightSteps = 0
         }
@@ -237,12 +270,16 @@ export default new Vuex.Store({
         state.speedmeter.stepsAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.stepsAsymmetry), -100), 100);
         
         // Reset the variables
-        state.speedmeter.rightMaxValue = 0
-        state.speedmeter.leftMaxValue = 0
         state.speedmeter.rightFullPressed = false
         state.speedmeter.leftFullPressed = false
         state.speedmeter.start = null
       }
+
+      //console.log(state.speedmeter.maxHistoryLeftPlate)
+      //console.log(state.speedmeter.rightMaxValue,state.speedmeter.leftMaxValue)
+      // Reset the max value
+      //state.speedmeter.rightMaxValue = 0
+      //state.speedmeter.leftMaxValue = 0
     },
 
     // Line Chart
