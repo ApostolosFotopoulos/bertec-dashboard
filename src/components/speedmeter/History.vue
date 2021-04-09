@@ -1,52 +1,33 @@
 <template>
-  <v-container>
-    <v-row class="text-center mt-5">
-      <v-col cols="12">
-        <v-card color="#262D47" class="pa-4 history">
-          <v-row>
-            <v-col cols="4" offset="2" class="text-center">
-              Left Foot Maximum:
-              <v-timeline
-                align-top
-                dense
-              >
-                <v-timeline-item
-                  :color="`${index == 0?'#6ab187':'#355944'}`"
-                  small
-                  v-for="(item,index) in $store.state.speedmeter.maxHistoryLeftPlate.slice().reverse()"
-                  :key="index"
-                >
-                {{item.toFixed(1)}}
-                </v-timeline-item>
-              </v-timeline>
-            </v-col>
-            <v-col cols="4">
-              Right Foot Maximum:
-              <v-timeline
-                align-top
-                dense
-              >
-                <v-timeline-item
-                  :color="`${index == 0?'#d32d41':'#6b151f'}`"
-                  small
-                  v-for="(item,index) in $store.state.speedmeter.maxHistoryRightPlate.slice().reverse()"
-                  :key="index"
-                >
-                {{item.toFixed(1)}}
-                </v-timeline-item>
-              </v-timeline>
-            </v-col>
-          </v-row>
-        </v-card>
+  <v-card color="#262D47" class="pa-4 history">
+    <v-row>
+      <v-col cols="4" offset="1" class="text-center">
+        Left Foot Maximum:
+        <div
+          v-for="(item,index) in $store.state.speedmeter.maxHistoryLeftPlate.slice().reverse()"
+          :key="index"
+        >
+          <h2 v-if="index == 0">{{item.toFixed(1)}}</h2>
+          <span v-else>{{item.toFixed(1)}}</span>
+        </div>
       </v-col>
-    </v-row> 
-  </v-container>
+      <v-col cols="4" offset="2">
+        Right Foot Maximum:
+          <div
+          v-for="(item,index) in $store.state.speedmeter.maxHistoryRightPlate.slice().reverse()"
+          :key="index"
+        >
+          {{item.toFixed(1)}}
+        </div>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <style scoped>
 .history{
-  min-height: 250px;
-  max-height: 250px;
+  min-height: 300px;
+  max-height: 300px;
   overflow-y: scroll;
 }
 

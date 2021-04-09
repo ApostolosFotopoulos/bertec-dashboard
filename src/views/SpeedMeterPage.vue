@@ -10,17 +10,19 @@
     <Statistics/>
     <v-container>
       <v-row>
-        <v-col cols="3" offset="4">
+        <v-col>
+          <History/>
+        </v-col>
+        <v-col cols="2">
           <v-text-field
             @change="(v)=>$store.commit('setMaxHistory',Number(v))"
             :value="$store.state.speedmeter.maxHistory"
             label="History Instances"
             outlined
             min="0"
-            max="10"
           />
         </v-col>
-        <v-col cols="3">
+        <v-col cols="2">
           <v-text-field
             @change="(v)=>$store.commit('setStepsPerMinuteTargetAtSpeedmeter',Number(v))"
             :value="$store.state.speedmeter.stepsPerMinuteTarget"
@@ -34,13 +36,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-row class="mt-0">
-      <v-col>
-        <h3>Force History</h3>
-        <hr class="hr">
-      </v-col>
-    </v-row>
-    <History/>
+
   </v-container>
 </template>
 
@@ -57,7 +53,7 @@ export default {
     History
   },
   mounted(){
-    setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_SPEEDMETER') },1)
+    //setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_SPEEDMETER') },1)
   }
 }
 </script>

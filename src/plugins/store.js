@@ -70,7 +70,7 @@ export default new Vuex.Store({
       leftSteps: 0,
       rightSteps: 0,
       stepsPerMinuteTarget:150,
-      maxHistory:3,
+      maxHistory:8,
       maxHistoryLeftPlate:[],
       maxHistoryRightPlate:[],
     },
@@ -150,7 +150,13 @@ export default new Vuex.Store({
       state.speedmeter.maxHistoryRightPlate = []
     },
     setMaxHistory(state,maxHistory){
-      state.speedmeter.maxHistory = Number(maxHistory)
+      console.log("CHANGED")
+      console.log(maxHistory)
+      if(Number(maxHistory) > 10){
+        state.speedmeter.maxHistory = 10
+      } else {
+        state.speedmeter.maxHistory = Number(maxHistory)
+      }
     },
     setForceFZ1(state,force) {
       state.speedmeter.forceFZ1 = force
