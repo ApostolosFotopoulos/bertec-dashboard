@@ -150,12 +150,11 @@ export default new Vuex.Store({
       state.speedmeter.maxHistoryRightPlate = []
     },
     setMaxHistory(state,maxHistory){
-      console.log("CHANGED")
-      console.log(maxHistory)
       if(Number(maxHistory) > 10){
         state.speedmeter.maxHistory = 10
       } else {
-        state.speedmeter.maxHistory = Number(maxHistory)
+        state.speedmeter.maxHistory = 0
+        state.speedmeter.maxHistory = maxHistory
       }
     },
     setForceFZ1(state,force) {
@@ -193,11 +192,8 @@ export default new Vuex.Store({
           if (state.speedmeter.leftSteps > 0.2 * state.options.frequency) {
             state.speedmeter.nOfSteps += 1
             state.speedmeter.leftFullPressed = true
-
-            console.log('adads')
             
             // Setup the history of left foot
-            console.log( state.speedmeter.leftMaxValueHistory)
             if((state.speedmeter.maxHistoryLeftPlate.length >= state.speedmeter.maxHistory) && state.speedmeter.leftMaxValueHistory > 0){
               state.speedmeter.maxHistoryLeftPlate.shift()
               state.speedmeter.maxHistoryLeftPlate.push(state.speedmeter.leftMaxValueHistory)
@@ -280,12 +276,6 @@ export default new Vuex.Store({
         state.speedmeter.leftFullPressed = false
         state.speedmeter.start = null
       }
-
-      //console.log(state.speedmeter.maxHistoryLeftPlate)
-      //console.log(state.speedmeter.rightMaxValue,state.speedmeter.leftMaxValue)
-      // Reset the max value
-      //state.speedmeter.rightMaxValue = 0
-      //state.speedmeter.leftMaxValue = 0
     },
 
     // Line Chart
@@ -635,7 +625,6 @@ export default new Vuex.Store({
           state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = d
         }
       }
-      //console.log(state.copChart.leftPlateFinalSeries)
     },
     setRightPlateAtCOP(state, rows) {
       let fz2 = Number(rows[8])

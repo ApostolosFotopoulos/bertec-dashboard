@@ -15,16 +15,15 @@
         </v-col>
         <v-col cols="2">
           <v-text-field
-            @change="(v)=>$store.commit('setMaxHistory',Number(v))"
+            @input="(v)=>$store.commit('setMaxHistory',Number(v))"
             :value="$store.state.speedmeter.maxHistory"
             label="History Instances"
             outlined
-            min="0"
           />
         </v-col>
         <v-col cols="2">
           <v-text-field
-            @change="(v)=>$store.commit('setStepsPerMinuteTargetAtSpeedmeter',Number(v))"
+            @input="(v)=>$store.commit('setStepsPerMinuteTargetAtSpeedmeter',Number(v))"
             :value="$store.state.speedmeter.stepsPerMinuteTarget"
             label="Steps/Minute"
             outlined
@@ -36,7 +35,6 @@
         </v-col>
       </v-row>
     </v-container>
-
   </v-container>
 </template>
 
