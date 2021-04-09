@@ -8,24 +8,12 @@ using System.Threading;
 
 namespace BertecForcePlatesFetchData{
   enum Channel{
-    FX1,
-    FY1,
-    FZ1,
-    MX1,
-    MY1,
-    MZ1,
-    FX2,
-    FY2,
-    FZ2,
-    MX2,
-    MY2,
-    MZ2,
-    COPX1,
-    COPY1,
-    COPXY1,
-    COPX2,
-    COPY2,
-    COPXY2
+    FX,
+    FY,
+    FZ,
+    MX,
+    MY,
+    MZ
   };
 
   class CallbackHandler{
@@ -94,24 +82,22 @@ namespace BertecForcePlatesFetchData{
           d = d + "0;0;0;0;0;0;";
 
           // Copx1
-          Double copx1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1]);
+          Double copx1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MY]/firstForcePlate.forceData[(int)Channel.FZ]);
           d = d + copx1.ToString()+";";
           
           // Copy1
-          Double copy1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1]);
+          Double copy1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MX]/firstForcePlate.forceData[(int)Channel.FZ]);
           d = d + copy1.ToString()+";";
           
           // Copxy1
-          d = d + (Math.Sqrt( Math.Pow(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1],2)+ Math.Pow(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1],2))).ToString()+";";
+          d = d + (Math.Sqrt( Math.Pow(copx1,2)+ Math.Pow(copy1,2))).ToString()+";";
           
           // Copx2 Copy2 Copxy2
           d = d + "0;0;0\r\n";
-          //Console.Write(d);
 
           // Write to TCP buffe
           if(dataCollected == 10){
             dataCollected = 0;
-            //Console.Write(d);
 
             writer.Flush();
             String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;-1;";
@@ -155,29 +141,44 @@ namespace BertecForcePlatesFetchData{
         }
 
         // Copx1
-        d = d + (firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+        Double copx1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MY]/firstForcePlate.forceData[(int)Channel.FZ]);
+        d = d + copx1.ToString()+";";
         
         // Copy1
-        d = d + (firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1]).ToString()+";";
+        Double copy1 = 1000*Convert.ToDouble(firstForcePlate.forceData[(int)Channel.MX]/firstForcePlate.forceData[(int)Channel.FZ]);
+        d = d + copy1.ToString()+";";
         
         // Copxy1
-        d = d + (Math.Sqrt( Math.Pow(firstForcePlate.forceData[(int)Channel.MY1]/firstForcePlate.forceData[(int)Channel.FZ1],2)+ Math.Pow(firstForcePlate.forceData[(int)Channel.MX1]/firstForcePlate.forceData[(int)Channel.FZ1],2))).ToString()+";";
-
+        d = d + (Math.Sqrt( Math.Pow(copx1,2)+ Math.Pow(copy1,2))).ToString()+";";
+        
         // Copx2
-        d = d + (secForcePlate.forceData[(int)Channel.MY2]/secForcePlate.forceData[(int)Channel.FZ2]).ToString()+";";
-
+        Double copx2 = 1000*Convert.ToDouble(secForcePlate.forceData[(int)Channel.MY]/secForcePlate.forceData[(int)Channel.FZ]);
+        d = d + copx2.ToString()+";";
+        
         // Copy2
-        d = d + (secForcePlate.forceData[(int)Channel.MX2]/secForcePlate.forceData[(int)Channel.FZ2]).ToString()+";";
-
+        Double copy2 = 1000*Convert.ToDouble(secForcePlate.forceData[(int)Channel.MX]/secForcePlate.forceData[(int)Channel.FZ]);
+        d = d + copy2.ToString()+";";
+        
         // Copxy2
-        d = d + (Math.Sqrt( Math.Pow(secForcePlate.forceData[(int)Channel.MY2]/secForcePlate.forceData[(int)Channel.FZ2],2)+ Math.Pow(secForcePlate.forceData[(int)Channel.MX2]/secForcePlate.forceData[(int)Channel.FZ2],2))).ToString()+";";
-      
-        Console.Write(d);
+        d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString()+";";
 
-        // Write to TCP buffer
-        writer.Flush();
-        writer.WriteLine(d);
-        writer.Flush();
+        if(dataCollected == 10){
+          dataCollected = 0;
+
+          writer.Flush();
+          String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;-1;";
+          writer.WriteLine(forcePlates);
+          writer.Flush();
+
+          writer.Flush();
+          writer.WriteLine(d);
+          writer.Flush();
+          //Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
+          //Console.WriteLine(counter);
+          //Console.WriteLine(copx1.ToString());
+          //counter+=1;
+        }
+        dataCollected += 1;
       }
     }
     public void statusEvent(BertecDeviceNET.StatusErrors status){
