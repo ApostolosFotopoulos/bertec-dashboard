@@ -166,7 +166,7 @@ namespace BertecForcePlatesFetchData{
           dataCollected = 0;
 
           writer.Flush();
-          String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;-1;";
+          String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;"+handler.DeviceSerialNumber(1).ToString()+";";;
           writer.WriteLine(forcePlates);
           writer.Flush();
 

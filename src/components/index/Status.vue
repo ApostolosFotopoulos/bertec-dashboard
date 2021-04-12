@@ -1,60 +1,64 @@
 <template>
   <div>
-  <v-row class="pb-0 mb-0">
-    <v-col>
-      <v-select
-        @change="(v)=>$store.commit('setLeftPlateChannelAtOptions',v)"
-        :value="$store.state.options.leftPlateChannel"
-        :items="leftForcePlateChannels"
-        label="Left Plate Channel"
-        solo
-      ></v-select>
-    </v-col>
-    <v-col>
-      <v-text-field
-        :value="$store.state.options.leftPlateValue"
-        solo
-        readonly
-      />
-    </v-col>
-    <v-col>
-      <v-select
-        @change="(v)=>$store.commit('setRightPlateChannelAtOptions',v)"
-        :value="$store.state.options.rightPlateChannel"
-        :items="rightForcePlateChannels"
-        label="Right Plate Channel"
-        solo
-      ></v-select>
-    </v-col>
-    <v-col>
-      <v-text-field
-        :value="$store.state.options.rightPlateValue"
-        solo
-        readonly
-      />
-    </v-col>
-    <v-col>
-      <v-btn 
-        :class="`${setButtonStyle()} v-input__control`"
-        @click="resetForcePlate"
-        :disabled="$store.state.options.isSessionRunning"
-      >
-        Reset
-      </v-btn>
-    </v-col>
-  </v-row>
-  <v-layout class="mt-0 pt-0">
-    <v-flex>
-      <strong :class="`${$store.state.options.deviceLeft!=-1?'device-success':'device-error'}`">
-        {{`${$store.state.options.deviceLeft!=-1? `${$store.state.options.deviceLeft} Connected` : "• No Device Connected"}`}}
-      </strong>
-    </v-flex>
-     <v-flex>
-        <strong :class="`${$store.state.options.deviceRight!=-1?'device-success':'device-error'}`">
-        {{`${$store.state.options.deviceRight!=-1? `${$store.state.options.deviceRight} Connected` : "• No Device Connected"}`}}
+    <v-row class="pb-0 mb-0">
+      <v-col>
+        <v-select
+          @change="(v)=>$store.commit('setLeftPlateChannelAtOptions',v)"
+          :value="$store.state.options.leftPlateChannel"
+          :items="leftForcePlateChannels"
+          hide-details="auto"
+          label="Left Plate Channel"
+          solo
+        ></v-select>
+      </v-col>
+      <v-col>
+        <v-text-field
+          :value="$store.state.options.leftPlateValue"
+          hide-details="auto"
+          solo
+          readonly
+        />
+      </v-col>
+      <v-col>
+        <v-select
+          @change="(v)=>$store.commit('setRightPlateChannelAtOptions',v)"
+          :value="$store.state.options.rightPlateChannel"
+          :items="rightForcePlateChannels"
+          hide-details="auto"
+          label="Right Plate Channel"
+          solo
+        ></v-select>
+      </v-col>
+      <v-col>
+        <v-text-field
+          :value="$store.state.options.rightPlateValue"
+          hide-details="auto"
+          solo
+          readonly
+        />
+      </v-col>
+      <v-col>
+        <v-btn 
+          :class="`${setButtonStyle()} v-input__control`"
+          @click="resetForcePlate"
+          :disabled="$store.state.options.isSessionRunning"
+        >
+          Reset
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row class="pt-0 mt-0">
+      <v-col class="pt-0 mt-0" cols="5">
+        <strong :class="`${$store.state.options.deviceLeft!=-1?'device-success':'device-error'}`">
+          {{`${$store.state.options.deviceLeft!=-1? `${$store.state.options.deviceLeft} Connected` : "• No Device Connected"}`}}
         </strong>
-    </v-flex>
-  </v-layout>
+      </v-col>
+      <v-col class="pt-0 mt-0">
+        <strong :class="`${$store.state.options.deviceRight!=-1?'device-success':'device-error'}`">
+          {{`${$store.state.options.deviceRight!=-1? `${$store.state.options.deviceRight} Connected` : "• No Device Connected"}`}}
+        </strong>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
