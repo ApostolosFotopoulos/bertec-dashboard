@@ -1,5 +1,6 @@
 const { BrowserWindow ,ipcMain, dialog } = require('electron')
 const SecondaryWindow = require('./SecondaryWindow')
+const ForcePlatesProcess = require('./ForcePlatesProcess');
 const csv = require('async-csv')
 const fs = require('fs').promises
 const path = require('path')
@@ -45,6 +46,8 @@ module.exports = class {
     this.server.listen(this.port, () => {
       console.log("TCPListener is active....")
     })
+    
+    new ForcePlatesProcess().createForcePlateProcess()
   }
 
   async createWindow() {
