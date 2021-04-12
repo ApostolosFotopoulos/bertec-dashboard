@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-row class="pb-0 mb-0">
     <v-col>
       <v-select
@@ -8,9 +9,6 @@
         label="Left Plate Channel"
         solo
       ></v-select>
-      <small :class="`${$store.state.options.deviceLeft!=-1?'device-success':'device-error'}`">
-        {{`${$store.state.options.deviceLeft!=-1? `${$store.state.options.deviceLeft} is Connected` : "• No Device is Connected"}`}}
-      </small>
     </v-col>
     <v-col>
       <v-text-field
@@ -27,9 +25,6 @@
         label="Right Plate Channel"
         solo
       ></v-select>
-      <small :class="`${$store.state.options.deviceRight!=-1?'device-success':'device-error'}`">
-        {{`${$store.state.options.deviceRight!=-1? `${$store.state.options.deviceRight} is Connected` : "• No Device is Connected"}`}}
-      </small>
     </v-col>
     <v-col>
       <v-text-field
@@ -42,11 +37,25 @@
       <v-btn 
         :class="`${setButtonStyle()} v-input__control`"
         @click="resetForcePlate"
+        :disabled="$store.state.options.isSessionRunning"
       >
         Reset
       </v-btn>
     </v-col>
   </v-row>
+  <v-layout class="mt-0 pt-0">
+    <v-flex>
+      <strong :class="`${$store.state.options.deviceLeft!=-1?'device-success':'device-error'}`">
+        {{`${$store.state.options.deviceLeft!=-1? `${$store.state.options.deviceLeft} Connected` : "• No Device Connected"}`}}
+      </strong>
+    </v-flex>
+     <v-flex>
+        <strong :class="`${$store.state.options.deviceRight!=-1?'device-success':'device-error'}`">
+        {{`${$store.state.options.deviceRight!=-1? `${$store.state.options.deviceRight} Connected` : "• No Device Connected"}`}}
+        </strong>
+    </v-flex>
+  </v-layout>
+  </div>
 </template>
 
 <script>

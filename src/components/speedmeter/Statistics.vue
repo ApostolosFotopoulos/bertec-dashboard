@@ -4,13 +4,13 @@
       <v-col>
         <v-card color="#262D47" class="pa-1">
           <h4 class="card-title">Force FZ1</h4>
-          <h2 class="metric-value">{{$store.state.speedmeter.forceFZ1.toFixed(1)}}</h2>
+          <h2 class="metric-value">{{$store.state.speedmeter.forceFZ1 && $store.state.speedmeter.forceFZ1.toFixed(1)}}</h2>
         </v-card>
       </v-col>
       <v-col>
         <v-card color="#262D47" class="pa-1">
           <h4 class="card-title">Force FZ2</h4>
-          <h2 class="metric-value">{{$store.state.speedmeter.forceFZ2.toFixed(1)}}</h2>
+          <h2 class="metric-value">{{$store.state.speedmeter.forceFZ2 && $store.state.speedmeter.forceFZ2.toFixed(1)}}</h2>
         </v-card>
       </v-col>
       <v-col>

@@ -264,7 +264,8 @@ export default new Vuex.Store({
         
         let now = moment()
         // Calculate the foot asymmetry
-        state.speedmeter.footAsymmetry = ((2 * (state.speedmeter.leftMaxValue - state.speedmeter.rightMaxValue)) / (state.speedmeter.leftMaxValue + state.speedmeter.rightMaxValue)) * 100
+        state.speedmeter.footAsymmetry = ((2 * (state.speedmeter.rightMaxValue - state.speedmeter.leftMaxValue)) / (state.speedmeter.leftMaxValue + state.speedmeter.rightMaxValue)) * 100
+        console.log(state.speedmeter.footAsymmetry)
         state.speedmeter.footAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.footAsymmetry), -100), 100);
         
         state.speedmeter.stepsPerMinute = (2 * 60000) / (now.diff(state.speedmeter.start, "milliseconds"))
@@ -272,6 +273,8 @@ export default new Vuex.Store({
         state.speedmeter.stepsAsymmetry = Math.min(Math.max(parseInt(state.speedmeter.stepsAsymmetry), -100), 100);
         
         // Reset the variables
+        state.speedmeter.leftMaxValue = 0
+        state.speedmeter.rightMaxValue = 0
         state.speedmeter.rightFullPressed = false
         state.speedmeter.leftFullPressed = false
         state.speedmeter.start = null
@@ -388,6 +391,16 @@ export default new Vuex.Store({
             }]
             state.lineChart.leftSteps = 0 
             state.lineChart.leftPlateRows = 0
+
+            state.lineChart.shouldUpdateRight = true
+            state.lineChart.righPlateSeries = [{
+              data: []
+            }]
+            state.lineChart.rightPlateFinalSeries = [{
+              data:[]
+            }]
+            state.lineChart.rightSteps = 0 
+            state.lineChart.rightPlateRows = 0
           }
 
           // Update the left plate series with the new value that is over the
@@ -476,6 +489,16 @@ export default new Vuex.Store({
           // If the number of lines is over the predefined limit
           // then clean the chart to retrieve the next lines
           if(state.lineChart.rightPlateRows > Number(state.lineChart.nOfLines)){
+            state.lineChart.shouldUpdateLeft = true
+            state.lineChart.leftPlateSeries = [{
+              data: []
+            }]
+            state.lineChart.leftPlateFinalSeries = [{
+              data:[]
+            }]
+            state.lineChart.leftSteps = 0 
+            state.lineChart.leftPlateRows = 0
+
             state.lineChart.shouldUpdateRight = true
             state.lineChart.righPlateSeries = [{
               data: []
