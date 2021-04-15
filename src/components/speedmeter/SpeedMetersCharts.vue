@@ -30,7 +30,7 @@
           :segmentColors="segmentColors"
         />
         <div class="pa-5">
-          <h2>Steps Asymmetry</h2>
+          <h2>Steps Frequency</h2>
         </div>
       </v-col>
     </v-row>
