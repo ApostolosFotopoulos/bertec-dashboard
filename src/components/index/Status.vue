@@ -43,7 +43,7 @@
           @click="resetForcePlate"
           :disabled="$store.state.options.isSessionRunning"
         >
-          Reset
+          {{setButtonText()}}
         </v-btn>
       </v-col>
     </v-row>
@@ -97,6 +97,16 @@ export default{
         return "resetButton"
       } else {
         return "errorButton"
+      }
+    },
+    setButtonText(){
+      if(
+        Number(this.$store.state.options.leftPlateValue) < 4 && Number(this.$store.state.options.leftPlateValue) > -4 && 
+        Number(this.$store.state.options.rightPlateValue) < 4 && Number(this.$store.state.options.rightPlateValue) > -4
+      ){
+        return "Reset"
+      } else {
+        return "Press to reset"
       }
     }
   }
