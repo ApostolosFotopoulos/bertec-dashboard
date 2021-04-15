@@ -207,37 +207,7 @@ namespace BertecForcePlatesFetchData{
         Console.WriteLine(e);
         return;
       }
-
       
-      /*//--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
-
-      // Read all the data
-      bool isFirstLine = true;
-      List<string> dataArr = new List<string>(); 
-      using(var reader = new StreamReader(@"./run_2belts.csv")){
-        while (!reader.EndOfStream){
-          if(isFirstLine){
-            reader.ReadLine();
-            isFirstLine = false;
-          } else {
-            var line = reader.ReadLine();
-            dataArr.Add(line);
-          }
-        }
-      }
-    
-      Console.Write("Started streaming data....");
-      int step = 0;
-      while(isTesting){
-        writer.Flush();
-        writer.WriteLine(dataArr[step % dataArr.Count]);
-        writer.Flush();
-        System.Threading.Thread.Sleep(10);
-        step = step + 1;
-      }
-
-      //--------------------------------------- ONLY FOR TEST PURPOSE -------------------------------
-      */
        // After the connection link the connection handler wtih callback handler
       callback.handler = handler;
 
