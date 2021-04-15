@@ -94,6 +94,29 @@ export default new Vuex.Store({
       leftSteps: 0,
       rightSteps: 0,
       nOfGroupPoints: 10,
+    },
+    timeline:{
+      leftPlateSeries: [{
+        data:[]
+      }],
+      rightPlateSeries: [{
+        data:[]
+      }],
+      isLeftPlateLocked: false,
+      isLeftPlateReset: false,
+      isRightPlateReset:false,
+      isRightPlateLocked: false,
+      leftPlateChannel: "FZ1",
+      rightPlateChannel: "FZ2",
+      leftPlateMax:-1,
+      rightPlateMax:-1,
+      shouldUpdateLeft:false,
+      shouldUpdateRight:false,
+      threshold: 5,
+      nOfPoints: 50,
+      dataType: "Normalized",
+      leftPlateChannel: "FZ1",
+      rightPlateChannel: "FZ2",
     }
   },
   mutations: {
@@ -134,7 +157,8 @@ export default new Vuex.Store({
 
     // Speedmeter
     resetSpeedmeterState(state) {
-      state.speedmeter.force = 0
+      state.speedmeter.forceFZ1 = 0
+      state.speedmeter.forceFZ2 = 0
       state.speedmeter.nOfSteps = 0
       state.speedmeter.stepsPerMinute = 0
       state.speedmeter.footAsymmetry = 0
@@ -314,6 +338,7 @@ export default new Vuex.Store({
     setNofLinesAtLineChart(state, nOfLines) {
       state.lineChart.nOfLines = Number(nOfLines)
     },
+
     setLeftPlateAtLineChart(state, rows) {
       let fz1 = Number(rows[2])
       let entry = rows[rowsNames[state.lineChart.leftPlateChannel]] 
@@ -711,6 +736,189 @@ export default new Vuex.Store({
         }
       }
     },
+
+    // Timeline
+    resetTimelineState(state){
+      state.timeline.leftPlateSeries = [{
+        data:[]
+      }]
+      state.timeline.rightPlateSeries = [{
+        data:[]
+      }]
+      state.timeline.isLeftPlateLocked = false
+      state.timeline.isLeftPlateReset = true
+      state.timeline.isRightPlateReset = true
+      state.timeline.isRightPlateLocked = false
+      state.timeline.leftPlateMax = -1
+      state.timeline.rightPlateMax = -1
+      state.timeline.shouldUpdateLeft = false
+      state.timeline.shouldUpdateRight = false
+    },
+    setLeftPlateAtTimeline(state, rows){
+      let fz1 = Number(rows[2])
+      let entry = rows[rowsNames[state.timeline.leftPlateChannel]] 
+      let threshold = Number((state.timeline.threshold/100) * state.options.weight)
+    
+      // When the force is larger than the threshold 
+      // then we have a step since the force is lower than that
+      // threshold
+      if (state.timeline.isLeftPlateLocked) {
+        if (fz1 > threshold && !state.timeline.isLeftPlateReset) {
+          // Update the left plate max with biggest value
+          // that we get
+          if (state.timeline.dataType === "Normalized") {
+            if (state.timeline.leftPlateChannel.includes("COP")) {
+              if(state.timeline.leftPlateMax < entry){
+                state.timeline.leftPlateMax = entry
+              }
+            } else {
+              if(state.timeline.leftPlateMax < (100*(entry / state.options.weight))){
+                state.timeline.leftPlateMax = entry
+              }
+            }
+          } else {
+            if(state.timeline.leftPlateMax < entry){
+              state.timeline.leftPlateMax = entry
+            }
+          }
+        }
+
+        if(fz1 < threshold){
+          state.timeline.isLeftPlateLocked = false
+          state.timeline.isLeftPlateReset = false
+
+          // Add the new max to the left plate max
+          state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
+          state.timeline.leftPlateMax = -1;
+          state.timeline.shouldUpdateLeft = true;
+        }
+
+
+      } else {
+        if(fz1 > threshold){
+          // If the number of points is over the predefined limit
+          // we start poping the old ones
+          if (state.timeline.leftPlateSeries[0].data.length > Number(state.timeline.nOfPoints)){
+            let s = state.timeline.leftPlateSeries[0].data
+            s.shift()
+            state.timeline.leftPlateSeries[0].data = s
+          }
+
+          // Update the left plate max with biggest value
+          // that we get
+          state.timeline.isLeftPlateLocked = true
+          if (state.timeline.dataType === "Normalized") {
+            if (state.timeline.leftPlateChannel.includes("COP")) {
+              if(state.timeline.leftPlateMax < entry){
+                state.timeline.leftPlateMax = entry
+              }
+            } else {
+              if(state.timeline.leftPlateMax < (100*(entry / state.options.weight))){
+                state.timeline.leftPlateMax = entry
+              }
+            }
+          } else {
+            if(state.timeline.leftPlateMax < entry){
+              state.timeline.leftPlateMax = entry
+            }
+          }
+        }
+      }
+    },
+    setRightPlateAtTimeline(state, rows){
+      let fz2 = Number(rows[8])
+      let entry = rows[rowsNames[state.timeline.rightPlateChannel]] 
+      let threshold = Number((state.timeline.threshold/100) * state.options.weight)
+
+      // When the force is larger than the threshold 
+      // then we have a step since the force is lower than that
+      // threshold
+      if (state.timeline.isRightPlateLocked) {
+        if (fz2 > threshold && !state.timeline.isRightPlateReset) {
+          // Update the left plate max with biggest value
+          // that we get
+          if (state.timeline.dataType === "Normalized") {
+            if (state.timeline.rightPlateChannel.includes("COP")) {
+              if(state.timeline.rightPlateMax < entry){
+                state.timeline.rightPlateMax = entry
+              }
+            } else {
+              if(state.timeline.rightPlateMax < (100*(entry / state.options.weight))){
+                state.timeline.rightPlateMax = entry
+              }
+            }
+          } else {
+            if(state.timeline.rightPlateMax < entry){
+              state.timeline.rightPlateMax = entry
+            }
+          }
+        }
+
+        if(fz2 < threshold){
+          state.timeline.isRightPlateLocked = false
+          state.timeline.isRightPlateReset = false
+
+          // Add the new max to the left plate max
+          state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
+          state.timeline.rightPlateMax = -1;
+          state.timeline.shouldUpdateRight = true;
+        }
+
+
+      } else {
+        if(fz2 > threshold){
+          // If the number of points is over the predefined limit
+          // we start poping the old ones
+          if (state.timeline.rightPlateSeries[0].data.length > Number(state.timeline.nOfPoints)){
+            let s = state.timeline.rightPlateSeries[0].data
+            s.shift()
+            state.timeline.rightPlateSeries[0].data = s
+          }
+
+          // Update the left plate max with biggest value
+          // that we get
+          state.timeline.isRightPlateLocked = true
+          if (state.timeline.dataType === "Normalized") {
+            if (state.timeline.rightPlateChannel.includes("COP")) {
+              if(state.timeline.rightPlateMax < entry){
+                state.timeline.rightPlateMax = entry
+              }
+            } else {
+              if(state.timeline.rightPlateMax < (100*(entry / state.options.weight))){
+                state.timeline.rightPlateMax = entry
+              }
+            }
+          } else {
+            if(state.timeline.rightPlateMax < entry){
+              state.timeline.rightPlateMax = entry
+            }
+          }
+        }
+      }
+    },
+    setLeftPlateChannelAtTimeline(state,channel){
+      state.timeline.leftPlateChannel = channel;
+    },
+    setRightPlateChannelAtTimeline(state,channel){
+      state.timeline.rightPlateChannel = channel;
+    },
+    setDataTypeAtTimeline(state,dataType){
+      state.timeline.dataType = dataType;
+    },
+    setThresholdAtTimeline(state,threshold){
+      state.timeline.threshold = threshold;
+    },
+    setNofPointsAtTimeline(state,nOfPoints){
+      state.timeline.leftPlateSeries[0].data = []
+      state.timeline.rightPlateSeries[0].data = []
+      state.timeline.nOfPoints = nOfPoints;
+    },
+    setShouldUpdateLeftAtTimeline(state,shouldUpdateLeft){
+      state.timeline.shouldUpdateLeft = shouldUpdateLeft;
+    },
+    setShouldUpdateRightAtTimeline(state,shouldUpdateRight){
+      state.timeline.shouldUpdateRight = shouldUpdateRight;
+    }
   },
   actions:{}
 })

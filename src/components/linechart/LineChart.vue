@@ -87,7 +87,6 @@ export default {
       rightFootChart:{
         ...defaultLineChartOptions,
         yaxis: {
-          max: this.$store.state.axesMax,
           dataLabels:{
             show:false,
             enabled:false,
@@ -145,7 +144,6 @@ export default {
     },
     updateVariables(responseData){
       this.$store.commit('setWeight',responseData.weight)
-      this.$store.commit('setForce',responseData.force)
       this.$store.commit('setLeftPlateAtLineChart',responseData.rows)
       this.$store.commit('setRightPlateAtLineChart',responseData.rows) 
       if(this.$store.state.lineChart.shouldUpdateLeft){

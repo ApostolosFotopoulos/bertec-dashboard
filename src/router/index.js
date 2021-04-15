@@ -19,6 +19,10 @@ const routes = [{
 		path: "/speedmeter",
 		name: "SpeedMeterPage",
 		component: () => import("../views/SpeedMeterPage.vue")
+	},,{
+		path: "/timeline",
+		name: "Timeline",
+		component: () => import("../views/TimelinePage.vue")
 	}]
 
 export default new VueRouter({

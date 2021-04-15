@@ -30,6 +30,16 @@
         @change="lineChartCheckboxHandler"
       ></v-checkbox>
     </v-col>
+    <v-col>
+      <v-checkbox
+        v-model="isTimelineChecked"
+        label="Timeline"
+        color="#6ab187"
+        hide-details
+        :disabled="!$store.state.options.isSessionRunning"
+        @change="timelineCheckboxHandler"
+      ></v-checkbox>
+    </v-col>
   </v-row>
 </template>
 
@@ -42,14 +52,16 @@ export default {
       isChartChecked: false,
       isCopChecked: false,
       isLineChartChecked:false,
+      isTimelineChecked:false,
     }
   },
   mounted(){
     ipcRenderer.on('WINDOWS_STATUS_RESPONSE',(_,responseData)=>{
-      const { chartWindowVisible, copWindowVisible,lineChartWindowVisible } = responseData
+      const { chartWindowVisible, copWindowVisible, lineChartWindowVisible, isTimelineVisibile } = responseData
       this.isChartChecked = chartWindowVisible
       this.isCopChecked = copWindowVisible
       this.isLineChartChecked = lineChartWindowVisible
+      this.isTimelineChecked = isTimelineVisibile
     })
   },
   methods:{
@@ -72,6 +84,13 @@ export default {
         ipcRenderer.send('OPEN_LINECHART_WINDOW');
       } else {
         ipcRenderer.send('CLOSE_LINECHART_WINDOW');
+      }
+    },
+    timelineCheckboxHandler(){
+      if(this.isTimelineChecked){
+        ipcRenderer.send('OPEN_TIMELINE_WINDOW');
+      } else {
+        ipcRenderer.send('CLOSE_TIMELINE_WINDOW');
       }
     }
   }

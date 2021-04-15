@@ -11,6 +11,7 @@ var net = require("net");
 const SKIP_ENTRIES_SPEEDMETER = 1
 const SKIP_ENTRIES_LINECHART = 1
 const SKIP_ENTRIES_COPCHART = 1
+const SKIP_ENTRIES_TIMELINE = 1
 
 module.exports = class {
   constructor() {
@@ -32,11 +33,13 @@ module.exports = class {
     this.nOfStepsSpeedMeter = 0
     this.nOfStepsLineChart = 0
     this.nOfCOPChart = 0
+    this.nOfTimeline = 0
     
     // Window Options
     this.cw = null 
     this.cpw = null
     this.linechartw = null
+    this.timelinew = null
     this.window = null
 
     // TCP / Event Listeners
@@ -99,11 +102,15 @@ module.exports = class {
     this.linechartw = new SecondaryWindow("Analysis Dashboard", "OPEN_LINECHART_WINDOW", "CLOSE_LINECHART_WINDOW", "/linechart");
     this.linechartw.addEventListener();
 
+    this.timelinew = new SecondaryWindow("Analysis Dashboard", "OPEN_TIMELINE_WINDOW", "CLOSE_TIMELINE_WINDOW", "/timeline");
+    this.timelinew.addEventListener();
+
     ipcMain.on('WINDOWS_STATUS', async (e) => {
       e.reply('WINDOWS_STATUS_RESPONSE', { 
         chartWindowVisible: this.cw.window !== null, 
         copWindowVisible: this.cpw.window != null, 
-        lineChartWindowVisible: this.linechartw.window != null 
+        lineChartWindowVisible: this.linechartw.window != null,
+        isTimelineVisibile: this.timelinew.window != null
       })
     });
   }
@@ -228,6 +235,25 @@ module.exports = class {
             });
           }
         }
+
+        // Send the data to the timeline window
+        if (this.timelinew && this.timelinew.window) {
+          if (this.isSessionRunning) {
+            this.timelinew.window.webContents.send("SESSION_RESPONSE_TIMELINE", {
+              rows: packetArray,
+              force: Math.random().toFixed(2),
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+            });
+          } else {
+            this.timelinew.window.webContents.send("SESSION_RESPONSE_TIMELINE", {
+              rows: [],
+              force: 0,
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+            });
+          }
+        }
         
         // Send the details the main window with the options
         if(this.window){
@@ -310,6 +336,26 @@ module.exports = class {
           rows: [],
           isSessionRunning: this.isSessionRunning,
           weight: this.weight,
+        })
+      }
+    })
+
+    ipcMain.on("SESSION_RUNNING_TIMELINE",(e,d)=>{
+      if(this.isSessionRunning){
+        e.reply("SESSION_RESPONSE_TIMELINE",{
+          rows: this.rows[(this.nOfTimeline) % this.rows.length].map(i => Number(i)),
+          isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+          force: Math.random().toFixed(2)
+        })
+        this.nOfTimeline = this.nOfTimeline + SKIP_ENTRIES_COPCHART
+      } else {
+        this.nOfTimeline = 0
+        e.reply("SESSION_RESPONSE_TIMELINE",{
+          rows: [],
+          isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+          force: 0
         })
       }
     })
