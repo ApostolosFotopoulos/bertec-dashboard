@@ -53,25 +53,38 @@
         </v-tooltip>
       </v-col>
       <v-col>
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-bind="attrs"
-            v-on="on"
-            class="mt-3"
-            @change="(v)=>$store.commit('setNofPointsAtTimeline',Number(v))"
-            :value="$store.state.timeline.nOfPoints"
-            label="Display"
-            outlined
-            :disabled="$store.state.options.isSessionRunning"
-            min="0"
-          />
-          </template>
-          <span>Number of Lines</span>
-        </v-tooltip>
+        <v-text-field
+          class="mt-3"
+          @change="(v)=>$store.commit('setNofPointsAtTimeline',Number(v))"
+          :value="$store.state.timeline.nOfPoints"
+          label="Display"
+          outlined
+          :disabled="$store.state.options.isSessionRunning"
+          min="0"
+        />
       </v-col>
       <v-col>
         <v-btn @click="$store.commit('resetTimelineState')" class="resetButton  v-input__control mt-3">Reset</v-btn>
+      </v-col>
+    </v-row>
+    <v-row class="pt-0 mt-0">
+      <v-col cols="2" class="pt-0 mt-0">
+        <v-text-field
+          @input="(v)=>$store.commit('setRangeMin',Number(v))"
+          :value="$store.state.timeline.rangeMin"
+          label="Min Range"
+          outlined
+          :disabled="$store.state.options.isSessionRunning"
+        />
+      </v-col>
+      <v-col cols="2" class="pt-0 mt-0">
+        <v-text-field
+          @input="(v)=>$store.commit('setRangeMax',Number(v))"
+          :value="$store.state.timeline.rangeMax"
+          label="Max Range"
+          outlined
+          :disabled="$store.state.options.isSessionRunning"
+        />
       </v-col>
     </v-row>
   </div>

@@ -118,6 +118,8 @@ export default new Vuex.Store({
       leftPlateChannel: "FZ1",
       rightPlateChannel: "FZ2",
       yAxisMaxValue: -1,
+      rangeMax: 100,
+      rangeMin: 80,
     }
   },
   mutations: {
@@ -925,6 +927,20 @@ export default new Vuex.Store({
     },
     setShouldUpdateRightAtTimeline(state,shouldUpdateRight){
       state.timeline.shouldUpdateRight = shouldUpdateRight;
+    },
+    setRangeMax(state,max){
+      if(max < state.timeline.rangeMin){
+        state.timeline.rangeMax = state.timeline.rangeMin
+      } else {
+        state.timeline.rangeMax = max
+      }
+    },
+    setRangeMin(state,min){
+      if(min > state.timeline.rangeMax){
+        state.timeline.rangeMin =state.timeline.rangeMax
+      } else{
+        state.timeline.rangeMin = min
+      }
     }
   },
   actions:{}

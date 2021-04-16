@@ -84,9 +84,19 @@ export default {
         markers: {
           size: 4,
         },
+        annotations: {
+          yaxis: [
+            {
+              y: this.$store.state.timeline.rangeMin,
+              y2: this.$store.state.timeline.rangeMax,
+              borderColor: '#000',
+              fillColor: '#FEB019',
+            }
+          ]
+        }
       },
       rightFootChart:{
-         ...defaultOptions,
+        ...defaultOptions,
         yaxis: {
           min:0,
           tickAmount:6,
@@ -126,6 +136,16 @@ export default {
         markers: {
           size: 4,
         },
+        annotations: {
+          yaxis: [
+            {
+              y: this.$store.state.timeline.rangeMin,
+              y2: this.$store.state.timeline.rangeMax,
+              borderColor: '#000',
+              fillColor: '#FEB019',
+            }
+          ]
+        }
       }
     }
   },
@@ -159,7 +179,7 @@ export default {
     },
     updateLeftChart(){
       if(this.$store.state.timeline.yAxisMaxValue != -1){
-         this.$refs.leftPlateChart.updateOptions({
+        this.$refs.leftPlateChart.updateOptions({
           ...defaultOptions,
           yaxis: {
             min:0,
@@ -201,6 +221,16 @@ export default {
           markers: {
             size: 4,
           },
+          annotations: {
+            yaxis: [
+              {
+                y: this.$store.state.timeline.rangeMin,
+                y2: this.$store.state.timeline.rangeMax,
+                borderColor: '#000',
+                fillColor: '#FEB019',
+              }
+            ]
+          }
         })
       } else {
         this.$refs.leftPlateChart.updateOptions({
@@ -244,6 +274,16 @@ export default {
           markers: {
             size: 4,
           },
+          annotations: {
+            yaxis: [
+              {
+                y: this.$store.state.timeline.rangeMin,
+                y2: this.$store.state.timeline.rangeMax,
+                borderColor: '#000',
+                fillColor: '#FEB019',
+              }
+            ]
+          }
         })
       }
     },
@@ -269,7 +309,7 @@ export default {
             },
           },
           xaxis:{
-             min:0,
+            min:0,
             max:this.$store.state.timeline.nOfPoints,
             dataLabels:{
               show:false,
@@ -290,6 +330,16 @@ export default {
           colors:["#6ab187"],
           markers: {
             size: 4,
+          },
+          annotations: {
+            yaxis: [
+              {
+                y: this.$store.state.timeline.rangeMin,
+                y2: this.$store.state.timeline.rangeMax,
+                borderColor: '#000',
+                fillColor: '#FEB019',
+              }
+            ]
           }
         })
       } else {
@@ -313,7 +363,7 @@ export default {
             },
           },
           xaxis:{
-             min:0,
+            min:0,
             max:this.$store.state.timeline.yAxisMaxValue,
             dataLabels:{
               show:false,
@@ -334,6 +384,16 @@ export default {
           colors:["#6ab187"],
           markers: {
             size: 4,
+          },
+          annotations: {
+            yaxis: [
+              {
+                y: this.$store.state.timeline.rangeMin,
+                y2: this.$store.state.timeline.rangeMax,
+                borderColor: '#000',
+                fillColor: '#FEB019',
+              }
+            ]
           }
         })
       }
