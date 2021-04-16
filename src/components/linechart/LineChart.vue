@@ -42,10 +42,18 @@ export default {
   },
   data(){
     return{
-      height: 0.8 * window.innerHeight,
+      height: 0.78 * window.innerHeight,
       leftFootChart:{
         ...defaultLineChartOptions,
         yaxis: {
+          min: (min) => {
+            if(this.$store.state.lineChart.leftPlateChannel.includes("COP")){
+              return min;
+            } else {
+              return 0;
+            }
+          },
+          tickAmount: (this.$store.state.lineChart.yAxisMaxValue/(this.$store.state.lineChart.dataType === "Normalized"?10:100)),
           dataLabels:{
             show:false,
             enabled:false,
@@ -87,6 +95,14 @@ export default {
       rightFootChart:{
         ...defaultLineChartOptions,
         yaxis: {
+           min: (min)=>{
+            if(this.$store.state.lineChart.rightPlateChannel.includes("COP")){
+              return min;
+            } else {
+              return 0;
+            }
+          },
+          tickAmount: (this.$store.state.lineChart.yAxisMaxValue/(this.$store.state.lineChart.dataType === "Normalized"?10:100))-1,
           dataLabels:{
             show:false,
             enabled:false,
@@ -160,6 +176,14 @@ export default {
         this.$refs.leftPlateChart.updateOptions({
           ...defaultLineChartOptions,
           yaxis: {
+            tickAmount: (this.$store.state.lineChart.yAxisMaxValue/(this.$store.state.lineChart.dataType === "Normalized"?10:100)),
+             min:(min) =>{
+              if(this.$store.state.lineChart.leftPlateChannel.includes("COP")){
+                return min;
+              } else {
+                return 0;
+              }
+            },
             max:Number(this.$store.state.lineChart.yAxisMaxValue),
             dataLabels:{
               show:false,
@@ -203,6 +227,14 @@ export default {
         this.$refs.leftPlateChart.updateOptions({
         ...defaultLineChartOptions,
         yaxis: {
+          tickAmount: (this.$store.state.lineChart.yAxisMaxValue/(this.$store.state.lineChart.dataType === "Normalized"?10:100)),
+          min:(min)=>{
+            if(this.$store.state.lineChart.leftPlateChannel.includes("COP")){
+              return min;
+            } else {
+              return 0;
+            }
+          },
           dataLabels:{
             show:false,
             enabled:false,
@@ -248,6 +280,14 @@ export default {
         this.$refs.rightPlateChart.updateOptions({  
           ...defaultLineChartOptions,
           yaxis: {
+            tickAmount: (this.$store.state.lineChart.yAxisMaxValue/(this.$store.state.lineChart.dataType === "Normalized"?10:100)),
+            min:(min)=>{
+              if(this.$store.state.lineChart.rightPlateChannel.includes("COP")){
+                return min;
+              } else {
+                return 0;
+              }
+            },
             max:Number(this.$store.state.lineChart.yAxisMaxValue),
             dataLabels:{
               show:false,
@@ -291,6 +331,14 @@ export default {
         this.$refs.rightPlateChart.updateOptions({  
           ...defaultLineChartOptions,
           yaxis: {
+            tickAmount: (this.$store.state.lineChart.yAxisMaxValue/(this.$store.state.lineChart.dataType === "Normalized"?10:100)),
+            min:(min)=>{
+              if(this.$store.state.lineChart.rightPlateChannel.includes("COP")){
+                return min;
+              } else {
+                return 0;
+              }
+            },
             dataLabels:{
               show:false,
               enabled:false,

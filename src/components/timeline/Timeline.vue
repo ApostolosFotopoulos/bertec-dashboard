@@ -42,12 +42,12 @@ export default {
   },
   data(){
     return{
-      height: 0.8 * window.innerHeight,
+      height: 0.78 * window.innerHeight,
       leftFootChart:{
         ...defaultOptions,
         yaxis: {
           min:0,
-          tickAmount:6,
+          tickAmount: (this.$store.state.timeline.yAxisMaxValue/(this.$store.state.timeline.dataType === "Normalized"?10:100)),
           dataLabels:{
             show:false,
             enabled:false,
@@ -82,7 +82,7 @@ export default {
         },
         colors:["#d32d41"],
         markers: {
-          size: 4,
+          size: 6,
         },
         annotations: {
           yaxis: [
@@ -99,7 +99,7 @@ export default {
         ...defaultOptions,
         yaxis: {
           min:0,
-          tickAmount:6,
+          tickAmount: (this.$store.state.timeline.yAxisMaxValue/(this.$store.state.timeline.dataType === "Normalized"?10:100)),
           dataLabels:{
             show:false,
             enabled:false,
@@ -134,7 +134,7 @@ export default {
         },
         colors:["#6ab187"],
         markers: {
-          size: 4,
+          size: 6,
         },
         annotations: {
           yaxis: [
@@ -184,7 +184,7 @@ export default {
           yaxis: {
             min:0,
             max:this.$store.state.timeline.yAxisMaxValue,
-            tickAmount:6,
+            tickAmount: (this.$store.state.timeline.yAxisMaxValue/(this.$store.state.timeline.dataType === "Normalized"?10:100)),
             dataLabels:{
               show:false,
               enabled:false,
@@ -219,7 +219,7 @@ export default {
           },
           colors:["#d32d41"],
           markers: {
-            size: 4,
+            size: 6,
           },
           annotations: {
             yaxis: [
@@ -237,7 +237,7 @@ export default {
           ...defaultOptions,
           yaxis: {
             min:0,
-            tickAmount:6,
+            tickAmount: (this.$store.state.timeline.yAxisMaxValue/(this.$store.state.timeline.dataType === "Normalized"?10:100)),
             dataLabels:{
               show:false,
               enabled:false,
@@ -272,7 +272,7 @@ export default {
           },
           colors:["#d32d41"],
           markers: {
-            size: 4,
+            size: 6,
           },
           annotations: {
             yaxis: [
@@ -294,7 +294,7 @@ export default {
           yaxis: {
             min:0,
             max:this.$store.state.timeline.yAxisMaxValue,
-            tickAmount:6,
+            tickAmount: (this.$store.state.timeline.yAxisMaxValue/(this.$store.state.timeline.dataType === "Normalized"?10:100)),
             dataLabels:{
               show:false,
               enabled:false,
@@ -329,7 +329,7 @@ export default {
           },
           colors:["#6ab187"],
           markers: {
-            size: 4,
+            size: 6,
           },
           annotations: {
             yaxis: [
@@ -348,7 +348,7 @@ export default {
           yaxis: {
             min:0,
             max:this.$store.state.timeline.yAxisMaxValue,
-            tickAmount:6,
+            tickAmount: (this.$store.state.timeline.yAxisMaxValue/(this.$store.state.timeline.dataType === "Normalized"?10:100)),
             dataLabels:{
               show:false,
               enabled:false,
@@ -383,7 +383,7 @@ export default {
           },
           colors:["#6ab187"],
           markers: {
-            size: 4,
+            size: 6,
           },
           annotations: {
             yaxis: [

@@ -1,7 +1,7 @@
 <template>
-  <div class="mt-3">
-    <v-row>
-      <v-col>
+  <div>
+    <v-row class="pb-0 mb-0">
+      <v-col class="pb-0 mb-0">
         <v-select
           class="mt-3"
           @change="(v)=>$store.commit('setLeftPlateChannelAtTimeline',v)"
@@ -25,6 +25,7 @@
         <v-select
           @change="(v)=>{
             $store.commit('setDataTypeAtTimeline',v)
+            $store.commit('resetTimelineState')
           }"
           class="mt-3"
           :disabled="$store.state.options.isSessionRunning"
@@ -113,10 +114,13 @@ export default {
 }
 </style>
 
-<style scoped>
+<style>
 .resetButton{
   height: 48px !important;
   min-height: 48px !important;
   background: #6ab187 !important;
+}
+.v-text-field__details{
+  display: none!important;
 }
 </style>

@@ -25,6 +25,7 @@
         <v-select
           @change="(v)=>{
             $store.commit('setDataTypeAtLineChart',v)
+            $store.commit('resetLineChartState')
           }"
           class="mt-3"
           :disabled="$store.state.options.isSessionRunning"

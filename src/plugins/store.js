@@ -383,7 +383,7 @@ export default new Vuex.Store({
             // Check if there is another max for the y axis
             let maxVal = Math.max(...state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data)
             if (!state.lineChart.rightPlateChannel.includes("COP") && !state.lineChart.leftPlateChannel.includes("COP") && Number(maxVal) > Number(state.lineChart.yAxisMaxValue)) {
-              state.lineChart.yAxisMaxValue = maxVal + (state.options.dataType == "Absolute" ? 10 : 1)
+              state.lineChart.yAxisMaxValue =  state.lineChart.dataType === "Normalized"?Math.ceil(maxVal/10)*10:Math.ceil(maxVal/100)*100
               state.lineChart.shouldUpdateLeft = true
               state.lineChart.shouldUpdateRight = true
             }
@@ -490,7 +490,7 @@ export default new Vuex.Store({
             // Check if there is another max for the y axis
             let maxVal = Math.max(...state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data)
             if (!state.lineChart.rightPlateChannel.includes("COP") && !state.lineChart.leftPlateChannel.includes("COP") && Number(maxVal) > Number(state.lineChart.yAxisMaxValue)) {
-              state.lineChart.yAxisMaxValue = maxVal + (state.options.dataType == "Absolute"?10:1)
+              state.lineChart.yAxisMaxValue = state.lineChart.dataType === "Normalized"?Math.ceil(maxVal/10)*10:Math.ceil(maxVal/100)*100
               state.lineChart.shouldUpdateLeft = true
               state.lineChart.shouldUpdateRight = true
             }
@@ -545,7 +545,7 @@ export default new Vuex.Store({
             if (state.lineChart.rightPlateChannel.includes("COP")) {
               d.push(entry)
             } else {
-              d.push(100*(ntry / state.options.weight))
+              d.push(100*(entry / state.options.weight))
             }
           } else {
             d.push(entry)
@@ -791,9 +791,20 @@ export default new Vuex.Store({
           state.timeline.isLeftPlateReset = false
 
           // Add the new max to the left plate max
-          state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
-          if(state.timeline.yAxisMaxValue < state.timeline.leftPlateMax){
-            state.timeline.yAxisMaxValue = state.timeline.leftPlateMax
+          if(state.timeline.dataType === "Normalized"){
+            if(state.timeline.leftPlateMax > 50){
+              state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
+              if(state.timeline.yAxisMaxValue < state.timeline.leftPlateMax){
+                state.timeline.yAxisMaxValue =  state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.leftPlateMax/10)*10:Math.ceil(state.timeline.leftPlateMax/100)*100
+              }
+            }
+          } else {
+            if(state.timeline.leftPlateMax > 0.5* state.options.weight){
+              state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
+              if(state.timeline.yAxisMaxValue < state.timeline.leftPlateMax){
+                state.timeline.yAxisMaxValue =  state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.leftPlateMax/10)*10:Math.ceil(state.timeline.leftPlateMax/100)*100
+              }
+            }
           }
           state.timeline.leftPlateMax = -1;
           state.timeline.shouldUpdateLeft = true;
@@ -865,10 +876,24 @@ export default new Vuex.Store({
           state.timeline.isRightPlateReset = false
 
           // Add the new max to the left plate max
-          state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
-          if(state.timeline.yAxisMaxValue < state.timeline.rightPlateMax){
-            state.timeline.yAxisMaxValue = state.timeline.rightPlateMax
+          if(state.timeline.dataType === "Normalized"){
+            if(state.timeline.rightPlateMax > 50){
+              state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
+              if(state.timeline.yAxisMaxValue < state.timeline.rightPlateMax){
+                state.timeline.yAxisMaxValue = state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.rightPlateMax/10)*10:Math.ceil(state.timeline.rightPlateMax/100)*100
+              }
+            }
+  
+          } else {
+            if(state.timeline.rightPlateMax > 0.5* state.options.weight){
+              state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
+              if(state.timeline.yAxisMaxValue < state.timeline.rightPlateMax){
+                state.timeline.yAxisMaxValue = state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.rightPlateMax/10)*10:Math.ceil(state.timeline.rightPlateMax/100)*100
+              }
+            }
+  
           }
+
           state.timeline.rightPlateMax = -1;
           state.timeline.shouldUpdateRight = true;
         }
