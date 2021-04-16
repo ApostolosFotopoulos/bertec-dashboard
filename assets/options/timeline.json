@@ -18,11 +18,12 @@
     "animations": {
       "enabled": false
     },
-    "type": "line",
+    "type": "scatter",
     "foreColor": "#fff"
   },
   "xaxis": {
-    "forceNiceScale": true,
+    "tickAmount":12,
+    "forceNiceScale": false,
     "labels": {
       "style": {
         "colors": [
@@ -42,6 +43,9 @@
         ]
       }
     }
+  },
+  "crosshairs":{
+    "show":false
   },
   "tooltip": {
     "show": false,

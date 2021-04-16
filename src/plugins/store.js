@@ -117,6 +117,7 @@ export default new Vuex.Store({
       dataType: "Normalized",
       leftPlateChannel: "FZ1",
       rightPlateChannel: "FZ2",
+      yAxisMaxValue: -1,
     }
   },
   mutations: {
@@ -773,7 +774,7 @@ export default new Vuex.Store({
               }
             } else {
               if(state.timeline.leftPlateMax < (100*(entry / state.options.weight))){
-                state.timeline.leftPlateMax = entry
+                state.timeline.leftPlateMax = (100*(entry / state.options.weight))
               }
             }
           } else {
@@ -789,6 +790,9 @@ export default new Vuex.Store({
 
           // Add the new max to the left plate max
           state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
+          if(state.timeline.yAxisMaxValue < state.timeline.leftPlateMax){
+            state.timeline.yAxisMaxValue = state.timeline.leftPlateMax
+          }
           state.timeline.leftPlateMax = -1;
           state.timeline.shouldUpdateLeft = true;
         }
@@ -814,7 +818,7 @@ export default new Vuex.Store({
               }
             } else {
               if(state.timeline.leftPlateMax < (100*(entry / state.options.weight))){
-                state.timeline.leftPlateMax = entry
+                state.timeline.leftPlateMax =  (100*(entry / state.options.weight))
               }
             }
           } else {
@@ -844,7 +848,7 @@ export default new Vuex.Store({
               }
             } else {
               if(state.timeline.rightPlateMax < (100*(entry / state.options.weight))){
-                state.timeline.rightPlateMax = entry
+                state.timeline.rightPlateMax = (100*(entry / state.options.weight))
               }
             }
           } else {
@@ -860,6 +864,9 @@ export default new Vuex.Store({
 
           // Add the new max to the left plate max
           state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
+          if(state.timeline.yAxisMaxValue < state.timeline.rightPlateMax){
+            state.timeline.yAxisMaxValue = state.timeline.rightPlateMax
+          }
           state.timeline.rightPlateMax = -1;
           state.timeline.shouldUpdateRight = true;
         }
@@ -885,7 +892,7 @@ export default new Vuex.Store({
               }
             } else {
               if(state.timeline.rightPlateMax < (100*(entry / state.options.weight))){
-                state.timeline.rightPlateMax = entry
+                state.timeline.rightPlateMax = (100*(entry / state.options.weight))
               }
             }
           } else {

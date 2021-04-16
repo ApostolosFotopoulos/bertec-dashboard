@@ -46,6 +46,8 @@ export default {
       leftFootChart:{
         ...defaultOptions,
         yaxis: {
+          min:0,
+          tickAmount:6,
           dataLabels:{
             show:false,
             enabled:false,
@@ -60,6 +62,8 @@ export default {
           },
         },
         xaxis:{
+          min:0,
+          max: this.$store.state.timeline.nOfPoints,
           dataLabels:{
             show:false,
             enabled:false,
@@ -76,11 +80,16 @@ export default {
             show:true,
           },
         },
-        colors:["#d32d41"]
+        colors:["#d32d41"],
+        markers: {
+          size: 4,
+        },
       },
       rightFootChart:{
-        ...defaultOptions,
+         ...defaultOptions,
         yaxis: {
+          min:0,
+          tickAmount:6,
           dataLabels:{
             show:false,
             enabled:false,
@@ -95,6 +104,8 @@ export default {
           },
         },
         xaxis:{
+          min:0,
+          max: this.$store.state.timeline.nOfPoints,
           dataLabels:{
             show:false,
             enabled:false,
@@ -111,8 +122,11 @@ export default {
             show:true,
           },
         },
-        colors:["#6ab187"]
-      },
+        colors:["#6ab187"],
+        markers: {
+          size: 4,
+        },
+      }
     }
   },
   mounted(){
@@ -144,68 +158,185 @@ export default {
       }
     },
     updateLeftChart(){
-      this.$refs.leftPlateChart.updateOptions({
-        ...defaultOptions,
-        yaxis: {
-          dataLabels:{
-            show:false,
-            enabled:false,
-          },
-          labels:{
-            style:{
-              colors:['#fff']
+      if(this.$store.state.timeline.yAxisMaxValue != -1){
+         this.$refs.leftPlateChart.updateOptions({
+          ...defaultOptions,
+          yaxis: {
+            min:0,
+            max:this.$store.state.timeline.yAxisMaxValue,
+            tickAmount:6,
+            dataLabels:{
+              show:false,
+              enabled:false,
             },
-            formatter: (val)=>{
-              return val.toFixed(0)
-            }
-          },
-        },
-        xaxis:{
-          dataLabels:{
-            show:false,
-            enabled:false,
-          },
-          labels:{
-            style:{
-              colors:['#fff']
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                return val.toFixed(0)
+              }
             },
-            show:true,
           },
-        },
-        colors:["#d32d41"]
-      })
+          xaxis:{
+            min:0,
+            max: this.$store.state.timeline.nOfPoints,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                }
+              },
+              show:true,
+            },
+          },
+          colors:["#d32d41"],
+          markers: {
+            size: 4,
+          },
+        })
+      } else {
+        this.$refs.leftPlateChart.updateOptions({
+          ...defaultOptions,
+          yaxis: {
+            min:0,
+            tickAmount:6,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                return val.toFixed(0)
+              }
+            },
+          },
+          xaxis:{
+            min:0,
+            max: this.$store.state.timeline.nOfPoints,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                }
+              },
+              show:true,
+            },
+          },
+          colors:["#d32d41"],
+          markers: {
+            size: 4,
+          },
+        })
+      }
     },
     updateRightChart(){
-      this.$refs.rightPlateChart.updateOptions({
-        ...defaultOptions,
-        yaxis: {
-          dataLabels:{
-            show:false,
-            enabled:false,
-          },
-          labels:{
-            style:{
-              colors:['#fff']
+      if(this.$store.state.timeline.yAxisMaxValue != -1){
+        this.$refs.rightPlateChart.updateOptions({
+          ...defaultOptions,
+          yaxis: {
+            min:0,
+            max:this.$store.state.timeline.yAxisMaxValue,
+            tickAmount:6,
+            dataLabels:{
+              show:false,
+              enabled:false,
             },
-            formatter: (val)=>{
-              return val.toFixed(0)
-            }
-          },
-        },
-        xaxis:{
-          dataLabels:{
-            show:false,
-            enabled:false,
-          },
-          labels:{
-            style:{
-              colors:['#fff']
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                return val.toFixed(0)
+              }
             },
-            show:true,
           },
-        },
-        colors:["#6ab187"]
-      })
+          xaxis:{
+             min:0,
+            max:this.$store.state.timeline.nOfPoints,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                }
+              },
+              show:true,
+            },
+          },
+          colors:["#6ab187"],
+          markers: {
+            size: 4,
+          }
+        })
+      } else {
+        this.$refs.rightPlateChart.updateOptions({
+          ...defaultOptions,
+          yaxis: {
+            min:0,
+            max:this.$store.state.timeline.yAxisMaxValue,
+            tickAmount:6,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                return val.toFixed(0)
+              }
+            },
+          },
+          xaxis:{
+             min:0,
+            max:this.$store.state.timeline.yAxisMaxValue,
+            dataLabels:{
+              show:false,
+              enabled:false,
+            },
+            labels:{
+              style:{
+                colors:['#fff']
+              },
+              formatter: (val)=>{
+                if (val.toFixed(0)%10 == 0){
+                  return val.toFixed(0)
+                }
+              },
+              show:true,
+            },
+          },
+          colors:["#6ab187"],
+          markers: {
+            size: 4,
+          }
+        })
+      }
     }
   }
 }
