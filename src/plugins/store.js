@@ -113,6 +113,7 @@ export default new Vuex.Store({
       shouldUpdateLeft:false,
       shouldUpdateRight:false,
       threshold: 5,
+      trialThreshold:50,
       nOfPoints: 50,
       dataType: "Normalized",
       leftPlateChannel: "FZ1",
@@ -792,14 +793,14 @@ export default new Vuex.Store({
 
           // Add the new max to the left plate max
           if(state.timeline.dataType === "Normalized"){
-            if(state.timeline.leftPlateMax > 50){
+            if(state.timeline.leftPlateMax > state.timeline.trialThreshold){
               state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
               if(state.timeline.yAxisMaxValue < state.timeline.leftPlateMax){
                 state.timeline.yAxisMaxValue =  state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.leftPlateMax/10)*10:Math.ceil(state.timeline.leftPlateMax/100)*100
               }
             }
           } else {
-            if(state.timeline.leftPlateMax > 0.5* state.options.weight){
+            if(state.timeline.leftPlateMax > (state.timeline.trialThreshold/100)* state.options.weight){
               state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
               if(state.timeline.yAxisMaxValue < state.timeline.leftPlateMax){
                 state.timeline.yAxisMaxValue =  state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.leftPlateMax/10)*10:Math.ceil(state.timeline.leftPlateMax/100)*100
@@ -877,7 +878,7 @@ export default new Vuex.Store({
 
           // Add the new max to the left plate max
           if(state.timeline.dataType === "Normalized"){
-            if(state.timeline.rightPlateMax > 50){
+            if(state.timeline.rightPlateMax > (state.timeline.trialThreshold)){
               state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
               if(state.timeline.yAxisMaxValue < state.timeline.rightPlateMax){
                 state.timeline.yAxisMaxValue = state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.rightPlateMax/10)*10:Math.ceil(state.timeline.rightPlateMax/100)*100
@@ -885,7 +886,7 @@ export default new Vuex.Store({
             }
   
           } else {
-            if(state.timeline.rightPlateMax > 0.5* state.options.weight){
+            if(state.timeline.rightPlateMax > (state.timeline.trialThreshold/100)* state.options.weight){
               state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
               if(state.timeline.yAxisMaxValue < state.timeline.rightPlateMax){
                 state.timeline.yAxisMaxValue = state.timeline.dataType === "Normalized"?Math.ceil(state.timeline.rightPlateMax/10)*10:Math.ceil(state.timeline.rightPlateMax/100)*100
@@ -966,6 +967,9 @@ export default new Vuex.Store({
       } else{
         state.timeline.rangeMin = min
       }
+    },
+    setTrialThreshold(state,trialThreshold){
+      state.timeline.trialThreshold = trialThreshold
     }
   },
   actions:{}

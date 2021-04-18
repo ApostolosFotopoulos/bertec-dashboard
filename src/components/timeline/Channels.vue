@@ -36,22 +36,14 @@
         ></v-select>
       </v-col>
       <v-col>
-        <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-bind="attrs"
-            v-on="on"
-            class="mt-3"
-            @change="(v)=>$store.commit('setThresholdAtLineChart',Number(v))"
-            :value="$store.state.timeline.threshold"
-            label="Threshold (%BW) - Standard value = 5"
-            outlined
-            :disabled="$store.state.options.isSessionRunning"
-            min="0"
-          />
-          </template>
-          <span>Threshold</span>
-        </v-tooltip>
+        <v-text-field
+          class="mt-3"
+          @input="(v)=>$store.commit('setTrialThreshold',Number(v))"
+          :value="$store.state.timeline.trialThreshold"
+          label="Trial Threshold"
+          outlined
+          :disabled="$store.state.options.isSessionRunning"
+        />
       </v-col>
       <v-col>
         <v-text-field
@@ -85,6 +77,16 @@
           label="Max Range"
           outlined
           :disabled="$store.state.options.isSessionRunning"
+        />
+      </v-col>
+      <v-col cols="4" class="pt-0 mt-0">
+        <v-text-field
+          @change="(v)=>$store.commit('setThresholdAtLineChart',Number(v))"
+          :value="$store.state.timeline.threshold"
+          label="Minimum Threshold - Standard value = 5"
+          outlined
+          :disabled="$store.state.options.isSessionRunning"
+          min="0"
         />
       </v-col>
     </v-row>
