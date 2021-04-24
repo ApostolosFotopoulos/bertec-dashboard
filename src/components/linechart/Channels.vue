@@ -25,6 +25,7 @@
         <v-select
           @change="(v)=>{
             $store.commit('setDataTypeAtLineChart',v)
+            $store.commit('resetLineChartState')
           }"
           class="mt-3"
           :disabled="$store.state.options.isSessionRunning"
@@ -43,8 +44,8 @@
             class="mt-3"
             @change="(v)=>$store.commit('setThresholdAtLineChart',Number(v))"
             :value="$store.state.lineChart.threshold"
-            label="Threshold"
-            solo
+            label="Threshold (%BW) - Standard value = 5"
+            outlined
             :disabled="$store.state.options.isSessionRunning"
             min="0"
           />
@@ -61,8 +62,8 @@
             class="mt-3"
             @change="(v)=>$store.commit('setNofLinesAtLineChart',Number(v))"
             :value="$store.state.lineChart.nOfLines"
-            label="Number of Lines"
-            solo
+            label="Display"
+            outlined
             :disabled="$store.state.options.isSessionRunning"
             min="0"
           />

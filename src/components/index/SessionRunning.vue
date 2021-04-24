@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="8">
+    <v-col cols="5">
       <v-select
         @change="(v)=>$store.commit('setMode',v)"
         :value="$store.state.options.mode"
@@ -29,6 +29,7 @@
     </v-col>
     <v-col>
       <v-btn 
+        elevation="25"
         :class="$store.state.options.isSessionRunning?'stopButton v-input__control':'startButton v-input__control'" 
         @click="()=>startStopSession()"
         :disabled="$store.state.options.filePath ===''"

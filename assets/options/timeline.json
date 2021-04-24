@@ -1,0 +1,57 @@
+{
+  "dataLabels": {
+    "enabled": false,
+    "show": false
+  },
+  "grid": {
+    "padding": {
+      "top": 0,
+      "right": 10,
+      "bottom": 0,
+      "left": 10
+    }
+  },
+  "chart": {
+    "toolbar": {
+      "show": false
+    },
+    "animations": {
+      "enabled": false
+    },
+    "type": "scatter",
+    "foreColor": "#fff"
+  },
+  "xaxis": {
+    "tickAmount":12,
+    "forceNiceScale": false,
+    "labels": {
+      "style": {
+        "colors": [
+          "#fff",
+          "#fff"
+        ]
+      }
+    },
+    "type": "category"
+  },
+  "yaxis": {
+    "forceNiceScale": false,
+    "labels": {
+      "style": {
+        "colors": [
+          "#fff"
+        ]
+      }
+    }
+  },
+  "crosshairs":{
+    "show":false
+  },
+  "tooltip": {
+    "show": false,
+    "theme": "dark"
+  },
+  "legend": {
+    "show": false
+  }
+}

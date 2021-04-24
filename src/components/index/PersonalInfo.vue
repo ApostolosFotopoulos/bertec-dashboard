@@ -34,12 +34,13 @@ export default {
   mounted(){
     var _this = this
     ipcRenderer.on('SESSION_RESPONSE_OPTIONS',(_,responseData)=>{
-      _this.$store.commit('setWeight',responseData.weight)
+      //_this.$store.commit('setWeight',responseData.weight)
     }) 
   },
   methods:{
     setWeight(){
-      this.$store.commit('setWeight',Number(this.$store.state.options.leftPlateValue));
+      console.log(this.$store.state.options.leftPlateValue)
+      this.$store.commit('setWeight',Number(this.$store.state.options.leftPlateValue)+Number(this.$store.state.options.rightPlateValue));
     }
   }
 }

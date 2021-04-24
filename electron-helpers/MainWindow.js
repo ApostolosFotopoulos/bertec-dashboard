@@ -1,5 +1,6 @@
 const { BrowserWindow ,ipcMain, dialog } = require('electron')
 const SecondaryWindow = require('./SecondaryWindow')
+const ForcePlatesProcess = require('./ForcePlatesProcess');
 const csv = require('async-csv')
 const fs = require('fs').promises
 const path = require('path')
@@ -11,6 +12,7 @@ const IPCEvents = require('../electron-app/utils/IPCEvents.js')
 const SKIP_ENTRIES_SPEEDMETER = 1
 const SKIP_ENTRIES_LINECHART = 1
 const SKIP_ENTRIES_COPCHART = 1
+const SKIP_ENTRIES_TIMELINE = 1
 
 module.exports = class {
   constructor() {
@@ -25,6 +27,7 @@ module.exports = class {
     this.frequency = 100
     this.threshold = -1
     this.nOfLines = 10
+    this.socket = null
     this.isSessionRunning = false
 
     // Backend Options
@@ -32,6 +35,7 @@ module.exports = class {
     this.nOfStepsSpeedMeter = 0
     this.nOfStepsLineChart = 0
     this.nOfCOPChart = 0
+    this.nOfTimeline = 0
     
     // Window Options
     this.cw = null 
@@ -48,6 +52,8 @@ module.exports = class {
     this.server.listen(this.port, () => {
       console.log("TCPListener is active....")
     })
+    
+    new ForcePlatesProcess().createForcePlateProcess()
   }
 
   async createWindow() {
@@ -109,7 +115,8 @@ module.exports = class {
       e.reply('WINDOWS_STATUS_RESPONSE', { 
         chartWindowVisible: this.cw.window !== null, 
         copWindowVisible: this.cpw.window != null, 
-        lineChartWindowVisible: this.linechartw.window != null 
+        lineChartWindowVisible: this.linechartw.window != null,
+        isTimelineVisibile: this.timelinew.window != null
       })
     });
   }
@@ -168,15 +175,26 @@ module.exports = class {
 
     // Listen for TCP Packets to forward them to the dashboard
     this.server.on("connection", (socket) => {
+      this.socket = socket
       socket.on("data", (packet) => {
+
         // Retrieve the packet and break to each section
         let packetArray = packet
           .toString()
           .replaceAll(/(\r\n|\n|\r)/gm, "")
           .replaceAll(",",".")
           .split(";")
-          .map(i => Number(i));
+          .filter((i,idx)=>idx >= 4)
+          .map(i=>Number(i))
 
+        // Retrieve the serial numbers of the devices
+        let details =   packet
+          .toString()
+          .replaceAll(/(\r\n|\n|\r)/gm, "")
+          .replaceAll(",",".")
+          .split(";")
+          .filter((i,idx)=>idx < 4)
+        
         // Send the data to the linechart window
         if (this.linechartw && this.linechartw.window) {
           if (this.isSessionRunning) {
@@ -229,6 +247,25 @@ module.exports = class {
             });
           }
         }
+
+        // Send the data to the timeline window
+        if (this.timelinew && this.timelinew.window) {
+          if (this.isSessionRunning) {
+            this.timelinew.window.webContents.send("SESSION_RESPONSE_TIMELINE", {
+              rows: packetArray,
+              force: Math.random().toFixed(2),
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+            });
+          } else {
+            this.timelinew.window.webContents.send("SESSION_RESPONSE_TIMELINE", {
+              rows: [],
+              force: 0,
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+            });
+          }
+        }
         
         // Send the details the main window with the options
         if(this.window){
@@ -237,6 +274,12 @@ module.exports = class {
             isSessionRunning: this.isSessionRunning,
             weight: this.weight,
             filePath: this.filePath,
+          });
+
+          // Send the device serial to the dashboard
+          this.window.webContents.send("SESSION_DEVICE_DETAILS", {
+            deviceLeft: Number(details[1]),
+            deviceRight: Number(details[3])
           });
         }
 	
@@ -248,6 +291,10 @@ module.exports = class {
       })
     })
   
+    ipcMain.on("RESET_FORCE_PLATES", (e, d) => {
+      console.log("Tried to reset force plate")
+      this.socket.write("RESET_FORCE_PLATES");
+    })
 
     // SpeedMeter Events
     ipcMain.on("SESSION_RUNNING_SPEEDMETER", (e, d) => {
@@ -306,6 +353,26 @@ module.exports = class {
           rows: [],
           isSessionRunning: this.isSessionRunning,
           weight: this.weight,
+        })
+      }
+    })
+
+    ipcMain.on("SESSION_RUNNING_TIMELINE",(e,d)=>{
+      if(this.isSessionRunning){
+        e.reply("SESSION_RESPONSE_TIMELINE",{
+          rows: this.rows[(this.nOfTimeline) % this.rows.length].map(i => Number(i)),
+          isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+          force: Math.random().toFixed(2)
+        })
+        this.nOfTimeline = this.nOfTimeline + SKIP_ENTRIES_COPCHART
+      } else {
+        this.nOfTimeline = 0
+        e.reply("SESSION_RESPONSE_TIMELINE",{
+          rows: [],
+          isSessionRunning: this.isSessionRunning,
+          weight: this.weight,
+          force: 0
         })
       }
     })
