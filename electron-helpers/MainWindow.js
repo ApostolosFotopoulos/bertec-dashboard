@@ -5,6 +5,7 @@ const fs = require('fs').promises
 const path = require('path')
 const events = require("events");
 var net = require("net");
+const IPCEvents = require('../electron-app/utils/IPCEvents.js')
 
 // Global Variables
 const SKIP_ENTRIES_SPEEDMETER = 1
@@ -14,6 +15,7 @@ const SKIP_ENTRIES_COPCHART = 1
 module.exports = class {
   constructor() {
     // Options
+    this.ipcEvents = new IPCEvents();
     this.filePath = ""
     this.mode = "Walking",
     this.timeout = 60
@@ -35,6 +37,8 @@ module.exports = class {
     this.cw = null 
     this.cpw = null
     this.linechartw = null
+    this.usersw = null
+    this.createuserw = null
     this.window = null
 
     // TCP / Event Listeners
@@ -95,6 +99,12 @@ module.exports = class {
     this.linechartw = new SecondaryWindow("Analysis Dashboard", "OPEN_LINECHART_WINDOW", "CLOSE_LINECHART_WINDOW", "/linechart");
     this.linechartw.addEventListener();
 
+    this.usersw = new SecondaryWindow("Users Dashboard", "OPEN_USERS_WINDOW", "CLOSE_USERS_WINDOW", "/users");
+    this.usersw.addEventListener();
+
+    this.createuserw = new SecondaryWindow("Users Dashboard", "OPEN_USERS_CREATE_WINDOW", "CLOSE_USERS__CREATE_WINDOW", "/user/create");
+    this.createuserw.addEventListener();
+
     ipcMain.on('WINDOWS_STATUS', async (e) => {
       e.reply('WINDOWS_STATUS_RESPONSE', { 
         chartWindowVisible: this.cw.window !== null, 
@@ -123,7 +133,7 @@ module.exports = class {
       // Create the file
       this.filePath = res.filePath
       fs.writeFile(res.filePath, "")
-      
+      i
       // Reply to the file path event
       e.reply("FILE_SAVE_RESPONSE", { filePath: res.filePath })
     })
@@ -131,6 +141,12 @@ module.exports = class {
 
   startSessionEvents() {
       
+    // Start the listener for the IPCEvents
+
+    this.ipcEvents.createDatabaseEvent();
+    this.ipcEvents.fetchAllDatabasesEvent();
+    this.ipcEvents.fetchAllUsersEvent();
+    
     // Session Events
     ipcMain.on('START_SESSION', (_, d) => {
       const { weight } = d
@@ -223,6 +239,12 @@ module.exports = class {
             filePath: this.filePath,
           });
         }
+	
+	if(this.createuserw){
+	  this.createuserw.window.webContents.send("USER_WEIGHT",{
+	    rows: packetArray,
+	  })
+	}
       })
     })
   
