@@ -10,7 +10,12 @@
       <v-row class="mt-3" align="center">
         <v-col>
           <v-select
-            :items="databases"
+            :items="
+              databases.map((d) => ({
+                text: d.substr(0, d.lastIndexOf('_')),
+                value: d,
+              }))
+            "
             label="Database"
             @input="databaseChanged"
             outlined
@@ -18,7 +23,7 @@
         </v-col>
         <v-col align="center">
           <v-select
-            :items="users.map((u) => u.firstName + ' ' + u.lastName)"
+            :items="users.map((u) => ({ text: u.firstName + ' ' + u.lastName, value: u} ))"
             label="Users"
             @input="userChanged"
             outlined
@@ -26,15 +31,18 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="1" offset="9">
-          <v-btn @click="skipDatabase()" class="skipButton"> Skip </v-btn>
+        <v-col>
+          <SaveFile />
         </v-col>
-        <v-col cols="1">
+        <v-col cols="2">
+          <v-btn @click="skipDatabase()" class="skipButton"> Real Time </v-btn>
+        </v-col>
+        <v-col cols="2">
           <v-btn
             @click="continueToMain(selectedDatabase, selectedUser)"
             class="continueButton"
           >
-            Continue
+            New Trial
           </v-btn>
         </v-col>
       </v-row>
@@ -45,10 +53,14 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
+import SaveFile from "./SaveFile.vue";
 export default {
   props: {
     skipDatabase: Function,
     continueToMain: Function,
+  },
+  components:{
+    SaveFile
   },
   mounted() {
     setInterval(() => {

@@ -23,15 +23,15 @@
     </v-row>
     <v-row align="center">
       <v-col align="center">
-        <v-text-field v-model="year" label="Year" outlined />
+        <v-text-field v-model="year" label="Year of Birth" outlined />
       </v-col>
       <v-col align="center">
-        <v-text-field v-model="height" label="Height" outlined />
+        <v-text-field v-model="height" label="Height (cm)" outlined />
       </v-col>
     </v-row>
     <v-row align="center">
       <v-col align="center">
-        <v-text-field v-model="legLength" label="Leg Length" outlined />
+        <v-text-field v-model="legLength" label="Leg Length (cm)" outlined />
       </v-col>
       <v-col align="center">
         <v-select
@@ -46,13 +46,18 @@
       <v-col align="center" cols="6">
         <v-select
           v-model="selectedDatabase"
-          :items="databases"
+          :items="
+            databases.map((d) => ({
+              text: d.substr(0, d.lastIndexOf('_')),
+              value: d,
+            }))
+          "
           label="Database"
           outlined
         ></v-select>
       </v-col>
       <v-col align="center" cols="4">
-        <v-text-field v-model="weight" label="Weight" outlined />
+        <v-text-field v-model="weight" label="Weight (N)" outlined />
       </v-col>
       <v-col align="center" cols="1">
         <v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
@@ -87,8 +92,16 @@ export default {
       _this.databases = responseData.databases;
     });
     ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
-      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]);
-      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]);
+      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]).toFixed(2);
+      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]).toFixed(2);
+    });
+    ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
+      _this.databases = responseData.databases;
+    });
+    ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
+      if(_this.selectedDatabase  === ""){
+        _this.selectedDatabase = responseData.database
+      }
     });
   },
   data() {
@@ -137,7 +150,7 @@ export default {
       }, 3000);
     },
     getWeight() {
-      this.weight = this.fz1 + this.fz2;
+      this.weight = (this.fz1 + this.fz2).toFixed(2);
     },
   },
 };

@@ -10,7 +10,13 @@
       <v-col cols="6" offset="3" align="center">
         <v-select
           class="mt-3"
-          :items="databases"
+          v-model="selectedDatabase"
+          :items="
+            databases.map((d) => ({
+              text: d.substr(0, d.lastIndexOf('_')),
+              value: d,
+            }))
+          "
           label="Database"
           :items-per-page="5"
           @input="databaseChanged"
@@ -36,7 +42,7 @@
           v-model="search.year"
           :max="new Date().getFullYear()"
           :min="1900"
-          label="Year"
+          label="Year of Birth"
           hide-details
           thumb-label="always"
         />
@@ -46,7 +52,7 @@
           v-model="search.weight"
           :max="300"
           :min="30"
-          label="Weight (kg)"
+          label="Weight (N)"
           hide-details
           thumb-label="always"
         />
@@ -109,7 +115,6 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-import moment from "moment";
 export default {
   mounted() {
     setInterval(() => {
@@ -122,6 +127,13 @@ export default {
     ipcRenderer.on("FETCH_ALL_USERS_RESPONSE", (_, responseData) => {
       console.log(responseData.users);
       _this.users = responseData.users;
+    });
+    ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
+      if(_this.selectedDatabase  === ""){
+        console.log(_this.selectedDatabase)
+        _this.selectedDatabase = responseData.database
+        ipcRenderer.send("FETCH_ALL_USERS", { database: _this.selectedDatabase });
+      }
     });
   },
   data() {
@@ -139,7 +151,7 @@ export default {
           value: "lastName",
         },
         {
-          text: "Year",
+          text: "Year of Birth",
           value: "year",
         },
         {
@@ -151,15 +163,15 @@ export default {
           value: "sex",
         },
         {
-          text: "Height",
+          text: "Height (cm)",
           value: "height",
         },
         {
-          text: "Leg Length",
+          text: "Leg Length (cm)",
           value: "leg_length",
         },
         {
-          text: "Weight",
+          text: "Weight (N)",
           value: "weight",
         },
         {
@@ -203,7 +215,7 @@ export default {
         height: [100, 250],
         legLength: [30, 200],
       }),
-        ipcRenderer.send("QUERY_USERS", { ...this.search });
+      ipcRenderer.send("QUERY_USERS", { ...this.search });
     },
   },
 };

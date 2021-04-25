@@ -35,6 +35,7 @@ class IPCEvents {
 			try {
 				let databases = await fs.readdir(path.resolve(__dirname, '../../assets/databases'));
 				e.reply('FETCH_ALL_DATABASES_RESPONSE', { databases });
+				e.reply('FETCH_SELECTED_DATABASE_RESPONSE', { database: this.selectedDatabase});
 			} catch (e) {
 				throw new Error(e);
 			}
@@ -58,8 +59,9 @@ class IPCEvents {
 			const { database, firstName, lastName, year, sex, height, legLength, weight, otherInfo } = d;
 			const db = new sqlite3.Database(path.resolve(__dirname, `../../assets/databases/${database}`));
 			db.run(
-				`insert into users(firstName, lastName, year, other_info, sex, height, leg_length, weight, created_at,		updated_at) values('${firstName}', '${lastName}', ${year},'${otherInfo}', '${sex}', ${height}, ${legLength},
-	 ${weight},'${moment(new Date()).format('DD-MM-YYYY')}','${moment(new Date()).format('DD-MM-YYYY')}')`
+				`insert into users(firstName, lastName, year, other_info, sex, height, leg_length, weight, created_at,updated_at)` +
+					`values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
+					`${moment(new Date()).format('DD - MM - YYYY')}', '${moment(new Date()).format('DD - MM - YYYY')}')`
 			);
 		});
 	}

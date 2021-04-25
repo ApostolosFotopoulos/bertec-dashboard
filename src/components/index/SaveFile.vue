@@ -1,23 +1,14 @@
 <template>
-  <v-row>
-    <v-col cols="10">
-      <v-text-field
-        :value="this.$store.state.options.filePath"
-        label="Where to save the data"
-        type="text"
-        solo
-        readonly
-      />
-    </v-col>
-    <v-col cols="2">
-      <v-btn
-        class="saveButton v-input__control"
-        @click="saveFile"
-        :disabled="buttonDisabled"
-        >Save</v-btn
-      >
-    </v-col>
-  </v-row>
+  <div @click="saveFile">
+    <v-text-field
+      :value="this.$store.state.options.filePath"
+      label="Where to save the data"
+      type="text"
+      solo
+      disabled
+      @click="saveFile"
+    />
+  </div>
 </template>
 
 <script>
@@ -50,8 +41,15 @@ export default {
 
 <style scoped>
 .saveButton {
-  height: 48px !important;
-  min-height: 48px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   background: #1c4e80 !important;
+}
+</style>
+
+<style>
+.v-text-field.v-text-field--solo .v-input__control {
+  height: 38px !important;
+  min-height: 38px !important;
 }
 </style>

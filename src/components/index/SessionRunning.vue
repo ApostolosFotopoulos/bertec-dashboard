@@ -36,7 +36,6 @@
             : 'startButton v-input__control'
         "
         @click="() => startStopSession()"
-        :disabled="$store.state.options.filePath === ''"
       >
         {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
       </v-btn>

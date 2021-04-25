@@ -9,7 +9,7 @@ export default new Vuex.Store({
 	state: {
 		options: {
 			database: '',
-			user: '',
+			user: {},
 			filePath: '',
 			mode: 'Walking',
 			timeout: 60,
