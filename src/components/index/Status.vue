@@ -80,7 +80,7 @@ export default{
       _this.$store.commit('setRightPlateValue',responseData.rows[rowsNames[_this.$store.state.options.rightPlateChannel]])
     }) 
     ipcRenderer.on('SESSION_DEVICE_DETAILS',(_,responseData)=>{
-      console.log(responseData)
+      //console.log(responseData)
       _this.$store.commit('setDeviceLeft',responseData.deviceLeft)
       _this.$store.commit('setDeviceRight',responseData.deviceRight)
     }) 

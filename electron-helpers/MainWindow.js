@@ -41,6 +41,7 @@ module.exports = class {
     this.cw = null 
     this.cpw = null
     this.linechartw = null
+    this.timelinew = null
     this.usersw = null
     this.createuserw = null
     this.window = null
@@ -104,6 +105,9 @@ module.exports = class {
 
     this.linechartw = new SecondaryWindow("Analysis Dashboard", "OPEN_LINECHART_WINDOW", "CLOSE_LINECHART_WINDOW", "/linechart");
     this.linechartw.addEventListener();
+
+    this.timelinew = new SecondaryWindow("Analysis Dashboard", "OPEN_TIMELINE_WINDOW", "CLOSE_TIMELINE_WINDOW", "/timeline");
+    this.timelinew.addEventListener();
 
     this.usersw = new SecondaryWindow("Users Dashboard", "OPEN_USERS_WINDOW", "CLOSE_USERS_WINDOW", "/users");
     this.usersw.addEventListener();

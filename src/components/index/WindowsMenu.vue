@@ -87,6 +87,7 @@ export default {
       }
     },
     timelineCheckboxHandler(){
+      console.log(this.isLineChartChecked)
       if(this.isTimelineChecked){
         ipcRenderer.send('OPEN_TIMELINE_WINDOW');
       } else {

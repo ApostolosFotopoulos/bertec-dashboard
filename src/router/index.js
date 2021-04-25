@@ -25,6 +25,11 @@ const routes = [
 		component: () => import('../views/SpeedMeterPage.vue')
 	},
 	{
+		path: '/timeline',
+		name: 'TimelinePage',
+		component: () => import('../views/TimelinePage.vue')
+	},
+	{
 		path: '/users',
 		name: 'UsersPage',
 		component: () => import('../views/UsersPage.vue')
