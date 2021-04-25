@@ -113,10 +113,10 @@ module.exports = class {
 
     ipcMain.on('WINDOWS_STATUS', async (e) => {
       e.reply('WINDOWS_STATUS_RESPONSE', { 
-        chartWindowVisible: this.cw.window !== null, 
-        copWindowVisible: this.cpw.window != null, 
-        lineChartWindowVisible: this.linechartw.window != null,
-        isTimelineVisibile: this.timelinew.window != null
+        chartWindowVisible: (this.cw && this.cw.window) !== null, 
+        copWindowVisible: (this.cpw &&this.cpw.window) != null, 
+        lineChartWindowVisible: (this.linechartw && this.linechartw.window) != null,
+        isTimelineVisibile: (this.timelinew && this.timelinew.window) != null
       })
     });
   }
@@ -140,7 +140,7 @@ module.exports = class {
       // Create the file
       this.filePath = res.filePath
       fs.writeFile(res.filePath, "")
-      i
+      
       // Reply to the file path event
       e.reply("FILE_SAVE_RESPONSE", { filePath: res.filePath })
     })
@@ -153,7 +153,9 @@ module.exports = class {
     this.ipcEvents.createDatabaseEvent();
     this.ipcEvents.fetchAllDatabasesEvent();
     this.ipcEvents.fetchAllUsersEvent();
-    
+    this.ipcEvents.createUserEvent();    
+    this.ipcEvents.queryUsersEvent();
+
     // Session Events
     ipcMain.on('START_SESSION', (_, d) => {
       const { weight } = d
@@ -283,8 +285,8 @@ module.exports = class {
           });
         }
 	
-	if(this.createuserw){
-	  this.createuserw.window.webContents.send("USER_WEIGHT",{
+	if(this.createuserw && this.createuserw.window){
+	  this.createuserw.window.webContents.send("CREATE_USER_SESSION",{
 	    rows: packetArray,
 	  })
 	}

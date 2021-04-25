@@ -17,7 +17,7 @@
 	      text
 	      v-if="databaseCreationAlert"
 	    >
-	    Successfully created a database
+	      Successfully created a database
 	    </v-alert> 
 	  </v-col>
 	</v-row>

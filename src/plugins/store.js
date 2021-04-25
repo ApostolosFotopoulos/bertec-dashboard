@@ -8,6 +8,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     options: {
+      database:"",
+      user:"",
       filePath: "",
       mode: "Walking",
       timeout: 60,
@@ -124,6 +126,12 @@ export default new Vuex.Store({
     }
   },
   mutations: {
+    setDatabase(state, database){
+      state.options.database = database
+    },
+    setUser(state, user){
+      state.options.user = user
+    },
     // Options
     setFilePath(state, path) {
       state.options.filePath = path
