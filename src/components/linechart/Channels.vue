@@ -4,7 +4,7 @@
       <v-col>
         <v-select
           class="mt-3"
-          @change="(v)=>$store.commit('setLeftPlateChannel',v)"
+          @change="(v) => $store.commit('setLeftPlateChannel', v)"
           :value="$store.state.lineChart.leftPlateChannel"
           :items="leftForcePlateChannels"
           label="Channels"
@@ -14,7 +14,7 @@
       <v-col>
         <v-select
           class="mt-3"
-          @change="(v)=>$store.commit('setRightPlateChannel',v)"
+          @change="(v) => $store.commit('setRightPlateChannel', v)"
           :value="$store.state.lineChart.rightPlateChannel"
           :items="rightForcePlateChannels"
           label="Channels"
@@ -23,10 +23,12 @@
       </v-col>
       <v-col>
         <v-select
-          @change="(v)=>{
-            $store.commit('setDataTypeAtLineChart',v)
-            $store.commit('resetLineChartState')
-          }"
+          @change="
+            (v) => {
+              $store.commit('setDataTypeAtLineChart', v);
+              $store.commit('resetLineChartState');
+            }
+          "
           class="mt-3"
           :disabled="$store.state.options.isSessionRunning"
           :value="$store.state.lineChart.dataType"
@@ -38,17 +40,19 @@
       <v-col>
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-bind="attrs"
-            v-on="on"
-            class="mt-3"
-            @change="(v)=>$store.commit('setThresholdAtLineChart',Number(v))"
-            :value="$store.state.lineChart.threshold"
-            label="Threshold (%BW) - Standard value = 5"
-            outlined
-            :disabled="$store.state.options.isSessionRunning"
-            min="0"
-          />
+            <v-text-field
+              v-bind="attrs"
+              v-on="on"
+              class="mt-3"
+              @change="
+                (v) => $store.commit('setThresholdAtLineChart', Number(v))
+              "
+              :value="$store.state.lineChart.threshold"
+              label="Threshold (%BW) - Standard value = 5"
+              outlined
+              :disabled="$store.state.options.isSessionRunning"
+              min="0"
+            />
           </template>
           <span>Threshold</span>
         </v-tooltip>
@@ -56,23 +60,29 @@
       <v-col>
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-bind="attrs"
-            v-on="on"
-            class="mt-3"
-            @change="(v)=>$store.commit('setNofLinesAtLineChart',Number(v))"
-            :value="$store.state.lineChart.nOfLines"
-            label="Display"
-            outlined
-            :disabled="$store.state.options.isSessionRunning"
-            min="0"
-          />
+            <v-text-field
+              v-bind="attrs"
+              v-on="on"
+              class="mt-3"
+              @change="
+                (v) => $store.commit('setNofLinesAtLineChart', Number(v))
+              "
+              :value="$store.state.lineChart.nOfLines"
+              label="Display"
+              outlined
+              :disabled="$store.state.options.isSessionRunning"
+              min="0"
+            />
           </template>
           <span>Number of Lines</span>
         </v-tooltip>
       </v-col>
       <v-col>
-        <v-btn @click="$store.commit('resetLineChartState')" class="resetButton  v-input__control mt-3">Reset</v-btn>
+        <v-btn
+          @click="$store.commit('resetLineChartState')"
+          class="resetButton v-input__control mt-3"
+          >Reset</v-btn
+        >
       </v-col>
     </v-row>
   </div>
@@ -80,29 +90,49 @@
 
 <script>
 export default {
-  data(){
-    return{
-      dataTypes:["Normalized","Absolute"],
-      leftForcePlateChannels: ["FX1","FY1","FZ1","MX1","MY1","MZ1","COPX1","COPY1","COPXY1"],
-      rightForcePlateChannels: ["FX2","FY2","FZ2","MX2","MY2","MZ2","COPX2","COPY2","COPXY2"],
-    }
+  data() {
+    return {
+      dataTypes: ["Normalized", "Absolute"],
+      leftForcePlateChannels: [
+        "FX1",
+        "FY1",
+        "FZ1",
+        "MX1",
+        "MY1",
+        "MZ1",
+        "COPX1",
+        "COPY1",
+        "COPXY1",
+      ],
+      rightForcePlateChannels: [
+        "FX2",
+        "FY2",
+        "FZ2",
+        "MX2",
+        "MY2",
+        "MZ2",
+        "COPX2",
+        "COPY2",
+        "COPXY2",
+      ],
+    };
   },
-}
+};
 </script>
 
 <style>
-.v-menu__content.theme--dark::-webkit-scrollbar{
+.v-menu__content.theme--dark::-webkit-scrollbar {
   background-color: transparent !important;
   width: 0px;
 }
-.v-menu__content.theme--dark.menuable__content__active::-webkit-scrollbar-track{
-	background-color: transparent;
+.v-menu__content.theme--dark.menuable__content__active::-webkit-scrollbar-track {
+  background-color: transparent;
   width: 0px;
 }
 </style>
 
 <style scoped>
-.resetButton{
+.resetButton {
   height: 48px !important;
   min-height: 48px !important;
   background: #6ab187 !important;

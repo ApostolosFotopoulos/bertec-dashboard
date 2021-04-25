@@ -30,7 +30,10 @@
           <v-btn @click="skipDatabase()" class="skipButton"> Skip </v-btn>
         </v-col>
         <v-col cols="1">
-          <v-btn @click="continueToMain(selectedDatabase, selectedUser)" class="continueButton">
+          <v-btn
+            @click="continueToMain(selectedDatabase, selectedUser)"
+            class="continueButton"
+          >
             Continue
           </v-btn>
         </v-col>
@@ -70,7 +73,7 @@ export default {
   methods: {
     databaseChanged(d) {
       this.selectedDatabase = d;
-      this.users = []
+      this.users = [];
       ipcRenderer.send("FETCH_ALL_USERS", { database: d });
     },
     userChanged(u) {

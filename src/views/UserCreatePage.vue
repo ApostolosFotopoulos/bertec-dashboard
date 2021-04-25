@@ -8,14 +8,9 @@
     </v-row>
     <v-row>
       <v-col>
-	<v-alert
-	  outlined
-	  type="success"
-	  text
-	  v-if="userCreationAlert"
-	>
-	  Successfully created a user
-	</v-alert> 
+        <v-alert outlined type="success" text v-if="userCreationAlert">
+          Successfully created a user
+        </v-alert>
       </v-col>
     </v-row>
     <v-row align="center">
@@ -59,8 +54,8 @@
       <v-col align="center" cols="4">
         <v-text-field v-model="weight" label="Weight" outlined />
       </v-col>
-      <v-col align="center" cols="1"> 
-	<v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
+      <v-col align="center" cols="1">
+        <v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
       </v-col>
     </v-row>
     <v-row align="center">
@@ -80,7 +75,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-import rowsNames from '../../assets/store/rowsNames.json'
+import rowsNames from "../../assets/store/rowsNames.json";
 
 export default {
   mounted() {
@@ -91,9 +86,9 @@ export default {
     ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
     });
-    ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => { 
-      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]])
-      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]])
+    ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
+      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]);
+      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]);
     });
   },
   data() {
@@ -127,21 +122,23 @@ export default {
         weight: Number(this.weight) || 0,
         otherInfo: this.otherInfo,
       });
-      this.selectedDatabase = ""
-      this.firstName = ""
-      this.lastName = ""
-      this.year = ""
-      this.sex = "Male"
-      this.height = ""
-      this.legLength = ""
-      this.weight = ""
-      this.otherInfo = ""
-      this.userCreationAlert = true
-      setTimeout(() => { this.userCreationAlert = false }, 3000)
+      this.selectedDatabase = "";
+      this.firstName = "";
+      this.lastName = "";
+      this.year = "";
+      this.sex = "Male";
+      this.height = "";
+      this.legLength = "";
+      this.weight = "";
+      this.otherInfo = "";
+      this.userCreationAlert = true;
+      setTimeout(() => {
+        this.userCreationAlert = false;
+      }, 3000);
     },
-    getWeight(){
-      this.weight = this.fz1 + this.fz2
-    }
+    getWeight() {
+      this.weight = this.fz1 + this.fz2;
+    },
   },
 };
 </script>
@@ -153,7 +150,8 @@ export default {
 </style>
 
 <style scoped>
-.createUserButton, .getWeightButton {
+.createUserButton,
+.getWeightButton {
   height: 38px !important;
   min-height: 38px !important;
   background: #6ab187 !important;

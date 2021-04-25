@@ -12,17 +12,17 @@
         <v-col>
           <h1>Dashboard - Overview</h1>
         </v-col>
-	<v-col align="right" v-if="$store.state.options.user != ''">
-	  <span class="mr-3"> {{ $store.state.options.user }} </span>
-	  <v-avatar color="#d32d41">
-	    <span class="white--text headline">
-	      {{
-		$store.state.options.user.split(" ")[0][0].toUpperCase() +
-		$store.state.options.user.split(" ")[1][0].toUpperCase() 
-	      }}
-	    </span>
-	  </v-avatar>
-	</v-col>
+        <v-col align="right" v-if="$store.state.options.user != ''">
+          <span class="mr-3"> {{ $store.state.options.user }} </span>
+          <v-avatar color="#d32d41">
+            <span class="white--text headline">
+              {{
+                $store.state.options.user.split(" ")[0][0].toUpperCase() +
+                $store.state.options.user.split(" ")[1][0].toUpperCase()
+              }}
+            </span>
+          </v-avatar>
+        </v-col>
       </v-row>
       <v-row class="mt-0">
         <v-col>
@@ -94,9 +94,9 @@ export default {
       this.isDatabaseReady = true;
     },
     continueToMain(d, u) {
-      console.log(d,u)
-      this.$store.commit("setDatabase",d)
-      this.$store.commit("setUser",u)
+      console.log(d, u);
+      this.$store.commit("setDatabase", d);
+      this.$store.commit("setUser", u);
       this.isDatabaseReady = true;
     },
   },

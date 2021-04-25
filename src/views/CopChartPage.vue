@@ -1,24 +1,24 @@
 <template>
   <v-container>
-    <CopChart/> 
+    <CopChart />
   </v-container>
 </template>
 
 <script>
-const { ipcRenderer } = window.require('electron')
-import CopChart from '../components/cop/CopChart.vue'
+const { ipcRenderer } = window.require("electron");
+import CopChart from "../components/cop/CopChart.vue";
 export default {
-  mounted(){
+  mounted() {
     //setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_COP') },1)
   },
-  components:{
-    CopChart
-  }
-}
+  components: {
+    CopChart,
+  },
+};
 </script>
 
 <style scoped>
-.resetButton{
+.resetButton {
   height: 38px !important;
   min-height: 38px !important;
   background: #6ab187 !important;
