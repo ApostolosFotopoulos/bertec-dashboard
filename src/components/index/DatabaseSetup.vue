@@ -32,7 +32,7 @@
       </v-row>
       <v-row>
         <v-col>
-          <SaveFile />
+          <SaveFile :databaseName="selectedDatabase" :user="selectedUser.firstName + ' '+selectedUser.lastName"/>
         </v-col>
         <v-col cols="2">
           <v-btn @click="skipDatabase()" class="skipButton"> Real Time </v-btn>

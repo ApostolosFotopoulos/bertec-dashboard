@@ -42,8 +42,8 @@ export default {
       console.log(this.$store.state.options.leftPlateValue);
       this.$store.commit(
         "setWeight",
-        Number(this.$store.state.options.leftPlateValue) +
-          Number(this.$store.state.options.rightPlateValue)
+        (Number(this.$store.state.options.leftPlateValue) +
+          Number(this.$store.state.options.rightPlateValue)).toFixed(2)
       );
     },
   },

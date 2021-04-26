@@ -58,10 +58,12 @@
     "appId": "bertec-dashboard",
     "productName": "bertec-dashboard",
     "files": [
+      "assets/**/*",
+      "data-fetching/**/*",
+      "electron-app/**/*",
       "dist/**/*",
       "node_modules/**/*",
-      "electron-windows/**/*",
-      "test/**/*",
+      "electron-helpers/**/*",
       "main.js"
     ],
     "directories": {

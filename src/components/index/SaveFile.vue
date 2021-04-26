@@ -1,12 +1,11 @@
 <template>
-  <div @click="saveFile">
+  <div>
     <v-text-field
-      :value="this.$store.state.options.filePath"
-      label="Where to save the data"
+      v-model="trialName"
+      label="Trial Name"
       type="text"
       solo
-      disabled
-      @click="saveFile"
+      :disabled="databaseName ==='' || user === ''"
     />
   </div>
 </template>
@@ -14,27 +13,14 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 export default {
+  props:{
+    databaseName: String,
+    user: String,
+  },
   data() {
     return {
-      buttonDisabled: false,
+      trialName: "",
     };
-  },
-  mounted() {
-    var _this = this;
-    ipcRenderer.on("FILE_SAVE_RESPONSE", (_, responseData) => {
-      const { filePath } = responseData;
-      _this.$store.commit("setFilePath", filePath);
-      _this.buttonDisabled = !_this.buttonDisabled;
-    });
-    ipcRenderer.on("SESSION_RESPONSE_OPTIONS", (_, responseData) => {
-      _this.$store.commit("setFilePath", responseData.filePath);
-    });
-  },
-  methods: {
-    saveFile() {
-      ipcRenderer.send("FILE_SAVE");
-      this.buttonDisabled = !this.buttonDisable;
-    },
   },
 };
 </script>
