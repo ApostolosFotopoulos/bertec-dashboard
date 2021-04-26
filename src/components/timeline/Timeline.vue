@@ -42,7 +42,7 @@ export default {
   },
   data() {
     return {
-      height: 0.78 * window.innerHeight,
+      height: 0.75 * window.innerHeight,
       leftFootChart: {
         ...defaultOptions,
         yaxis: {
@@ -165,7 +165,7 @@ export default {
   },
   methods: {
     resizeHandler(e) {
-      this.height = 0.8 * window.innerHeight;
+      this.height = 0.75 * window.innerHeight;
     },
     updateVariables(responseData) {
       this.$store.commit("setWeight", responseData.weight);

@@ -92,8 +92,9 @@ export default {
       _this.databases = responseData.databases;
     });
     ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
-      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]).toFixed(2);
-      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]).toFixed(2);
+      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]);
+      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]);
+
     });
     ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
@@ -124,6 +125,18 @@ export default {
   },
   methods: {
     createUser() {
+
+      console.log({
+        database: this.selectedDatabase,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        year: Number(this.year) || 0,
+        sex: this.sex,
+        height: Number(this.height) || 0,
+        legLength: Number(this.legLength) || 0,
+        weight: Number(this.weight) || 0,
+        otherInfo: this.otherInfo,
+      })
       ipcRenderer.send("CREATE_USER", {
         database: this.selectedDatabase,
         firstName: this.firstName,
@@ -150,7 +163,8 @@ export default {
       }, 3000);
     },
     getWeight() {
-      this.weight = (this.fz1 + this.fz2).toFixed(2);
+      let w = this.fz1 + this.fz2;
+      this.weight = w.toFixed(2);
     },
   },
 };

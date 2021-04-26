@@ -32,13 +32,32 @@
             outlined
             min="0"
           />
+          <v-text-field
+            class="mt-10"
+            @change="(v) => $store.commit('setTime', Number(v))"
+            :value="$store.state.options.timeout"
+            label="Time (sec)"
+            outlined
+            :disabled="$store.state.options.isSessionRunning"
+          />
         </v-col>
-        <v-col cols="2" align="right">
+        <v-col cols="2">
           <v-btn
             @click="$store.commit('resetSpeedmeterState')"
             class="resetButton v-input__control"
             >Reset</v-btn
           >
+          <v-btn
+            elevation="25"
+            :class="
+              $store.state.options.isSessionRunning
+                ? 'stopButton v-input__control mt-15'
+                : 'startButton v-input__control mt-15'
+            "
+            @click="() => startStopSession()"
+          >
+            {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+          </v-btn>
         </v-col>
       </v-row>
     </v-container>
@@ -68,5 +87,15 @@ export default {
   height: 48px !important;
   min-height: 48px !important;
   background: #6ab187 !important;
+}
+.startButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #6ab187 !important;
+}
+.stopButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #d32d41 !important;
 }
 </style>

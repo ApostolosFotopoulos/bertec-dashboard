@@ -10,7 +10,6 @@
             :value="$store.state.options.weight"
             label="Weight (in N)"
             solo
-            :disabled="$store.state.options.isSessionRunning"
           />
         </template>
         <span>Weight</span>
@@ -44,7 +43,7 @@ export default {
         "setWeight",
         (Number(this.$store.state.options.leftPlateValue) +
           Number(this.$store.state.options.rightPlateValue)).toFixed(2)
-      );
+      )
     },
   },
 };
@@ -53,8 +52,8 @@ export default {
 
 <style scoped>
 .getWeight {
-  height: 48px !important;
-  min-height: 48px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   background: #6ab187 !important;
 }
 </style>

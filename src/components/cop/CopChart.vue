@@ -14,19 +14,39 @@
       <v-col cols="2" class="mt-5">
         <v-btn
           @click="$store.commit('resetCOPChartState')"
-          class="resetButton v-input__control"
+          class="resetButton v-input__control mt-3"
           >Reset</v-btn
         >
         <v-text-field
           v-bind="attrs"
           v-on="on"
-          class="mt-3"
+          class="mt-4"
           @change="(v) => $store.commit('setNofGroupPoints', Number(v))"
           :value="$store.state.copChart.nOfGroupPoints"
-          label="Display"
+          label="Display Trials"
           outlined
           min="1"
         />
+        <v-text-field
+          class="mt-15"
+          @change="(v) => $store.commit('setTime', Number(v))"
+          :value="$store.state.options.timeout"
+          label="Time (sec)"
+          :disabled="$store.state.options.isSessionRunning"
+          min="0"
+          outlined
+        />
+        <v-btn
+          elevation="25"
+          :class="
+            $store.state.options.isSessionRunning
+              ? 'stopButton v-input__control'
+              : 'startButton v-input__control'
+          "
+          @click="() => startStopSession()"
+        >
+          {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+        </v-btn>
       </v-col>
       <v-col cols="5">
         <VueApexCharts
@@ -59,7 +79,7 @@ export default {
   },
   data() {
     return {
-      height: 0.8 * window.innerHeight,
+      height: 0.75 * window.innerHeight,
       leftFootChart: {
         ...defaultOptions,
         yaxis: {
@@ -246,7 +266,7 @@ export default {
   },
   methods: {
     resizeHandler(e) {
-      this.height = 0.8 * window.innerHeight;
+      this.height = 0.75 * window.innerHeight;
     },
     updateVariables(responseData) {
       console.log(responseData.rows);
@@ -263,5 +283,21 @@ export default {
   height: 38px !important;
   min-height: 38px !important;
   background: #6ab187 !important;
+}
+.startButton {
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #6ab187 !important;
+}
+.stopButton {
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #d32d41 !important;
+}
+</style>
+
+<style>
+.v-text-field__details {
+  display: none !important;
 }
 </style>

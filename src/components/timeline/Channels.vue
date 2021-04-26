@@ -95,6 +95,29 @@
           min="0"
         />
       </v-col>
+      <v-col cols="2" class="pt-0 mt-0">
+        <v-text-field
+          @change="(v) => $store.commit('setTime', Number(v))"
+          :value="$store.state.options.timeout"
+          label="Time (in seconds)"
+          :disabled="$store.state.options.isSessionRunning"
+          min="0"
+          outlined
+        />
+      </v-col>
+    <v-col cols="2" class="pt-0 mt-0">
+      <v-btn
+        elevation="25"
+        :class="
+          $store.state.options.isSessionRunning
+            ? 'stopButton v-input__control'
+            : 'startButton v-input__control'
+        "
+        @click="() => startStopSession()"
+      >
+        {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+      </v-btn>
+    </v-col>
     </v-row>
   </div>
 </template>
@@ -143,6 +166,16 @@ export default {
 </style>
 
 <style>
+.startButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #6ab187 !important;
+}
+.stopButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #d32d41 !important;
+}
 .resetButton {
   height: 48px !important;
   min-height: 48px !important;

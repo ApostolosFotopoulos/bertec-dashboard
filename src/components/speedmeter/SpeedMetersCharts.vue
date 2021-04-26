@@ -90,4 +90,7 @@ export default {
 .speedmeter {
   transform: scale(1.3);
 }
+.v-text-field__details {
+  display: none !important;
+}
 </style>

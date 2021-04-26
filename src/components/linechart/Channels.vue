@@ -85,6 +85,38 @@
         >
       </v-col>
     </v-row>
+    <v-row class="mt-0 pt-0">
+      <v-col cols="2" class="mt-0 pt-0">
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            v-bind="attrs"
+            v-on="on"
+            @change="(v) => $store.commit('setTime', Number(v))"
+            :value="$store.state.options.timeout"
+            label="Time (in seconds)"
+            solo
+            :disabled="$store.state.options.isSessionRunning"
+            min="0"
+          />
+        </template>
+        <span>Time (in seconds)</span>
+      </v-tooltip>
+    </v-col>
+    <v-col cols="2" class="mt-0 pt-0">
+      <v-btn
+        elevation="25"
+        :class="
+          $store.state.options.isSessionRunning
+            ? 'stopButton v-input__control'
+            : 'startButton v-input__control'
+        "
+        @click="() => startStopSession()"
+      >
+        {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+      </v-btn>
+    </v-col>
+    </v-row>
   </div>
 </template>
 
@@ -129,6 +161,9 @@ export default {
   background-color: transparent;
   width: 0px;
 }
+.v-text-field.v-text-field--enclosed .v-text-field__details{
+  display: none !important;
+}
 </style>
 
 <style scoped>
@@ -136,5 +171,15 @@ export default {
   height: 48px !important;
   min-height: 48px !important;
   background: #6ab187 !important;
+}
+.startButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #6ab187 !important;
+}
+.stopButton {
+  height: 48px !important;
+  min-height: 48px !important;
+  background: #d32d41 !important;
 }
 </style>

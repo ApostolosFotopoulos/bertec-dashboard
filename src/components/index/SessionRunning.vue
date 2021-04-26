@@ -10,24 +10,7 @@
         solo
       ></v-select>
     </v-col>
-    <v-col>
-      <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-bind="attrs"
-            v-on="on"
-            @change="(v) => $store.commit('setTime', Number(v))"
-            :value="$store.state.options.timeout"
-            label="Time (in seconds)"
-            solo
-            :disabled="$store.state.options.isSessionRunning"
-            min="0"
-          />
-        </template>
-        <span>Time (in seconds)</span>
-      </v-tooltip>
-    </v-col>
-    <v-col>
+    <v-col cols="2">
       <v-btn
         elevation="25"
         :class="
@@ -37,7 +20,7 @@
         "
         @click="() => startStopSession()"
       >
-        {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+        Real Time
       </v-btn>
     </v-col>
   </v-row>
@@ -70,18 +53,18 @@ export default {
 
 <style scoped>
 .startButton {
-  height: 48px !important;
-  min-height: 48px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   background: #6ab187 !important;
 }
 .stopButton {
-  height: 48px !important;
-  min-height: 48px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   background: #d32d41 !important;
 }
 .getWeight {
-  height: 48px !important;
-  min-height: 48px !important;
+  height: 38px !important;
+  min-height: 38px !important;
   background: #6ab187 !important;
 }
 </style>

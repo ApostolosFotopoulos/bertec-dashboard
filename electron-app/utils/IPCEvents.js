@@ -21,9 +21,9 @@ class IPCEvents {
 			const db = new sqlite3.Database(path.resolve(__dirname, `../../assets/databases/${database}`));
 			db.serialize(function() {
 				db.run(
-					'create table users(id integer primary key autoincrement, firstName text, lastName text,' +
-						'year integer, other_info text, sex text, height integer, leg_length integer,weight float,' +
-						'created_at date, updated_at date)'
+					'create table users(id integer primary key autoincrement, firstName text, lastName text, ' +
+						' year integer, other_info text, sex text, height float, leg_length float, weight float, ' +
+						' created_at date, updated_at date)'
 				);
 			});
 			db.close();
@@ -35,7 +35,6 @@ class IPCEvents {
 			try {
 				let databases = await fs.readdir(path.resolve(__dirname, '../../assets/databases'));
 				e.reply('FETCH_ALL_DATABASES_RESPONSE', { databases });
-				e.reply('FETCH_SELECTED_DATABASE_RESPONSE', { database: this.selectedDatabase});
 			} catch (e) {
 				throw new Error(e);
 			}
@@ -58,10 +57,13 @@ class IPCEvents {
 		ipcMain.on('CREATE_USER', (_, d) => {
 			const { database, firstName, lastName, year, sex, height, legLength, weight, otherInfo } = d;
 			const db = new sqlite3.Database(path.resolve(__dirname, `../../assets/databases/${database}`));
+			console.log(`insert into users(firstName, lastName, year, other_info, sex, height, leg_length, weight, created_at,updated_at)` +
+			`values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
+			`${moment(new Date()).format('DD - MM - YYYY')}', '${moment(new Date()).format('DD - MM - YYYY')}')`)
 			db.run(
 				`insert into users(firstName, lastName, year, other_info, sex, height, leg_length, weight, created_at,updated_at)` +
 					`values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
-					`${moment(new Date()).format('DD - MM - YYYY')}', '${moment(new Date()).format('DD - MM - YYYY')}')`
+					`'${moment(new Date()).format('DD - MM - YYYY')}', '${moment(new Date()).format('DD - MM - YYYY')}')`
 			);
 		});
 	}

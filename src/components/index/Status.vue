@@ -41,7 +41,6 @@
         <v-btn
           :class="`${setButtonStyle()} v-input__control`"
           @click="resetForcePlate"
-          :disabled="$store.state.options.isSessionRunning"
         >
           {{ setButtonText() }}
         </v-btn>
