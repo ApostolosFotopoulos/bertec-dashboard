@@ -65,6 +65,19 @@
     </v-row>
     <v-row align="center">
       <v-col align="center">
+        <v-text-field v-model="surgeryDate" label="Surgery Date" outlined />
+      </v-col>
+      <v-col align="center">
+        <v-text-field v-model="injuryDate" label="Injury Date" outlined />
+      </v-col>
+    </v-row>
+    <v-row align="center">
+      <v-col align="center" cols="6">
+        <v-text-field v-model="hospitalCode" label="Hospital Code" outlined />
+      </v-col>
+    </v-row>
+    <v-row align="center">
+      <v-col align="center">
         <v-textarea
           v-model="otherInfo"
           label="Other Info"
@@ -115,6 +128,9 @@ export default {
       legLength: "",
       weight: "",
       otherInfo: "",
+      hospitalCode: "",
+      surgeryDate:"",
+      injuryDate:"",
       sexOptions: ["Male", "Female"],
       databases: [],
       selectedDatabase: "",
@@ -136,6 +152,9 @@ export default {
         legLength: Number(this.legLength) || 0,
         weight: Number(this.weight) || 0,
         otherInfo: this.otherInfo,
+        hospitalCode: this.hospitalCode,
+        surgeryDate: this.surgeryDate,
+        injuryDate: this.injuryDate
       })
       ipcRenderer.send("CREATE_USER", {
         database: this.selectedDatabase,
@@ -147,6 +166,9 @@ export default {
         legLength: Number(this.legLength) || 0,
         weight: Number(this.weight) || 0,
         otherInfo: this.otherInfo,
+        hospitalCode: this.hospitalCode,
+        surgeryDate: this.surgeryDate,
+        injuryDate: this.injuryDate
       });
       this.selectedDatabase = "";
       this.firstName = "";
@@ -157,6 +179,9 @@ export default {
       this.legLength = "";
       this.weight = "";
       this.otherInfo = "";
+      this.hospitalCode = ""
+      this.surgeryDate = ""
+      this.injuryDate = ""
       this.userCreationAlert = true;
       setTimeout(() => {
         this.userCreationAlert = false;
