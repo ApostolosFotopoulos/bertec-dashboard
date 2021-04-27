@@ -100,18 +100,18 @@ module.exports = class {
 	addSecondaryWindowsEvents() {
 		// Capture the events
 		this.cw = new SecondaryWindow(
-			'Analysis Dashboard',
+			'Speed Meters',
 			'OPEN_SPEEDMETER_WINDOW',
 			'CLOSE_SPEEDMETER_WINDOW',
 			'/speedmeter'
 		);
 		this.cw.addEventListener();
 
-		this.cpw = new SecondaryWindow('Analysis Dashboard', 'OPEN_COP_WINDOW', 'CLOSE_COP_WINDOW', '/cop');
+		this.cpw = new SecondaryWindow('Centers of Pressure', 'OPEN_COP_WINDOW', 'CLOSE_COP_WINDOW', '/cop');
 		this.cpw.addEventListener();
 
 		this.linechartw = new SecondaryWindow(
-			'Analysis Dashboard',
+			'Line Charts',
 			'OPEN_LINECHART_WINDOW',
 			'CLOSE_LINECHART_WINDOW',
 			'/linechart'
@@ -119,7 +119,7 @@ module.exports = class {
 		this.linechartw.addEventListener();
 
 		this.timelinew = new SecondaryWindow(
-			'Analysis Dashboard',
+			'Timeline',
 			'OPEN_TIMELINE_WINDOW',
 			'CLOSE_TIMELINE_WINDOW',
 			'/timeline'
@@ -130,7 +130,7 @@ module.exports = class {
 		this.usersw.addEventListener();
 
 		this.createuserw = new SecondaryWindow(
-			'Users Dashboard',
+			'Create User',
 			'OPEN_USERS_CREATE_WINDOW',
 			'CLOSE_USERS__CREATE_WINDOW',
 			'/user/create'

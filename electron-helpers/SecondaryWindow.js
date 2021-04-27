@@ -25,6 +25,7 @@ module.exports = class {
 				devTools: process.env.NODE_ENV === 'development'
 			}
 		});
+		this.window.setTitle(this.title)
 
 		// Load the content
 		if (process.env.NODE_ENV === 'development') {
