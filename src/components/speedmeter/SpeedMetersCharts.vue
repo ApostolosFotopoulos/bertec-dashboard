@@ -6,8 +6,8 @@
           textColor="#fff"
           :value="Number($store.state.speedmeter.footAsymmetry.toFixed(2))"
           needleColor="#cbf3f0"
-          :minValue="-100"
-          :maxValue="100"
+          :minValue="-40"
+          :maxValue="40"
           :height="200"
           class="speedmeter"
           :customSegmentStops="customSegmentStops"
@@ -23,8 +23,8 @@
           :value="Number($store.state.speedmeter.stepsAsymmetry.toFixed(2))"
           needleColor="#cbf3f0"
           class="speedmeter"
-          :minValue="-100"
-          :maxValue="100"
+          :minValue="-40"
+          :maxValue="40"
           :height="200"
           :customSegmentStops="customSegmentStops"
           :segmentColors="segmentColors"
@@ -50,13 +50,15 @@ export default {
     return {
       segmentColors: [
         "#d62828",
+        "#e76f51",
         "#ffbe4d",
         "#5fad56",
         "#5fad56",
         "#ffbe4d",
+        "#e76f51",
         "#d62828",
       ],
-      customSegmentStops: [-100, -30, -10, 0, 10, 30, 100],
+      customSegmentStops: [-40, -20, -10, -5, 0, 5, 10, 20, 40],
     };
   },
   mounted() {

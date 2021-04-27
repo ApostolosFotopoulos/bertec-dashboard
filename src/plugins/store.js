@@ -336,11 +336,11 @@ export default new Vuex.Store({
 					2 *
 					(state.speedmeter.rightMaxValue - state.speedmeter.leftMaxValue) /
 					(state.speedmeter.leftMaxValue + state.speedmeter.rightMaxValue) *
-					100;
+					40;
 				console.log(state.speedmeter.footAsymmetry);
 				state.speedmeter.footAsymmetry = Math.min(
-					Math.max(parseInt(state.speedmeter.footAsymmetry), -100),
-					100
+					Math.max(parseInt(state.speedmeter.footAsymmetry), -40),
+					40
 				);
 
 				state.speedmeter.stepsPerMinute = 2 * 60000 / now.diff(state.speedmeter.start, 'milliseconds');
@@ -348,10 +348,10 @@ export default new Vuex.Store({
 					2 *
 					(state.speedmeter.stepsPerMinute - state.speedmeter.stepsPerMinuteTarget) /
 					(state.speedmeter.stepsPerMinuteTarget + state.speedmeter.stepsPerMinute) *
-					100;
+					40;
 				state.speedmeter.stepsAsymmetry = Math.min(
-					Math.max(parseInt(state.speedmeter.stepsAsymmetry), -100),
-					100
+					Math.max(parseInt(state.speedmeter.stepsAsymmetry), -40),
+					40
 				);
 
 				// Reset the variables
