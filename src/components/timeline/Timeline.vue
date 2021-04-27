@@ -1,5 +1,6 @@
 <template>
   <v-card elevation="10" color="#25282F" class="mt-5">
+    <AccuracyCard/>
     <v-row>
       <v-col cols="6">
         <VueApexCharts
@@ -28,11 +29,13 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 import VueApexCharts from "vue-apexcharts";
+import AccuracyCard from "./AccuracyCard.vue"
 const defaultOptions = require("../../../assets/options/timeline.json");
 
 export default {
   components: {
     VueApexCharts,
+    AccuracyCard
   },
   created() {
     window.addEventListener("resize", this.resizeHandler);
@@ -42,7 +45,7 @@ export default {
   },
   data() {
     return {
-      height: 0.75 * window.innerHeight,
+      height: 0.65 * window.innerHeight,
       leftFootChart: {
         ...defaultOptions,
         yaxis: {
@@ -165,7 +168,7 @@ export default {
   },
   methods: {
     resizeHandler(e) {
-      this.height = 0.75 * window.innerHeight;
+      this.height = 0.65 * window.innerHeight;
     },
     updateVariables(responseData) {
       this.$store.commit("setWeight", responseData.weight);

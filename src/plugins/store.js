@@ -142,7 +142,9 @@ export default new Vuex.Store({
 			rightPlateChannel: 'FZ2',
 			yAxisMaxValue: -1,
 			rangeMax: 120,
-			rangeMin: 90
+			rangeMin: 90,
+			leftAccuracy: 0.0,
+			rightAccuracy: 0.0,
 		}
 	},
 	mutations: {
@@ -727,7 +729,7 @@ export default new Vuex.Store({
 					// threshold
 					state.copChart.leftSteps += 1;
 					let d = state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data;
-					d.push([ copx1, copy1 ]);
+					d.push([copx1, copy1]);
 					state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = d;
 				}
 				if (fz1 < threshold) {
@@ -790,7 +792,7 @@ export default new Vuex.Store({
 					// threshold
 					state.copChart.rightSteps += 1;
 					let d = state.copChart.righPlateSeries[state.copChart.rightPlateRows].data;
-					d.push([ copx2, copy2 ]);
+					d.push([copx2, copy2]);
 					state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = d;
 				}
 				if (fz2 < threshold) {
@@ -836,7 +838,7 @@ export default new Vuex.Store({
 					// threshold and activate the step process
 					state.copChart.isRightPlateLocked = true;
 					let d = state.copChart.righPlateSeries[state.copChart.rightPlateRows].data;
-					d.push([ copx2, copy2 ]);
+					d.push([copx2, copy2]);
 					state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = d;
 				}
 			}
@@ -862,6 +864,8 @@ export default new Vuex.Store({
 			state.timeline.rightPlateMax = -1;
 			state.timeline.shouldUpdateLeft = false;
 			state.timeline.shouldUpdateRight = false;
+			state.timeline.leftAccuracy = 0
+			state.timeline.rightAccuracy = 0
 		},
 		setLeftPlateAtTimeline(state, rows) {
 			let fz1 = Number(rows[2]);
@@ -900,6 +904,17 @@ export default new Vuex.Store({
 					if (state.timeline.dataType === 'Normalized') {
 						if (state.timeline.leftPlateMax > state.timeline.trialThreshold) {
 							state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
+
+							// Calculate the accuracy ratio 
+							let isInsideRange = 0
+							state.timeline.leftPlateSeries[0].data.map(d => {
+								console.log(state.timeline.rangeMin, state.timeline.rangeMax, d)
+								if (state.timeline.rangeMin <= d && state.timeline.rangeMax >= d) {
+									isInsideRange += 1 
+								}
+							})
+							state.timeline.leftAccuracy = ((isInsideRange / state.timeline.leftPlateSeries[0].data.length)*100).toFixed(1) || 0.0
+
 							if (state.timeline.yAxisMaxValue < state.timeline.leftPlateMax) {
 								state.timeline.yAxisMaxValue =
 									state.timeline.dataType === 'Normalized'
@@ -910,6 +925,17 @@ export default new Vuex.Store({
 					} else {
 						if (state.timeline.leftPlateMax > state.timeline.trialThreshold / 100 * state.options.weight) {
 							state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
+
+							// Calculate the accuracy ratio 
+							let isInsideRange = 0
+							state.timeline.leftPlateSeries[0].data.map(d => {
+								console.log(state.timeline.rangeMin, state.timeline.rangeMax, d)
+								if (state.timeline.rangeMin <= d && state.timeline.rangeMax >= d) {
+									isInsideRange += 1 
+								}
+							})
+							state.timeline.leftAccuracy = ((isInsideRange / state.timeline.leftPlateSeries[0].data.length) * 100).toFixed(1) || 0.0
+							
 							if (state.timeline.yAxisMaxValue < state.timeline.leftPlateMax) {
 								state.timeline.yAxisMaxValue =
 									state.timeline.dataType === 'Normalized'
@@ -989,6 +1015,17 @@ export default new Vuex.Store({
 					if (state.timeline.dataType === 'Normalized') {
 						if (state.timeline.rightPlateMax > state.timeline.trialThreshold) {
 							state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
+
+							// Calculate the accuracy ratio 
+							let isInsideRange = 0
+							state.timeline.rightPlateSeries[0].data.map(d => {
+								console.log(state.timeline.rangeMin, state.timeline.rangeMax, d)
+								if (state.timeline.rangeMin <= d && state.timeline.rangeMax >= d) {
+									isInsideRange += 1 
+								}
+							})
+							state.timeline.rightAccuracy = ((isInsideRange / state.timeline.rightPlateSeries[0].data.length) * 100).toFixed(1) || 0.0
+
 							if (state.timeline.yAxisMaxValue < state.timeline.rightPlateMax) {
 								state.timeline.yAxisMaxValue =
 									state.timeline.dataType === 'Normalized'
@@ -999,6 +1036,17 @@ export default new Vuex.Store({
 					} else {
 						if (state.timeline.rightPlateMax > state.timeline.trialThreshold / 100 * state.options.weight) {
 							state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
+
+							// Calculate the accuracy ratio 
+							let isInsideRange = 0
+							state.timeline.rightPlateSeries[0].data.map(d => {
+								console.log(state.timeline.rangeMin, state.timeline.rangeMax, d)
+								if (state.timeline.rangeMin <= d && state.timeline.rangeMax >= d) {
+									isInsideRange += 1 
+								}
+							})
+							state.timeline.rightAccuracy = ((isInsideRange / state.timeline.rightPlateSeries[0].data.length) * 100).toFixed(1) || 0.0
+							
 							if (state.timeline.yAxisMaxValue < state.timeline.rightPlateMax) {
 								state.timeline.yAxisMaxValue =
 									state.timeline.dataType === 'Normalized'

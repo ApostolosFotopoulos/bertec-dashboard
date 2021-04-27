@@ -65,12 +65,12 @@ export default {
   mounted() {
     setInterval(() => {
       ipcRenderer.send("FETCH_ALL_DATABASES");
-    }, 10);
+    }, 100);
     setInterval(() => {
       if(this.selectedDatabase !=""){
         ipcRenderer.send("FETCH_ALL_USERS", { database: this.selectedDatabase });
       }
-    }, 10);
+    }, 100);
     var _this = this;
     ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
