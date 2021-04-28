@@ -150,6 +150,11 @@ export default {
       selectedDatabase: "",
       headers: [
         {
+          text: "Hospital ID",
+          sortable: false,
+          value: "hospital_code",
+        },
+        {
           text: "Firstname",
           value: "firstName",
         },
@@ -181,11 +186,6 @@ export default {
           text: "Weight (N)",
           value: "weight",
           sortable: false,
-        },
-        {
-          text: "Hospital",
-          sortable: false,
-          value: "hospital_code",
         },
         {
           text: "Affected Side",
