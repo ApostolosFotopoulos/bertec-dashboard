@@ -62,10 +62,58 @@
     </v-row>
     <v-row align="center">
       <v-col align="center">
-        <v-text-field v-model="surgeryDate" label="Surgery Date" outlined />
+        <v-menu
+          ref="injuryDate"
+          v-model="injuryDateMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          min-width="auto"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="injuryDate"
+              label="Injury Date"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            ref="injuryDatePicker"
+            v-model="injuryDate"
+            :max="new Date().toISOString().substr(0, 10)"
+            min="1950-01-01"
+            @change="saveInjuryDate"
+          ></v-date-picker>
+        </v-menu>
       </v-col>
       <v-col align="center">
-        <v-text-field v-model="injuryDate" label="Injury Date" outlined />
+        <v-menu
+          ref="surgeryDate"
+          v-model="surgeryDateMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          min-width="auto"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="surgeryDate"
+              label="Surgery Date"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            ref="surgeryDatePicker"
+            v-model="surgeryDate"
+            :max="new Date().toISOString().substr(0, 10)"
+            min="1950-01-01"
+            @change="saveSurgeryDate"
+          ></v-date-picker>
+        </v-menu>
       </v-col>
     </v-row>
     <v-row align="center">
@@ -75,7 +123,7 @@
       <v-col align="center" cols="2">
         <v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
       </v-col>
-     <v-col align="center">
+      <v-col align="center">
         <v-select
           v-model="affected"
           :items="affectedOptions"
@@ -115,7 +163,6 @@ export default {
     ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
       this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]);
       this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]);
-
     });
     ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
@@ -123,7 +170,9 @@ export default {
     ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
       if(_this.selectedDatabase  === ""){
         console.log(responseData.database)
-        _this.selectedDatabase = responseData.database
+        if(responseData.database != ""){
+          _this.selectedDatabase = responseData.database
+        }
       }
     });
   },
@@ -148,11 +197,26 @@ export default {
       fz1: 0,
       fz2: 0,
       userCreationAlert: false,
+      injuryDateMenu:false,
+      surgeryDateMenu:false
     };
   },
+  watch: {
+    injuryDateMenu (val) {
+      val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'))
+    },
+    surgeryDateMenu(val){
+      val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'))
+    }
+  },
   methods: {
+    saveInjuryDate(date) {
+      this.$refs.menu.save(date)
+    },
+    saveSurgeryDate(date) {
+      this.$refs.menu.save(date)
+    },
     createUser() {
-
       console.log({
         database: this.selectedDatabase,
         firstName: this.firstName,

@@ -124,6 +124,7 @@ export default {
     setInterval(() => {
       ipcRenderer.send("FETCH_ALL_DATABASES");
     }, 10);
+    
     var _this = this;
     ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
@@ -135,8 +136,10 @@ export default {
     ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
       if(_this.selectedDatabase  === ""){
         console.log(_this.selectedDatabase)
-        _this.selectedDatabase = responseData.database
-        ipcRenderer.send("FETCH_ALL_USERS", { database: _this.selectedDatabase });
+        if(responseData.database != ""){
+          _this.selectedDatabase = responseData.database
+          ipcRenderer.send("FETCH_ALL_USERS", { database: _this.selectedDatabase });
+        }
       }
     });
   },
@@ -199,6 +202,7 @@ export default {
         },
       ],
       sexOptions: ["Male", "Female", "All"],
+      affected:"Not Affected",
       affectedOptions: ["Left","Right","Left + Right","Not Affected"],
       search: {
         firstName: "",

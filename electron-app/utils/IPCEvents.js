@@ -46,11 +46,16 @@ class IPCEvents {
 		ipcMain.on('FETCH_ALL_USERS', (e, d) => {
 			const { database } = d;
 			this.selectedDatabase = database;
-
-			const db = new sqlite3.Database(path.resolve(__dirname, `../../assets/databases/${database}`));
-			db.all('select * from users', (err, rows) => {
-				e.reply('FETCH_ALL_USERS_RESPONSE', { users: rows });
-			});
+			console.log(this.selectedDatabase)
+			if (this.selectedDatabase != "") {
+				const db = new sqlite3.Database(path.resolve(__dirname, `../../assets/databases/${database}`));
+				db.all('select * from users', (err, rows) => {
+					e.reply('FETCH_ALL_USERS_RESPONSE', { users: rows });
+				});
+			} else {
+				e.reply('FETCH_ALL_USERS_RESPONSE', { users: [] });
+			}
+			
 		});
 	}
 
