@@ -23,7 +23,7 @@ class IPCEvents {
 				db.run(
 					'create table users(id integer primary key autoincrement, firstName text, lastName text, ' +
 						' year integer, other_info text, sex text, height float, leg_length float, weight float, ' +
-						'hospital_code text, injury_date date, surgery_date date ,created_at date, updated_at date)'
+						'hospital_code text, injury_date date, surgery_date date, affected_side text ,created_at date, updated_at date)'
 				);
 			});
 			db.close();
@@ -35,6 +35,7 @@ class IPCEvents {
 			try {
 				let databases = await fs.readdir(path.resolve(__dirname, '../../assets/databases'));
 				e.reply('FETCH_ALL_DATABASES_RESPONSE', { databases });
+				e.reply('FETCH_SELECTED_DATABASE_RESPONSE', { database: this.selectedDatabase })
 			} catch (e) {
 				throw new Error(e);
 			}
@@ -55,12 +56,12 @@ class IPCEvents {
 
 	createUserEvent() {
 		ipcMain.on('CREATE_USER', (_, d) => {
-			const { database, firstName, lastName, year, sex, height, legLength, weight, otherInfo, hospitalCode, surgeryDate, injuryDate } = d;
+			const { database, firstName, lastName, year, sex, height, legLength, weight, otherInfo, hospitalCode, surgeryDate, injuryDate, affectedSide} = d;
 			const db = new sqlite3.Database(path.resolve(__dirname, `../../assets/databases/${database}`));
 			db.run(
-				`insert into users(firstName, lastName, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, created_at,updated_at)` +
+				`insert into users(firstName, lastName, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, affected_side, created_at,updated_at)` +
 					`values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
-					`'${hospitalCode}','${moment(new Date(surgeryDate)).format('DD - MM - YYYY')}','${moment(new Date(injuryDate)).format('DD - MM - YYYY')}','${moment(new Date()).format('DD - MM - YYYY')}', '${moment(new Date()).format('DD - MM - YYYY')}')`
+					`'${hospitalCode}','${moment(new Date(surgeryDate)).format('DD - MM - YYYY')}','${moment(new Date(injuryDate)).format('DD - MM - YYYY')}','${affectedSide}','${moment(new Date()).format('DD - MM - YYYY')}', '${moment(new Date()).format('DD - MM - YYYY')}')`
 			);
 		});
 	}

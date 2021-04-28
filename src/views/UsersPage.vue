@@ -7,9 +7,8 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="6" offset="3" align="center">
+      <v-col cols="2">
         <v-select
-          class="mt-3"
           v-model="selectedDatabase"
           :items="
             databases.map((d) => ({
@@ -23,41 +22,16 @@
           outlined
         ></v-select>
       </v-col>
-    </v-row>
-    <v-row class="mt-0">
-      <v-col>
-        <h3>User Filters</h3>
-        <hr class="hr" />
+       <v-col cols="1">
+        <v-text-field v-model="search.firstName" label="Hospital ID" outlined />
       </v-col>
-    </v-row>
-    <v-row class="mt-10" align="center">
-      <v-col cols="3">
+      <v-col cols="2">
         <v-text-field v-model="search.firstName" label="Firstname" outlined />
       </v-col>
-      <v-col cols="3">
+      <v-col cols="2">
         <v-text-field v-model="search.lastName" label="Lastname" outlined />
       </v-col>
-      <v-col cols="3">
-        <v-range-slider
-          v-model="search.year"
-          :max="new Date().getFullYear()"
-          :min="1900"
-          label="Year of Birth"
-          hide-details
-          thumb-label="always"
-        />
-      </v-col>
-      <v-col cols="3">
-        <v-range-slider
-          v-model="search.weight"
-          :max="300"
-          :min="30"
-          label="Weight (N)"
-          hide-details
-          thumb-label="always"
-        />
-      </v-col>
-      <v-col cols="3">
+      <v-col cols="1">
         <v-select
           v-model="search.sex"
           :items="sexOptions"
@@ -65,33 +39,63 @@
           outlined
         ></v-select>
       </v-col>
-      <v-col cols="3">
+      <v-col cols="2">
+        <v-select
+          v-model="affected"
+          :items="affectedOptions"
+          label="Affected Side"
+          outlined
+        ></v-select>
+      </v-col>
+      <v-col cols="2" align="right">
+        <v-btn @click="applyFilters()" class="applyButton mt-2">
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+        <v-btn @click="resetFilters()" class="resetButton mt-2">
+          <v-icon>mdi-restart</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row class="mt-10" align="center">
+      <v-col cols="2">
+        <v-range-slider
+          v-model="search.year"
+          :max="new Date().getFullYear()"
+          :min="1960"
+          hide-details
+          thumb-label="always"
+        />
+        <div class="text-center"> Year of Birth </div>
+      </v-col>
+      <v-col cols="2">
+        <v-range-slider
+          v-model="search.weight"
+          :max="2000"
+          :min="300"
+          hide-details
+          thumb-label="always"
+        />
+        <div class="text-center"> Weight (N) </div>
+      </v-col>
+      <v-col cols="2">
         <v-range-slider
           v-model="search.height"
           :max="250"
           :min="100"
-          label="Height (cm)"
           hide-details
           thumb-label="always"
         />
+        <div class="text-center"> Height (cm) </div>
       </v-col>
-      <v-col cols="3">
+      <v-col cols="2">
         <v-range-slider
           v-model="search.legLength"
           :max="200"
           :min="30"
-          label="Leg Length (cm)"
           hide-details
           thumb-label="always"
         />
-      </v-col>
-      <v-col cols="3" style="display: inline-block">
-        <v-btn @click="applyFilters()" class="applyButton">
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-        <v-btn @click="resetFilters()" class="resetButton">
-          <v-icon>mdi-restart</v-icon>
-        </v-btn>
+        <div class="text-center"> Leg Length (cm) </div>
       </v-col>
     </v-row>
     <v-row class="mt-0">
@@ -181,6 +185,11 @@ export default {
           value: "hospital_code",
         },
         {
+          text: "Affected Side",
+          value: "affected_side",
+          sortable: false,
+        },
+        {
           text: "Injury Date",
           value: "injury_date",
         },
@@ -190,11 +199,12 @@ export default {
         },
       ],
       sexOptions: ["Male", "Female", "All"],
+      affectedOptions: ["Left","Right","Left + Right","Not Affected"],
       search: {
         firstName: "",
         lastName: "",
-        year: [1900, new Date().getFullYear()],
-        weight: [30, 300],
+        year: [1960, new Date().getFullYear()],
+        weight: [300, 2000],
         sex: "All",
         height: [100, 250],
         legLength: [30, 200],

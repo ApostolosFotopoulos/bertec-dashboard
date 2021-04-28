@@ -13,6 +13,24 @@
         </v-alert>
       </v-col>
     </v-row>
+    <v-row>
+       <v-col align="center" cols="6">
+        <v-select
+          v-model="selectedDatabase"
+          :items="
+            databases.map((d) => ({
+              text: d.substr(0, d.lastIndexOf('_')),
+              value: d,
+            }))
+          "
+          label="Database"
+          outlined
+        ></v-select>
+      </v-col>
+      <v-col align="center" cols="6">
+        <v-text-field v-model="hospitalCode" label="Hospital Code" outlined />
+      </v-col>
+    </v-row>
     <v-row align="center">
       <v-col align="center">
         <v-text-field v-model="firstName" label="First Name" outlined />
@@ -43,27 +61,6 @@
       </v-col>
     </v-row>
     <v-row align="center">
-      <v-col align="center" cols="6">
-        <v-select
-          v-model="selectedDatabase"
-          :items="
-            databases.map((d) => ({
-              text: d.substr(0, d.lastIndexOf('_')),
-              value: d,
-            }))
-          "
-          label="Database"
-          outlined
-        ></v-select>
-      </v-col>
-      <v-col align="center" cols="4">
-        <v-text-field v-model="weight" label="Weight (N)" outlined />
-      </v-col>
-      <v-col align="center" cols="1">
-        <v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
-      </v-col>
-    </v-row>
-    <v-row align="center">
       <v-col align="center">
         <v-text-field v-model="surgeryDate" label="Surgery Date" outlined />
       </v-col>
@@ -72,8 +69,19 @@
       </v-col>
     </v-row>
     <v-row align="center">
-      <v-col align="center" cols="6">
-        <v-text-field v-model="hospitalCode" label="Hospital Code" outlined />
+      <v-col align="center" cols="4">
+        <v-text-field v-model="weight" label="Weight (N)" outlined />
+      </v-col>
+      <v-col align="center" cols="2">
+        <v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
+      </v-col>
+     <v-col align="center">
+        <v-select
+          v-model="affected"
+          :items="affectedOptions"
+          label="Affected Side"
+          outlined
+        ></v-select>
       </v-col>
     </v-row>
     <v-row align="center">
@@ -114,6 +122,7 @@ export default {
     });
     ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
       if(_this.selectedDatabase  === ""){
+        console.log(responseData.database)
         _this.selectedDatabase = responseData.database
       }
     });
@@ -131,7 +140,9 @@ export default {
       hospitalCode: "",
       surgeryDate:"",
       injuryDate:"",
+      affected:"Not Affected",
       sexOptions: ["Male", "Female"],
+      affectedOptions: ["Left","Right","Left + Right","Not Affected"],
       databases: [],
       selectedDatabase: "",
       fz1: 0,
@@ -154,8 +165,9 @@ export default {
         otherInfo: this.otherInfo,
         hospitalCode: this.hospitalCode,
         surgeryDate: this.surgeryDate,
-        injuryDate: this.injuryDate
-      })
+        injuryDate: this.injuryDate,
+        affectedSide: this.affected
+      }),
       ipcRenderer.send("CREATE_USER", {
         database: this.selectedDatabase,
         firstName: this.firstName,
@@ -168,7 +180,8 @@ export default {
         otherInfo: this.otherInfo,
         hospitalCode: this.hospitalCode,
         surgeryDate: this.surgeryDate,
-        injuryDate: this.injuryDate
+        injuryDate: this.injuryDate,
+        affectedSide: this.affected
       });
       this.selectedDatabase = "";
       this.firstName = "";
@@ -182,6 +195,7 @@ export default {
       this.hospitalCode = ""
       this.surgeryDate = ""
       this.injuryDate = ""
+      this.affected = "Not Affected"
       this.userCreationAlert = true;
       setTimeout(() => {
         this.userCreationAlert = false;
