@@ -173,14 +173,20 @@ export default {
         {
           text: "Weight (N)",
           value: "weight",
+          sortable: false,
         },
         {
-          text: "Created At",
-          value: "created_at",
+          text: "Hospital",
+          sortable: false,
+          value: "hospital_code",
         },
         {
-          text: "Updated At",
-          value: "updated_at",
+          text: "Injury Date",
+          value: "injury_date",
+        },
+        {
+          text: "Surgery Date",
+          value: "surgery_date",
         },
       ],
       sexOptions: ["Male", "Female", "All"],
