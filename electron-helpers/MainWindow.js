@@ -74,7 +74,7 @@ module.exports = class {
 			});
 
 			if (process.env.NODE_ENV === 'development') {
-				const winURL = `http://localhost:8080/`;
+				const winURL = `http://localhost:1337/`;
 				this.window.loadURL(winURL);
 			} else {
 				this.window.loadURL('file://' + path.join(`${__dirname}`, '../dist/index.html'));
@@ -178,6 +178,7 @@ module.exports = class {
 		// Start the listener for the IPCEvents
 
 		this.ipcEvents.createDatabaseEvent();
+		this.ipcEvents.deleteDatabaseEvent();
 		this.ipcEvents.fetchAllDatabasesEvent();
 		this.ipcEvents.fetchAllUsersEvent();
 		this.ipcEvents.createUserEvent();

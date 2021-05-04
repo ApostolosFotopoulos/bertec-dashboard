@@ -29,7 +29,7 @@ module.exports = class {
 
 		// Load the content
 		if (process.env.NODE_ENV === 'development') {
-			const winURL = 'http://localhost:8080' + '#' + this.urlPath;
+			const winURL = 'http://localhost:1337' + '#' + this.urlPath;
 			this.window.loadURL(winURL);
 		} else {
 			this.window.loadURL('file://' + path.resolve(`${__dirname}`, '../dist/index.html') + '#' + this.urlPath);

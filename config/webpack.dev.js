@@ -5,7 +5,7 @@ const webpack = require('webpack');
 
 module.exports = {
 	mode: 'development',
-	entry: [ 'webpack-dev-server/client?http://0.0.0.0:8080', './src/main.js' ],
+	entry: [ 'webpack-dev-server/client?http://0.0.0.0:1337', './src/main.js' ],
 	output: {
 		filename: '[name].js',
 		path: path.resolve(__dirname, '../dist'),
@@ -14,7 +14,8 @@ module.exports = {
 	devServer: {
 		publicPath: '/',
 		hot: true,
-		contentBase: '../dist'
+		contentBase: '../dist',
+		port: 1337,
 	},
 	module: {
 		rules: [
