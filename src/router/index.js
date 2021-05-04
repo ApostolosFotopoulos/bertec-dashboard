@@ -38,6 +38,11 @@ const routes = [
 		path: '/user/create',
 		name: 'UserCreatePage',
 		component: () => import('../views/UserCreatePage.vue')
+	},
+	{
+		path: '/tag/create',
+		name: 'TagCreatePage',
+		component: () => import('../views/TagCreatePage.vue')
 	}
 ];
 

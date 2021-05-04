@@ -10,7 +10,7 @@
     "webapp:dev": "webpack serve --hot --mode development --config config/webpack.dev.js",
     "webapp:prod": "NODE_ENV=production webpack --config config/webpack.prod.js",
     "start": "NODE_ENV=production npm-run-all -s webapp:prod electron:dev",
-    "dev": "NODE_ENV=development npm-run-all -p electron:dev webapp:dev",
+    "dev": "NODE_ENV=development concurrently --kill-others \"npm run electron:dev\" \"npm run webapp:dev\"",
     "build:mac": "electron-builder build --mac",
     "build:windows": "electron-builder build --windows"
   },
@@ -37,6 +37,7 @@
     "@babel/preset-env": "^7.12.11",
     "babel-loader": "^8.2.2",
     "babel-preset-env": "^1.7.0",
+    "concurrently": "^6.0.2",
     "css-loader": "^5.0.1",
     "electron": "^11.2.1",
     "electron-builder": "^22.9.1",

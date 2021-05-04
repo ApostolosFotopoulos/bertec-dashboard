@@ -10,12 +10,12 @@
         <h1>Dashboard - Overview</h1>
       </v-col>
       <v-col align="right" v-if="Object.keys($store.state.options.user).length != 0">
-        <span class="mr-3"> {{ $store.state.options.user.firstName + " "+ $store.state.options.user.lastName }} </span>
+        <span class="mr-3"> {{ $store.state.options.user.first_name + " "+ $store.state.options.user.last_name }} </span>
         <v-avatar color="#d32d41">
           <span class="white--text headline">
             {{
-              $store.state.options.user.firstName[0] +
-              $store.state.options.user.lastName[0]
+              $store.state.options.user.first_name[0] +
+              $store.state.options.user.last_name[0]
             }}
           </span>
         </v-avatar>

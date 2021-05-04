@@ -43,6 +43,7 @@ module.exports = class {
 		this.timelinew = null;
 		this.usersw = null;
 		this.createuserw = null;
+		this.createtagsw = null;
 		this.window = null;
 
 		// TCP / Event Listeners
@@ -131,12 +132,20 @@ module.exports = class {
 
 		this.createuserw = new SecondaryWindow(
 			'Create User',
-			'OPEN_USERS_CREATE_WINDOW',
-			'CLOSE_USERS__CREATE_WINDOW',
+			'OPEN_USER_CREATE_WINDOW',
+			'CLOSE_USER_CREATE_WINDOW',
 			'/user/create'
 		);
 		this.createuserw.addEventListener();
 
+		this.createtagsw = new SecondaryWindow(
+			'Create Tag',
+			'OPEN_TAG_CREATE_WINDOW',
+			'CLOSE_TAG_CREATE_WINDOW',
+			'/tag/create'
+		);
+		this.createtagsw.addEventListener();
+		
 		ipcMain.on('WINDOWS_STATUS', async (e) => {
 			e.reply('WINDOWS_STATUS_RESPONSE', {
 				chartWindowVisible: (this.cw && this.cw.window) !== null,
@@ -177,8 +186,15 @@ module.exports = class {
 	startSessionEvents() {
 		// Start the listener for the IPCEvents
 
+		// Database Events
 		this.ipcEvents.createDatabaseEvent();
 		this.ipcEvents.deleteDatabaseEvent();
+		this.ipcEvents.fetchDatabasesToDeleteEvent();
+		this.ipcEvents.fetchDatabasesToContinueToTrialEvent();
+
+		// Users
+		this.ipcEvents.fetchUsersToContinueToTrialEvent();
+		
 		this.ipcEvents.fetchAllDatabasesEvent();
 		this.ipcEvents.fetchAllUsersEvent();
 		this.ipcEvents.createUserEvent();
