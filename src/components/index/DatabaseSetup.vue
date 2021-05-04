@@ -12,7 +12,7 @@
           <v-select
             :items="
               databases.map((d) => ({
-                text: d.substr(0, d.lastIndexOf('_')),
+                text: d.substr(0, d.lastIndexOf('.')),
                 value: d,
               }))
             "

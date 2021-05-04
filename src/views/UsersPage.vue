@@ -12,7 +12,7 @@
           v-model="selectedDatabase"
           :items="
             databases.map((d) => ({
-              text: d.substr(0, d.lastIndexOf('_')),
+              text: d.substr(0, d.lastIndexOf('.')),
               value: d,
             }))
           "
@@ -22,7 +22,7 @@
           outlined
         ></v-select>
       </v-col>
-       <v-col cols="1">
+      <v-col cols="1">
         <v-text-field v-model="search.firstName" label="Hospital ID" outlined />
       </v-col>
       <v-col cols="2">

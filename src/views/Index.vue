@@ -90,7 +90,6 @@ export default {
       this.isDatabaseReady = true;
     },
     continueToMain(d, u) {
-      console.log(d, u);
       this.$store.commit("setDatabase", d);
       this.$store.commit("setUser", u);
       this.$store.commit("setWeight", u.weight);

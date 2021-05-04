@@ -14,12 +14,12 @@
       </v-col>
     </v-row>
     <v-row>
-       <v-col align="center" cols="6">
+      <v-col align="center" cols="6">
         <v-select
           v-model="selectedDatabase"
           :items="
             databases.map((d) => ({
-              text: d.substr(0, d.lastIndexOf('_')),
+              text: d.substr(0, d.lastIndexOf('.')),
               value: d,
             }))
           "
