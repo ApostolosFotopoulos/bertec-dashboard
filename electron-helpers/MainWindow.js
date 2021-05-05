@@ -134,18 +134,18 @@ module.exports = class {
 		this.usersw.addEventListener();
 
 		this.createuserw = new SecondaryWindow(
-			'Create User',
-			'OPEN_USER_CREATE_WINDOW',
-			'CLOSE_USER_CREATE_WINDOW',
-			'/user/create'
+			'User Management',
+			'OPEN_USER_MANAGE_WINDOW',
+			'CLOSE_USER_MANAGE_WINDOW',
+			'/user/manage'
 		);
 		this.createuserw.addEventListener();
 
 		this.createtagsw = new SecondaryWindow(
 			'Tags Management',
-			'OPEN_TAG_CREATE_WINDOW',
-			'CLOSE_TAG_CREATE_WINDOW',
-			'/tag/create'
+			'OPEN_TAG_MANAGE_WINDOW',
+			'CLOSE_TAG_MANAGE_WINDOW',
+			'/tag/manage'
 		);
 		this.createtagsw.addEventListener();
 		
@@ -192,22 +192,25 @@ module.exports = class {
 		// Database Events
 		this.ipcEvents.createDatabaseEvent();
 		this.ipcEvents.deleteDatabaseEvent();
-		this.ipcEvents.fetchDatabasesToDeleteEvent();
-		this.ipcEvents.fetchDatabasesToContinueToTrialEvent();
-		this.ipcEvents.fetchDatabasesToTagManagementEvent();
-		this.ipcEvents.fetchDatabasesToUserCreationEvent();
+		this.ipcEvents.fetchDatabasesToDeleteEvent(this.window);
+		this.ipcEvents.fetchDatabasesToContinueToTrialEvent(this.window);
+		this.ipcEvents.fetchDatabasesToTagManagementEvent(this.createtagsw);
+		this.ipcEvents.fetchDatabasesToUserManagementEvent(this.createuserw);
 
 		// Users
-		this.ipcEvents.fetchUsersToContinueToTrialEvent();
+		this.ipcEvents.fetchUsersToContinueToTrialEvent(this.window);
 		this.ipcEvents.createUserEvent();
+		this.ipcEvents.fetchAllUsersToViewEvent(this.usersw);
+		this.ipcEvents.fetchAllUsersToEditEvent(this.createuserw);
+		this.ipcEvents.updateUserEvent();
 
 		// Tags
 		this.ipcEvents.createTagEvent();
 		this.ipcEvents.deleteTagEvent();
-		this.ipcEvents.fetchTagToTagManagementEvent();
-		this.ipcEvents.fetchTagToUserCreationEvent();
+		this.ipcEvents.fetchTagToTagManagementEvent(this.createtagsw);
+		this.ipcEvents.fetchTagToUserManagementEvent(this.createuserw);
+		this.ipcEvents.fetchAllTagsForUserEvent(this.createuserw);
 		
-		this.ipcEvents.fetchAllUsersEvent();
 		this.ipcEvents.queryUsersEvent();
 
 		// Session Events

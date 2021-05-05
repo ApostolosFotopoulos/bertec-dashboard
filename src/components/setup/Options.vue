@@ -67,15 +67,12 @@
             <h3>Users</h3>
             <div class="mt-3">
               <v-btn
-                @click="openUserCreationWindow()"
-                class="createUserButton"
+                @click="openUserManagementWindow()"
+                class="manageUserButton"
                 block
               >
-                Create
+                Manage
               </v-btn>
-            </div>
-            <div class="mt-3">
-              <v-btn class="editUsersButton" block> Edit </v-btn>
             </div>
             <div class="mt-3">
               <v-btn @click="openUsersWindow()" class="viewUsersButton" block>
@@ -89,8 +86,8 @@
             <h3>Tags</h3>
             <div class="mt-3">
               <v-btn
-                @click="openTagCreationWindow()"
-                class="viewUsersButton"
+                @click="openTagManagementWindow()"
+                class="manageTagsButton"
                 block
               >
                 Manage
@@ -144,11 +141,11 @@ export default {
     openUsersWindow() {
       ipcRenderer.send("OPEN_USERS_WINDOW");
     },
-    openUserCreationWindow() {
-      ipcRenderer.send("OPEN_USER_CREATE_WINDOW");
+    openUserManagementWindow() {
+      ipcRenderer.send("OPEN_USER_MANAGE_WINDOW");
     },
-    openTagCreationWindow() {
-      ipcRenderer.send("OPEN_TAG_CREATE_WINDOW");
+    openTagManagementWindow() {
+      ipcRenderer.send("OPEN_TAG_MANAGE_WINDOW");
     },
   },
 };
@@ -165,19 +162,19 @@ export default {
   min-height: 38px !important;
   background: #d32d41 !important;
 }
-.createUserButton {
+.manageUserButton {
   height: 38px !important;
   min-height: 38px !important;
   background: #6ab187 !important;
 }
-.editUsersButton {
+.viewUsersButton {
   height: 38px !important;
   min-height: 38px !important;
   background: #f4a261 !important;
 }
-.viewUsersButton {
+.manageTagsButton {
   height: 38px !important;
   min-height: 38px !important;
-  background: #e9c46a !important;
+  background: #f4a261 !important;
 }
 </style>

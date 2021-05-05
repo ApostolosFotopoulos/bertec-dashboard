@@ -31,18 +31,18 @@ const routes = [
 	},
 	{
 		path: '/users',
-		name: 'UsersPage',
-		component: () => import('../views/UsersPage.vue')
+		name: 'UsersViewPage',
+		component: () => import('../views/UsersViewPage.vue')
 	},
 	{
-		path: '/user/create',
-		name: 'UserCreatePage',
-		component: () => import('../views/UserCreatePage.vue')
+		path: '/user/manage',
+		name: 'UserManagePage',
+		component: () => import('../views/UserManagePage.vue')
 	},
 	{
-		path: '/tag/create',
-		name: 'TagCreatePage',
-		component: () => import('../views/TagCreatePage.vue')
+		path: '/tag/manage',
+		name: 'TagManagePage',
+		component: () => import('../views/TagManagePage.vue')
 	}
 ];
 

@@ -2,7 +2,7 @@ const path = require("path");
 const { ipcMain } = require("electron");
 const { v4: generateRandomHash } = require("uuid");
 const sqlite3 = require("sqlite3").verbose();
-const { promises: fs } = require("fs");
+const fs = require("fs");
 const moment = require("moment");
 
 class IPCEvents {
@@ -20,35 +20,38 @@ class IPCEvents {
         let { database } = d;
 
         // Check if there are similar databases with the provided name
-        let databases = await fs.readdir(
-          path.resolve(__dirname, "../../assets/databases")
-        );
-        let similarDbNamesLen = databases.filter(
-          (d) => d.substr(0, d.lastIndexOf("_")) == database
-        ).length;
+        fs.readdir(
+          path.resolve(__dirname, "../../assets/databases"),
+          (err, files) => {
+            let databases = files;
+            let similarDbNamesLen = databases.filter(
+              (d) => d.substr(0, d.lastIndexOf("_")) == database
+            ).length;
 
-        if (similarDbNamesLen > 0) {
-          database = `${database}_${similarDbNamesLen}`;
-        } else {
-          database = `${database}_0`;
-        }
-        database = `${database}.db`;
+            if (similarDbNamesLen > 0) {
+              database = `${database}_${similarDbNamesLen}`;
+            } else {
+              database = `${database}_0`;
+            }
+            database = `${database}.db`;
 
-        // Create a new database
-        const db = new sqlite3.Database(
-          path.resolve(__dirname, `../../assets/databases/${database}`)
+            // Create a new database
+            const db = new sqlite3.Database(
+              path.resolve(__dirname, `../../assets/databases/${database}`)
+            );
+            db.serialize(function() {
+              db.run(
+                "create table users(id integer primary key autoincrement, first_name text, last_name text, " +
+                  " year integer, other_info text, sex text, height float, leg_length float, weight float, " +
+                  " injury_date date, surgery_date date ,created_at date, updated_at date)"
+              );
+              db.run(
+                "create table tags(id integer primary key autoincrement, name text, user_id integer)"
+              );
+            });
+            db.close();
+          }
         );
-        db.serialize(function() {
-          db.run(
-            "create table users(id integer primary key autoincrement, first_name text, last_name text, " +
-              " year integer, other_info text, sex text, height float, leg_length float, weight float, " +
-              "hospital_code text, injury_date date, surgery_date date ,created_at date, updated_at date)"
-          );
-          db.run(
-            "create table tags(id integer primary key autoincrement, name text, user_id integer)"
-          );
-        });
-        db.close();
       } catch (e) {
         throw new Error(e);
       }
@@ -78,13 +81,19 @@ class IPCEvents {
    * Fetch all the databases to the delete section
    * in order to delete a selected one.
    */
-  fetchDatabasesToDeleteEvent() {
+  fetchDatabasesToDeleteEvent(win) {
     ipcMain.on("FETCH_DATABASES_TO_DELETE", async (e) => {
       try {
-        let databases = await fs.readdir(
-          path.resolve(__dirname, "../../assets/databases")
+        fs.readdir(
+          path.resolve(__dirname, "../../assets/databases"),
+          (err, files) => {
+            if (win && !win.isDestroyed()) {
+              e.reply("FETCH_DATABASES_TO_DELETE_RESPONSE", {
+                databases: files,
+              });
+            }
+          }
         );
-        e.reply("FETCH_DATABASES_TO_DELETE_RESPONSE", { databases });
       } catch (e) {
         throw new Error(e);
       }
@@ -94,13 +103,19 @@ class IPCEvents {
   /**
    * Fetch all the databases to continue to the trial menu
    */
-  fetchDatabasesToContinueToTrialEvent() {
+  fetchDatabasesToContinueToTrialEvent(win) {
     ipcMain.on("FETCH_DATABASES_TO_CONTINUE", async (e) => {
       try {
-        let databases = await fs.readdir(
-          path.resolve(__dirname, "../../assets/databases")
+        fs.readdir(
+          path.resolve(__dirname, "../../assets/databases"),
+          (err, files) => {
+            if (win && !win.isDestroyed()) {
+              e.reply("FETCH_DATABASES_TO_CONTINUE_RESPONSE", {
+                databases: files,
+              });
+            }
+          }
         );
-        e.reply("FETCH_DATABASES_TO_CONTINUE_RESPONSE", { databases });
       } catch (e) {
         throw new Error(e);
       }
@@ -111,7 +126,7 @@ class IPCEvents {
    * Fetch all the users from a database that the user
    * selects.
    */
-  fetchUsersToContinueToTrialEvent() {
+  fetchUsersToContinueToTrialEvent(win) {
     ipcMain.on("FETCH_ALL_USERS_TO_CONTINUE", async (e, d) => {
       try {
         const { database } = d;
@@ -121,10 +136,14 @@ class IPCEvents {
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
           db.all("select * from users", (err, rows) => {
-            e.reply("FETCH_ALL_USERS_TO_CONTINUE_RESPONSE", { users: rows });
+            if (win && !win.isDestroyed()) {
+              e.reply("FETCH_ALL_USERS_TO_CONTINUE_RESPONSE", { users: rows });
+            }
           });
         } else {
-          e.reply("FETCH_ALL_USERS_TO_CONTINUE_RESPONSE", { users: [] });
+          if (win && !win.isDestroyed()) {
+            e.reply("FETCH_ALL_USERS_TO_CONTINUE_RESPONSE", { users: [] });
+          }
         }
       } catch (e) {
         throw new Error(e);
@@ -136,13 +155,19 @@ class IPCEvents {
    * Fetch all the databases at the tag management
    * window to handle the tags for each database
    */
-  fetchDatabasesToTagManagementEvent() {
+  fetchDatabasesToTagManagementEvent(win) {
     ipcMain.on("FETCH_DATABASES_TO_TAG_MANAGEMENT", async (e, d) => {
       try {
-        let databases = await fs.readdir(
-          path.resolve(__dirname, "../../assets/databases")
+        fs.readdir(
+          path.resolve(__dirname, "../../assets/databases"),
+          (err, files) => {
+            if (win && win.window && !win.window.isDestroyed()) {
+              e.reply("FETCH_DATABASES_TO_TAG_MANAGEMENT_RESPONSE", {
+                databases: files,
+              });
+            }
+          }
         );
-        e.reply("FETCH_DATABASES_TO_TAG_MANAGEMENT_RESPONSE", { databases });
       } catch (e) {
         throw new Error(e);
       }
@@ -186,7 +211,7 @@ class IPCEvents {
   /**
    * Fetch the created tags from a specific database
    */
-  fetchTagToTagManagementEvent() {
+  fetchTagToTagManagementEvent(win) {
     ipcMain.on("FETCH_TAG_TO_TAG_MANAGEMENT", async (e, d) => {
       try {
         const { database } = d;
@@ -194,11 +219,15 @@ class IPCEvents {
           const db = new sqlite3.Database(
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
-          db.all("select * from tags where user_id=-1", (err, rows) => {
-            e.reply("FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE", { tags: rows });
-          });
+          if (win && win.window && !win.window.isDestroyed()) {
+            db.all("select * from tags where user_id=-1", (err, rows) => {
+              e.reply("FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE", { tags: rows });
+            });
+          }
         } else {
-          e.reply("FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE", { tags: [] });
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply("FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE", { tags: [] });
+          }
         }
       } catch (e) {
         throw new Error(e);
@@ -209,8 +238,8 @@ class IPCEvents {
   /**
    * Fetch the created tags from a specific database
    */
-  fetchTagToUserCreationEvent() {
-    ipcMain.on("FETCH_TAG_TO_USER_CREATION", async (e, d) => {
+  fetchTagToUserManagementEvent(win) {
+    ipcMain.on("FETCH_TAGS_TO_USER_MANAGEMENT", async (e, d) => {
       try {
         const { database } = d;
         if (database && database != "") {
@@ -218,10 +247,14 @@ class IPCEvents {
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
           db.all("select * from tags where user_id=-1", (err, rows) => {
-            e.reply("FETCH_TAG_TO_USER_CREATION_RESPONSE", { tags: rows });
+            if (win && win.window && !win.window.isDestroyed()) {
+              e.reply("FETCH_TAGS_TO_USER_MANAGEMENT_RESPONSE", { tags: rows });
+            }
           });
         } else {
-          e.reply("FETCH_TAG_TO_USER_CREATION_RESPONSE", { tags: [] });
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply("FETCH_TAGS_TO_USER_MANAGEMENT_RESPONSE", { tags: [] });
+          }
         }
       } catch (e) {
         throw new Error(e);
@@ -229,19 +262,32 @@ class IPCEvents {
     });
   }
 
-  fetchDatabasesToUserCreationEvent() {
-    ipcMain.on("FETCH_DATABASES_TO_USER_CREATION", async (e, d) => {
+  /**
+   * Fetch all the databases at the user creation.
+   */
+  fetchDatabasesToUserManagementEvent(win) {
+    ipcMain.on("FETCH_DATABASES_TO_USER_MANAGEMENT", async (e, d) => {
       try {
-        let databases = await fs.readdir(
-          path.resolve(__dirname, "../../assets/databases")
+        fs.readdir(
+          path.resolve(__dirname, "../../assets/databases"),
+          (err, files) => {
+            if (win && win.window && !win.window.isDestroyed()) {
+              e.reply("FETCH_DATABASES_TO_USER_MANAGEMENT_RESPONSE", {
+                databases: files,
+              });
+            }
+          }
         );
-        e.reply("FETCH_DATABASES_TO_USER_CREATION_RESPONSE", { databases });
       } catch (e) {
         throw new Error(e);
       }
     });
   }
 
+  /**
+   * Create a user at a specific database and then create all
+   * the tags that are binded to the created user.
+   */
   createUserEvent() {
     ipcMain.on("CREATE_USER", (_, d) => {
       try {
@@ -255,7 +301,6 @@ class IPCEvents {
           legLength,
           weight,
           otherInfo,
-          hospitalCode,
           surgeryDate,
           injuryDate,
           tags,
@@ -266,21 +311,22 @@ class IPCEvents {
         );
         db.serialize(function() {
           db.run(
-            `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, created_at,updated_at)` +
+            `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, weight, surgery_date, injury_date, created_at,updated_at)` +
               `values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
-              `'${hospitalCode}','${moment(new Date(surgeryDate)).format(
-                "DD - MM - YYYY"
+              `'${moment(new Date(surgeryDate)).format(
+                "DD-MM-YYYY"
               )}','${moment(new Date(injuryDate)).format(
-                "DD - MM - YYYY"
-              )}','${moment(new Date()).format("DD - MM - YYYY")}', '${moment(
+                "DD-MM-YYYY"
+              )}','${moment(new Date()).format("DD-MM-YYYY")}', '${moment(
                 new Date()
-              ).format("DD - MM - YYYY")}')`,
+              ).format("DD-MM-YYYY")}')`,
             [],
-            function(){
-              console.log(this.lastID);
-              tags.map(t => {
-                db.run(`insert into tags(name, user_id) values('${t.text}',${this.lastID})`)
-              })
+            function() {
+              tags.map((t) => {
+                db.run(
+                  `insert into tags(name, user_id) values('${t}',${this.lastID})`
+                );
+              });
             }
           );
         });
@@ -290,8 +336,11 @@ class IPCEvents {
     });
   }
 
-  fetchAllUsersEvent() {
-    ipcMain.on("FETCH_ALL_USERS", (e, d) => {
+  /**
+   * Fetch all the users to edit a specific user.
+   */
+  fetchAllUsersToEditEvent(win) {
+    ipcMain.on("FETCH_ALL_USERS_TO_EDIT", (e, d) => {
       const { database } = d;
       this.selectedDatabase = database;
       if (this.selectedDatabase && this.selectedDatabase != "") {
@@ -299,53 +348,119 @@ class IPCEvents {
           path.resolve(__dirname, `../../assets/databases/${database}`)
         );
         db.all("select * from users", (err, rows) => {
-          e.reply("FETCH_ALL_USERS_RESPONSE", { users: rows });
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply("FETCH_ALL_USERS_TO_EDIT_RESPONSE", { users: rows });
+          }
         });
       } else {
-        e.reply("FETCH_ALL_USERS_RESPONSE", { users: [] });
+        if (win && win.window && !win.window.isDestroyed()) {
+          e.reply("FETCH_ALL_USERS_TO_EDIT_RESPONSE", { users: [] });
+        }
       }
     });
   }
 
-  // createUserEvent() {
-  //   ipcMain.on("CREATE_USER", (_, d) => {
-  //     const {
-  //       database,
-  //       firstName,
-  //       lastName,
-  //       year,
-  //       sex,
-  //       height,
-  //       legLength,
-  //       weight,
-  //       otherInfo,
-  //       hospitalCode,
-  //       surgeryDate,
-  //       injuryDate,
-  //       affectedSide,
-  //     } = d;
-  //     const db = new sqlite3.Database(
-  //       path.resolve(__dirname, `../../assets/databases/${database}`)
-  //     );
-  //     db.run(
-  //       `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, affected_side, created_at,updated_at)` +
-  //         `values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
-  //         `'${hospitalCode}','${moment(new Date(surgeryDate)).format(
-  //           "DD - MM - YYYY"
-  //         )}','${moment(new Date(injuryDate)).format(
-  //           "DD - MM - YYYY"
-  //         )}','${affectedSide}','${moment(new Date()).format(
-  //           "DD - MM - YYYY"
-  //         )}', '${moment(new Date()).format("DD - MM - YYYY")}')`
-  //     );
-  //   });
-  // }
+  /**
+   * Fetch all the tags that belong to a user.
+   */
+  fetchAllTagsForUserEvent(win) {
+    ipcMain.on("FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT", (e, d) => {
+      const { database, userId } = d;
+      if (database && database != "") {
+        const db = new sqlite3.Database(
+          path.resolve(__dirname, `../../assets/databases/${database}`)
+        );
+        db.all(`select * from tags where user_id=${userId}`, (err, rows) => {
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply("FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT_RESPONSE", {
+              tags: rows,
+            });
+          }
+        });
+        db.close();
+      } else {
+        if (win && win.window && !win.window.isDestroyed()) {
+          e.reply("FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT_RESPONSE", {
+            tags: [],
+          });
+        }
+      }
+    });
+  }
+
+  /**
+   * Update the user with the new details.
+   */
+  updateUserEvent() {
+    ipcMain.on("UPDATE_USER", (_, d) => {
+      const {
+        id,
+        database,
+        firstName,
+        lastName,
+        year,
+        sex,
+        height,
+        legLength,
+        weight,
+        otherInfo,
+        surgeryDate,
+        injuryDate,
+        tags,
+      } = d;
+
+      if (database && database != "") {
+        const db = new sqlite3.Database(
+          path.resolve(__dirname, `../../assets/databases/${database}`)
+        );
+        db.run(
+          `update users set first_name='${firstName}', last_name='${lastName}', year=${year}, sex='${sex}', height=${height},` +
+            ` leg_length=${legLength} , weight=${weight}, other_info='${otherInfo}' , surgery_date='${moment(
+              new Date(surgeryDate)
+            ).format("DD-MM-YYYY")}', injury_date='${moment(
+              new Date(injuryDate)
+            ).format("DD-MM-YYYY")}', updated_at='${moment(new Date()).format(
+              "DD-MM-YYYY"
+            )}' where id = ${id}`
+        );
+        db.run(`delete from tags where user_id=${id}`);
+        tags.map((t) => {
+          db.run(
+            `insert into tags(name, user_id) values('${t}',${id})`
+          );
+        });
+        db.close();
+      }
+    });
+  }
+
+  /**
+   * Fetch all the users from a specific database
+   */
+  fetchAllUsersToViewEvent(win) {
+    ipcMain.on("FETCH_ALL_USERS_TO_VIEW", (e, d) => {
+      const { database } = d;
+      this.selectedDatabase = database;
+      if (this.selectedDatabase && this.selectedDatabase != "") {
+        const db = new sqlite3.Database(
+          path.resolve(__dirname, `../../assets/databases/${database}`)
+        );
+        db.all("select * from users", (err, rows) => {
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply("FETCH_ALL_USERS_TO_VIEW_RESPONSE", { users: rows });
+          }
+        });
+      } else {
+        if (win && win.window && !win.window.isDestroyed()) {
+          e.reply("FETCH_ALL_USERS_TO_VIEW_RESPONSE", { users: [] });
+        }
+      }
+    });
+  }
 
   queryUsersEvent() {
     ipcMain.on("QUERY_USERS", (e, d) => {
-      console.log(this.selectedDatabase);
       if (this.selectedDatabase != "") {
-        console.log(this.selectedDatabase);
         const { firstName, lastName, year, weight, sex, height, legLength } = d;
         const db = new sqlite3.Database(
           path.resolve(
