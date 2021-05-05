@@ -22,7 +22,7 @@
                 Successfully created a database.
               </v-alert>
               <v-btn
-                :disabled="databaseToCreate === ''"
+                :disabled="databaseToCreate === '' || !databaseToCreate"
                 @click="createDatabase()"
                 class="createDatabaseButton"
               >
@@ -55,7 +55,7 @@
                 Successfully deleted a database.
               </v-alert>
               <v-btn
-                :disabled="databaseToDelete === ''"
+                :disabled="databaseToDelete === '' || !databaseToDelete"
                 @click="deleteDatabase()"
                 class="deleteDatabaseButton"
               >

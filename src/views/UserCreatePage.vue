@@ -1,22 +1,19 @@
 <template>
   <v-container>
-    <v-row class="mt-4 mb-3">
+    <v-row class="mt-10">
       <v-col>
         <h3>Create a new user</h3>
         <hr class="hr" />
+        <div class="mt-3">
+          <v-alert outlined type="success" text v-if="userCreationAlert">
+            Successfully created a user
+          </v-alert>
+        </div>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col>
-        <v-alert outlined type="success" text v-if="userCreationAlert">
-          Successfully created a user
-        </v-alert>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col align="center" cols="6">
-        <v-select
-          v-model="selectedDatabase"
+    <v-row align="center" class="mt-0">
+      <v-col align="center"
+        ><v-select
           :items="
             databases.map((d) => ({
               text: d.substr(0, d.lastIndexOf('.')),
@@ -24,32 +21,62 @@
             }))
           "
           label="Database"
+          @input="databaseChanged"
+          clearable
           outlined
         ></v-select>
       </v-col>
-      <v-col align="center" cols="6">
-        <v-text-field v-model="hospitalCode" label="Hospital Code" outlined />
+      <v-col align="center">
+        <v-text-field
+          v-model="hospitalCode"
+          label="Hospital Code"
+          outlined
+          clearable
+        />
       </v-col>
     </v-row>
-    <v-row align="center">
+    <v-row align="center" class="mt-0">
       <v-col align="center">
-        <v-text-field v-model="firstName" label="First Name" outlined />
+        <v-text-field
+          v-model="firstName"
+          label="First Name"
+          outlined
+          clearable
+        />
       </v-col>
       <v-col align="center">
-        <v-text-field v-model="lastName" label="Last Name" outlined />
-      </v-col>
-    </v-row>
-    <v-row align="center">
-      <v-col align="center">
-        <v-text-field v-model="year" label="Year of Birth" outlined />
-      </v-col>
-      <v-col align="center">
-        <v-text-field v-model="height" label="Height (cm)" outlined />
+        <v-text-field v-model="lastName" label="Last Name" outlined clearable />
       </v-col>
     </v-row>
-    <v-row align="center">
+    <v-row align="center" class="mt-0">
       <v-col align="center">
-        <v-text-field v-model="legLength" label="Leg Length (cm)" outlined />
+        <v-text-field
+          v-model="year"
+          type="number"
+          label="Year of Birth"
+          outlined
+          clearable
+        />
+      </v-col>
+      <v-col align="center">
+        <v-text-field
+          v-model="height"
+          type="number"
+          label="Height (cm)"
+          outlined
+          clearable
+        />
+      </v-col>
+    </v-row>
+    <v-row align="center" class="mt-0">
+      <v-col align="center">
+        <v-text-field
+          v-model="legLength"
+          type="number"
+          label="Leg Length (cm)"
+          outlined
+          clearable
+        />
       </v-col>
       <v-col align="center">
         <v-select
@@ -57,10 +84,11 @@
           :items="sexOptions"
           label="Sex"
           outlined
+          clearable
         ></v-select>
       </v-col>
     </v-row>
-    <v-row align="center">
+    <v-row align="center" class="mt-0">
       <v-col align="center">
         <v-menu
           ref="injuryDate"
@@ -82,12 +110,12 @@
           <v-date-picker
             ref="injuryDatePicker"
             v-model="injuryDate"
+            light
             :max="new Date().toISOString().substr(0, 10)"
             min="1950-01-01"
             @change="saveInjuryDate"
-          ></v-date-picker>
-        </v-menu>
-      </v-col>
+          ></v-date-picker> </v-menu
+      ></v-col>
       <v-col align="center">
         <v-menu
           ref="surgeryDate"
@@ -109,6 +137,7 @@
           <v-date-picker
             ref="surgeryDatePicker"
             v-model="surgeryDate"
+            light
             :max="new Date().toISOString().substr(0, 10)"
             min="1950-01-01"
             @change="saveSurgeryDate"
@@ -116,33 +145,84 @@
         </v-menu>
       </v-col>
     </v-row>
-    <v-row align="center">
+    <v-row align="center" class="mt-0">
       <v-col align="center" cols="4">
-        <v-text-field v-model="weight" label="Weight (N)" outlined />
+        <v-text-field
+          v-model="weight"
+          type="number"
+          label="Weight (N)"
+          outlined
+          clearable
+        />
       </v-col>
       <v-col align="center" cols="2">
         <v-btn @click="getWeight()" class="getWeightButton">+ </v-btn>
       </v-col>
       <v-col align="center">
-        <v-select
-          v-model="affected"
-          :items="affectedOptions"
-          label="Affected Side"
+        <v-combobox
+          v-model="selectedTags"
+          :items="tags.map((t) => ({ text: t.name, value: t.id }))"
+          chips
+          clearable
+          label="Tags"
+          multiple
           outlined
-        ></v-select>
+        >
+          <template v-slot:selection="{ attrs, item, select, selected }">
+            <v-chip
+              v-bind="attrs"
+              :input-value="selected"
+              close
+              @click="select"
+              @click:close="remove(item)"
+            >
+              <strong>{{ item.text }}</strong>
+            </v-chip>
+          </template>
+        </v-combobox>
       </v-col>
     </v-row>
-    <v-row align="center">
+    <v-row align="center" class="mt-0">
       <v-col align="center">
         <v-textarea
           v-model="otherInfo"
           label="Other Info"
           outlined
+          clearable
+          no-resize
+          rows="4"
         ></v-textarea>
       </v-col>
     </v-row>
     <div class="createButtonDiv">
-      <v-btn @click="createUser()" class="createUserButton"> Create </v-btn>
+      <v-btn
+        @click="createUser()"
+        class="createUserButton"
+        :disabled="
+          selectedDatabase === '' ||
+          !selectedDatabase ||
+          hospitalCode === '' ||
+          !hospitalCode ||
+          firstName === '' ||
+          !firstName ||
+          year === '' ||
+          !year ||
+          height === '' ||
+          !height ||
+          legLength === '' ||
+          !legLength ||
+          sex === '' ||
+          !sex ||
+          injuryDate === '' ||
+          !injuryDate ||
+          surgeryDate === '' ||
+          !surgeryDate ||
+          weight === '' ||
+          !weight 
+        "
+      >
+        Create
+      </v-btn>
     </div>
   </v-container>
 </template>
@@ -154,84 +234,67 @@ import rowsNames from "../../assets/store/rowsNames.json";
 export default {
   mounted() {
     setInterval(() => {
-      ipcRenderer.send("FETCH_ALL_DATABASES");
-    }, 10);
+      ipcRenderer.send("FETCH_DATABASES_TO_USER_CREATION");
+    }, 100);
+    setInterval(() => {
+      if (this.selectedDatabase && this.selectedDatabase != "") {
+        ipcRenderer.send("FETCH_TAG_TO_USER_CREATION", {
+          database: this.selectedDatabase,
+        });
+      }
+    }, 100);
     var _this = this;
-    ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
-      _this.databases = responseData.databases;
+    ipcRenderer.on(
+      "FETCH_DATABASES_TO_USER_CREATION_RESPONSE",
+      (_, responseData) => {
+        _this.databases = responseData.databases;
+      }
+    );
+    ipcRenderer.on("FETCH_TAG_TO_USER_CREATION_RESPONSE", (_, responseData) => {
+      _this.tags = responseData.tags;
     });
     ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
-      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]);
-      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]);
-    });
-    ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
-      _this.databases = responseData.databases;
-    });
-    ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
-      if(_this.selectedDatabase  === ""){
-        console.log(responseData.database)
-        if(responseData.database != ""){
-          _this.selectedDatabase = responseData.database
-        }
-      }
+      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
+      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });
   },
   data() {
     return {
+      userCreationAlert: false,
+      selectedDatabase: "",
+      databases: [],
+      hospitalCode: "",
       firstName: "",
       lastName: "",
-      year: "",
+      year: 1950,
+      height: 120,
+      legLength: 100,
       sex: "Male",
-      height: "",
-      legLength: "",
-      weight: "",
-      otherInfo: "",
-      hospitalCode: "",
-      surgeryDate:"",
-      injuryDate:"",
-      affected:"Not Affected",
       sexOptions: ["Male", "Female"],
-      affectedOptions: ["Left","Right","Left + Right","Not Affected"],
-      databases: [],
-      selectedDatabase: "",
+      injuryDateMenu: false,
+      surgeryDateMenu: false,
+      injuryDate: "",
+      surgeryDate: "",
       fz1: 0,
       fz2: 0,
-      userCreationAlert: false,
-      injuryDateMenu:false,
-      surgeryDateMenu:false
+      weight: 0.0,
+      otherInfo: "",
+      tags: [],
+      selectedTags: [],
     };
-  },
-  watch: {
-    injuryDateMenu (val) {
-      val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'))
-    },
-    surgeryDateMenu(val){
-      val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'))
-    }
   },
   methods: {
     saveInjuryDate(date) {
-      this.$refs.menu.save(date)
+      this.$refs.injuryDate.save(date);
     },
     saveSurgeryDate(date) {
-      this.$refs.menu.save(date)
+      this.$refs.surgeryDate.save(date);
+    },
+    getWeight() {
+      let w = this.fz1 + this.fz2;
+      this.weight = w.toFixed(2);
     },
     createUser() {
-      console.log({
-        database: this.selectedDatabase,
-        firstName: this.firstName,
-        lastName: this.lastName,
-        year: Number(this.year) || 0,
-        sex: this.sex,
-        height: Number(this.height) || 0,
-        legLength: Number(this.legLength) || 0,
-        weight: Number(this.weight) || 0,
-        otherInfo: this.otherInfo,
-        hospitalCode: this.hospitalCode,
-        surgeryDate: this.surgeryDate,
-        injuryDate: this.injuryDate,
-        affectedSide: this.affected
-      }),
       ipcRenderer.send("CREATE_USER", {
         database: this.selectedDatabase,
         firstName: this.firstName,
@@ -245,29 +308,34 @@ export default {
         hospitalCode: this.hospitalCode,
         surgeryDate: this.surgeryDate,
         injuryDate: this.injuryDate,
-        affectedSide: this.affected
+        tags: this.selectedTags
       });
-      this.selectedDatabase = "";
-      this.firstName = "";
-      this.lastName = "";
-      this.year = "";
-      this.sex = "Male";
-      this.height = "";
-      this.legLength = "";
-      this.weight = "";
-      this.otherInfo = "";
+      
       this.hospitalCode = ""
-      this.surgeryDate = ""
+      this.firstName = ""
+      this.lastName = ""
+      this.year = 1950
+      this.height = 120
+      this.legLength = 100
+      this.sex = "Male"
       this.injuryDate = ""
-      this.affected = "Not Affected"
-      this.userCreationAlert = true;
+      this.surgeryDate = ""
+      this.weight = 0.0
+      this.otherInfo = ""
+      this.selectedTags = [],
+      this.userCreationAlert = true
       setTimeout(() => {
         this.userCreationAlert = false;
       }, 3000);
     },
-    getWeight() {
-      let w = this.fz1 + this.fz2;
-      this.weight = w.toFixed(2);
+    databaseChanged(d) {
+      if (d) {
+        this.tags = [];
+        this.selectedDatabase = d;
+      } else {
+        this.tags = [];
+        this.selectedDatabase = "";
+      }
     },
   },
 };
@@ -276,6 +344,24 @@ export default {
 <style>
 .v-text-field__details {
   display: none !important;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+textarea::-webkit-scrollbar {
+  background-color: transparent !important;
+  width: 0px;
+}
+textarea::-webkit-scrollbar-track {
+  background-color: transparent;
+  width: 0px;
 }
 </style>
 

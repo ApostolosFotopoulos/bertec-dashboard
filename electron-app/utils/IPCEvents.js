@@ -42,7 +42,7 @@ class IPCEvents {
           db.run(
             "create table users(id integer primary key autoincrement, first_name text, last_name text, " +
               " year integer, other_info text, sex text, height float, leg_length float, weight float, " +
-              "hospital_code text, injury_date date, surgery_date date, affected_side text ,created_at date, updated_at date)"
+              "hospital_code text, injury_date date, surgery_date date ,created_at date, updated_at date)"
           );
           db.run(
             "create table tags(id integer primary key autoincrement, name text, user_id integer)"
@@ -207,17 +207,82 @@ class IPCEvents {
   }
 
   /**
-   * Users Events
+   * Fetch the created tags from a specific database
    */
-  fetchAllDatabasesEvent() {
-    ipcMain.on("FETCH_ALL_DATABASES", async (e) => {
+  fetchTagToUserCreationEvent() {
+    ipcMain.on("FETCH_TAG_TO_USER_CREATION", async (e, d) => {
+      try {
+        const { database } = d;
+        if (database && database != "") {
+          const db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+          db.all("select * from tags where user_id=-1", (err, rows) => {
+            e.reply("FETCH_TAG_TO_USER_CREATION_RESPONSE", { tags: rows });
+          });
+        } else {
+          e.reply("FETCH_TAG_TO_USER_CREATION_RESPONSE", { tags: [] });
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  fetchDatabasesToUserCreationEvent() {
+    ipcMain.on("FETCH_DATABASES_TO_USER_CREATION", async (e, d) => {
       try {
         let databases = await fs.readdir(
           path.resolve(__dirname, "../../assets/databases")
         );
-        e.reply("FETCH_ALL_DATABASES_RESPONSE", { databases });
-        e.reply("FETCH_SELECTED_DATABASE_RESPONSE", {
-          database: this.selectedDatabase,
+        e.reply("FETCH_DATABASES_TO_USER_CREATION_RESPONSE", { databases });
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  createUserEvent() {
+    ipcMain.on("CREATE_USER", (_, d) => {
+      try {
+        const {
+          database,
+          firstName,
+          lastName,
+          year,
+          sex,
+          height,
+          legLength,
+          weight,
+          otherInfo,
+          hospitalCode,
+          surgeryDate,
+          injuryDate,
+          tags,
+        } = d;
+
+        const db = new sqlite3.Database(
+          path.resolve(__dirname, `../../assets/databases/${database}`)
+        );
+        db.serialize(function() {
+          db.run(
+            `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, created_at,updated_at)` +
+              `values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
+              `'${hospitalCode}','${moment(new Date(surgeryDate)).format(
+                "DD - MM - YYYY"
+              )}','${moment(new Date(injuryDate)).format(
+                "DD - MM - YYYY"
+              )}','${moment(new Date()).format("DD - MM - YYYY")}', '${moment(
+                new Date()
+              ).format("DD - MM - YYYY")}')`,
+            [],
+            function(){
+              console.log(this.lastID);
+              tags.map(t => {
+                db.run(`insert into tags(name, user_id) values('${t.text}',${this.lastID})`)
+              })
+            }
+          );
         });
       } catch (e) {
         throw new Error(e);
@@ -242,39 +307,39 @@ class IPCEvents {
     });
   }
 
-  createUserEvent() {
-    ipcMain.on("CREATE_USER", (_, d) => {
-      const {
-        database,
-        firstName,
-        lastName,
-        year,
-        sex,
-        height,
-        legLength,
-        weight,
-        otherInfo,
-        hospitalCode,
-        surgeryDate,
-        injuryDate,
-        affectedSide,
-      } = d;
-      const db = new sqlite3.Database(
-        path.resolve(__dirname, `../../assets/databases/${database}`)
-      );
-      db.run(
-        `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, affected_side, created_at,updated_at)` +
-          `values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
-          `'${hospitalCode}','${moment(new Date(surgeryDate)).format(
-            "DD - MM - YYYY"
-          )}','${moment(new Date(injuryDate)).format(
-            "DD - MM - YYYY"
-          )}','${affectedSide}','${moment(new Date()).format(
-            "DD - MM - YYYY"
-          )}', '${moment(new Date()).format("DD - MM - YYYY")}')`
-      );
-    });
-  }
+  // createUserEvent() {
+  //   ipcMain.on("CREATE_USER", (_, d) => {
+  //     const {
+  //       database,
+  //       firstName,
+  //       lastName,
+  //       year,
+  //       sex,
+  //       height,
+  //       legLength,
+  //       weight,
+  //       otherInfo,
+  //       hospitalCode,
+  //       surgeryDate,
+  //       injuryDate,
+  //       affectedSide,
+  //     } = d;
+  //     const db = new sqlite3.Database(
+  //       path.resolve(__dirname, `../../assets/databases/${database}`)
+  //     );
+  //     db.run(
+  //       `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, weight,hospital_code, surgery_date, injury_date, affected_side, created_at,updated_at)` +
+  //         `values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength}, ${weight},` +
+  //         `'${hospitalCode}','${moment(new Date(surgeryDate)).format(
+  //           "DD - MM - YYYY"
+  //         )}','${moment(new Date(injuryDate)).format(
+  //           "DD - MM - YYYY"
+  //         )}','${affectedSide}','${moment(new Date()).format(
+  //           "DD - MM - YYYY"
+  //         )}', '${moment(new Date()).format("DD - MM - YYYY")}')`
+  //     );
+  //   });
+  // }
 
   queryUsersEvent() {
     ipcMain.on("QUERY_USERS", (e, d) => {

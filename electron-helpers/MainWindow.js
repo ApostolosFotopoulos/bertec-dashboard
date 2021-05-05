@@ -195,18 +195,19 @@ module.exports = class {
 		this.ipcEvents.fetchDatabasesToDeleteEvent();
 		this.ipcEvents.fetchDatabasesToContinueToTrialEvent();
 		this.ipcEvents.fetchDatabasesToTagManagementEvent();
+		this.ipcEvents.fetchDatabasesToUserCreationEvent();
 
 		// Users
 		this.ipcEvents.fetchUsersToContinueToTrialEvent();
+		this.ipcEvents.createUserEvent();
 
 		// Tags
 		this.ipcEvents.createTagEvent();
 		this.ipcEvents.deleteTagEvent();
 		this.ipcEvents.fetchTagToTagManagementEvent();
+		this.ipcEvents.fetchTagToUserCreationEvent();
 		
-		this.ipcEvents.fetchAllDatabasesEvent();
 		this.ipcEvents.fetchAllUsersEvent();
-		this.ipcEvents.createUserEvent();
 		this.ipcEvents.queryUsersEvent();
 
 		// Session Events
