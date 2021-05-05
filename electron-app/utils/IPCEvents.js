@@ -133,6 +133,80 @@ class IPCEvents {
   }
 
   /**
+   * Fetch all the databases at the tag management
+   * window to handle the tags for each database
+   */
+  fetchDatabasesToTagManagementEvent() {
+    ipcMain.on("FETCH_DATABASES_TO_TAG_MANAGEMENT", async (e, d) => {
+      try {
+        let databases = await fs.readdir(
+          path.resolve(__dirname, "../../assets/databases")
+        );
+        e.reply("FETCH_DATABASES_TO_TAG_MANAGEMENT_RESPONSE", { databases });
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  /**
+   * Create a new tag to a specific database
+   */
+  createTagEvent() {
+    ipcMain.on("CREATE_TAG", async (_, d) => {
+      try {
+        const { database, tag } = d;
+        const db = new sqlite3.Database(
+          path.resolve(__dirname, `../../assets/databases/${database}`)
+        );
+        db.run(`insert into tags(name, user_id) values('${tag}',-1)`);
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  /**
+   * Delete a tag from a specific database
+   */
+  deleteTagEvent() {
+    ipcMain.on("DELETE_TAG", async (_, d) => {
+      try {
+        const { database, tagId } = d;
+        const db = new sqlite3.Database(
+          path.resolve(__dirname, `../../assets/databases/${database}`)
+        );
+        db.run(`delete from tags where id=${tagId}`);
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  /**
+   * Fetch the created tags from a specific database
+   */
+  fetchTagToTagManagementEvent() {
+    ipcMain.on("FETCH_TAG_TO_TAG_MANAGEMENT", async (e, d) => {
+      try {
+        const { database } = d;
+        if (database && database != "") {
+          const db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+          db.all("select * from tags where user_id=-1", (err, rows) => {
+            e.reply("FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE", { tags: rows });
+          });
+        } else {
+          e.reply("FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE", { tags: [] });
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  /**
    * Users Events
    */
   fetchAllDatabasesEvent() {

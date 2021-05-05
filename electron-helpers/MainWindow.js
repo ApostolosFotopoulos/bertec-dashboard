@@ -54,7 +54,10 @@ module.exports = class {
 			console.log('TCPListener is active....');
 		});
 
-		new ForcePlatesProcess().createForcePlateProcess();
+		// Start the forceplate process only at windows
+		if (process.platform === "win64")  {
+			new ForcePlatesProcess().createForcePlateProcess();
+		}
 	}
 
 	async createWindow() {
@@ -139,7 +142,7 @@ module.exports = class {
 		this.createuserw.addEventListener();
 
 		this.createtagsw = new SecondaryWindow(
-			'Create Tag',
+			'Tags Management',
 			'OPEN_TAG_CREATE_WINDOW',
 			'CLOSE_TAG_CREATE_WINDOW',
 			'/tag/create'
@@ -191,9 +194,15 @@ module.exports = class {
 		this.ipcEvents.deleteDatabaseEvent();
 		this.ipcEvents.fetchDatabasesToDeleteEvent();
 		this.ipcEvents.fetchDatabasesToContinueToTrialEvent();
+		this.ipcEvents.fetchDatabasesToTagManagementEvent();
 
 		// Users
 		this.ipcEvents.fetchUsersToContinueToTrialEvent();
+
+		// Tags
+		this.ipcEvents.createTagEvent();
+		this.ipcEvents.deleteTagEvent();
+		this.ipcEvents.fetchTagToTagManagementEvent();
 		
 		this.ipcEvents.fetchAllDatabasesEvent();
 		this.ipcEvents.fetchAllUsersEvent();

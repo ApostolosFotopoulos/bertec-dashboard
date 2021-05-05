@@ -137,7 +137,7 @@ export default {
 .realTimeButton {
   height: 38px !important;
   min-height: 38px !important;
-  background: #ffa505 !important;
+  background: #f4a261 !important;
 }
 .newTrialButton {
   height: 38px !important;

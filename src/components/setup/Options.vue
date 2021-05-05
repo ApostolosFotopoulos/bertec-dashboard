@@ -17,7 +17,7 @@
                 type="success"
                 text
                 class="text-left"
-                v-if="visibleCreationAlert"
+                v-if="visibleCreationDatabaseAlert"
               >
                 Successfully created a database.
               </v-alert>
@@ -50,7 +50,7 @@
                 type="success"
                 text
                 class="text-left"
-                v-if="visibleDeleteAlert"
+                v-if="visibleDeleteDatabaseAlert"
               >
                 Successfully deleted a database.
               </v-alert>
@@ -75,18 +75,25 @@
               </v-btn>
             </div>
             <div class="mt-3">
+              <v-btn class="editUsersButton" block> Edit </v-btn>
+            </div>
+            <div class="mt-3">
               <v-btn @click="openUsersWindow()" class="viewUsersButton" block>
                 View All
               </v-btn>
             </div>
-            <h3 class="mt-3">Tags</h3>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="4">
+            <h3>Tags</h3>
             <div class="mt-3">
               <v-btn
                 @click="openTagCreationWindow()"
-                class="createTagsButton"
+                class="viewUsersButton"
                 block
               >
-                Create
+                Manage
               </v-btn>
             </div>
           </v-col>
@@ -102,10 +109,10 @@ export default {
   data() {
     return {
       databaseToCreate: "",
-      visibleCreationAlert: false,
+      visibleCreationDatabaseAlert: false,
       databases: [],
       databaseToDelete: "",
-      visibleDeleteAlert: false,
+      visibleDeleteDatabaseAlert: false,
     };
   },
   mounted() {
@@ -121,17 +128,17 @@ export default {
     createDatabase() {
       ipcRenderer.send("CREATE_DATABASE", { database: this.databaseToCreate });
       this.databaseToCreate = "";
-      this.visibleCreationAlert = true;
+      this.visibleCreationDatabaseAlert = true;
       setTimeout(() => {
-        this.visibleCreationAlert = false;
+        this.visibleCreationDatabaseAlert = false;
       }, 3000);
     },
-    deleteDatabase(){
+    deleteDatabase() {
       ipcRenderer.send("DELETE_DATABASE", { database: this.databaseToDelete });
-      this.databaseToDelete = ""
-      this.visibleDeleteAlert = true;
+      this.databaseToDelete = "";
+      this.visibleDeleteDatabaseAlert = true;
       setTimeout(() => {
-        this.visibleDeleteAlert = false;
+        this.visibleDeleteDatabaseAlert = false;
       }, 3000);
     },
     openUsersWindow() {
@@ -140,9 +147,9 @@ export default {
     openUserCreationWindow() {
       ipcRenderer.send("OPEN_USER_CREATE_WINDOW");
     },
-    openTagCreationWindow(){
+    openTagCreationWindow() {
       ipcRenderer.send("OPEN_TAG_CREATE_WINDOW");
-    }
+    },
   },
 };
 </script>
@@ -163,15 +170,14 @@ export default {
   min-height: 38px !important;
   background: #6ab187 !important;
 }
+.editUsersButton {
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #f4a261 !important;
+}
 .viewUsersButton {
   height: 38px !important;
   min-height: 38px !important;
-  background: #ffa505 !important;
-}
-
-.createTagsButton{
-  height: 38px !important;
-  min-height: 38px !important;
-  background: #6ab187 !important;
+  background: #e9c46a !important;
 }
 </style>
