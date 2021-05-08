@@ -10,7 +10,8 @@
     "webapp:dev": "webpack serve --hot --mode development --config config/webpack.dev.js",
     "webapp:prod": "NODE_ENV=production webpack --config config/webpack.prod.js",
     "start": "NODE_ENV=production npm-run-all -s webapp:prod electron:dev",
-    "dev": "NODE_ENV=development concurrently --kill-others \"npm run electron:dev\" \"npm run webapp:dev\"",
+    "dev:win": "NODE_ENV=development npm-run-all -p electron:dev webapp:dev",
+    "dev:unix": "NODE_ENV=development concurrently --kill-others \"npm run electron:dev\" \"npm run webapp:dev\"",
     "build:mac": "electron-builder build --mac",
     "build:windows": "electron-builder build --windows"
   },
