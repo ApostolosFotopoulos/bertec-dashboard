@@ -1,6 +1,7 @@
 const { spawn } = require('child_process');
 module.exports = class {
 	createForcePlateProcess() {
+		console.log("[STATUS]: Force plate service is active");
 		const child = spawn('.\\data-fetching\\BertecForcePlatesFetchData.exe');
 
 		child.stdout.on('data', (data) => {

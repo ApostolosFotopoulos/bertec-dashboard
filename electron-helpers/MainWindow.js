@@ -37,11 +37,11 @@ module.exports = class {
 		this.ip = '0.0.0.0';
 		this.server = new net.Server();
 		this.server.listen(this.port, () => {
-			console.log('TCPListener is active....');
+			console.log('[STATUS] TCP server is active');
 		});
 
 		// Start the forceplate process only at windows
-		if (process.platform === "win64") {
+		if (process.platform === "win64" || process.platform == "win32") {
 			new ForcePlatesProcess().createForcePlateProcess();
 		}
 	}
