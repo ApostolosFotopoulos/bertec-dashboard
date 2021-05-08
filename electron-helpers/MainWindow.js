@@ -1,18 +1,11 @@
 const { BrowserWindow, ipcMain, dialog } = require('electron');
 const SecondaryWindow = require('./SecondaryWindow');
 const ForcePlatesProcess = require('./ForcePlatesProcess');
-const csv = require('async-csv');
 const fs = require('fs').promises;
 const path = require('path');
 const events = require('events');
 var net = require('net');
 const IPCEvents = require('../electron-app/utils/IPCEvents.js');
-
-// Global Variables
-const SKIP_ENTRIES_SPEEDMETER = 1;
-const SKIP_ENTRIES_LINECHART = 1;
-const SKIP_ENTRIES_COPCHART = 1;
-const SKIP_ENTRIES_TIMELINE = 1;
 
 module.exports = class {
 	constructor() {
@@ -28,13 +21,6 @@ module.exports = class {
 		this.nOfLines = 10;
 		this.socket = null;
 		this.isSessionRunning = false;
-
-		// Backend Options
-		this.rows = [];
-		this.nOfStepsSpeedMeter = 0;
-		this.nOfStepsLineChart = 0;
-		this.nOfCOPChart = 0;
-		this.nOfTimeline = 0;
 
 		// Window Options
 		this.cw = null;
@@ -55,14 +41,13 @@ module.exports = class {
 		});
 
 		// Start the forceplate process only at windows
-		if (process.platform === "win64")  {
+		if (process.platform === "win64") {
 			new ForcePlatesProcess().createForcePlateProcess();
 		}
 	}
 
 	async createWindow() {
 		try {
-			this.rows = await this.fetchDataFromCSV();
 			this.window = new BrowserWindow({
 				width: 1000,
 				height: 800,
@@ -85,7 +70,6 @@ module.exports = class {
 			}
 
 			this.addSecondaryWindowsEvents();
-			this.saveFileEvent();
 			this.startSessionEvents();
 
 			this.window.on('closed', () => {
@@ -148,7 +132,7 @@ module.exports = class {
 			'/tag/manage'
 		);
 		this.createtagsw.addEventListener();
-		
+
 		ipcMain.on('WINDOWS_STATUS', async (e) => {
 			e.reply('WINDOWS_STATUS_RESPONSE', {
 				chartWindowVisible: (this.cw && this.cw.window) !== null,
@@ -156,33 +140,6 @@ module.exports = class {
 				lineChartWindowVisible: (this.linechartw && this.linechartw.window) != null,
 				isTimelineVisibile: (this.timelinew && this.timelinew.window) != null
 			});
-		});
-	}
-
-	saveFileEvent() {
-		ipcMain.on('FILE_SAVE', async (e) => {
-			var options = {
-				title: 'Save file',
-				buttonLabel: 'Save',
-				defaultPath: `./${new Date().toLocaleString()}.csv`,
-				filters: [
-					{
-						name: 'CSV',
-						extensions: [ 'csv' ]
-					}
-				]
-			};
-			// Show dialog
-			const res = await dialog.showSaveDialog({
-				options
-			});
-
-			// Create the file
-			this.filePath = res.filePath;
-			fs.writeFile(res.filePath, '');
-
-			// Reply to the file path event
-			e.reply('FILE_SAVE_RESPONSE', { filePath: res.filePath });
 		});
 	}
 
@@ -210,7 +167,7 @@ module.exports = class {
 		this.ipcEvents.fetchTagToTagManagementEvent(this.createtagsw);
 		this.ipcEvents.fetchTagToUserManagementEvent(this.createuserw);
 		this.ipcEvents.fetchAllTagsForUserEvent(this.createuserw);
-		
+
 		this.ipcEvents.queryUsersEvent();
 
 		// Session Events
@@ -226,9 +183,6 @@ module.exports = class {
 		ipcMain.on('STOP_SESSION', () => {
 			// Reset the settings
 			this.isSessionRunning = false;
-			this.nOfStepsSpeedMeter = 0;
-			this.nOfStepsLineChart = 0;
-			this.nOfCOPChart = 0;
 		});
 
 		// Listen for TCP Packets to forward them to the dashboard
@@ -352,97 +306,5 @@ module.exports = class {
 			console.log('Tried to reset force plate');
 			this.socket.write('RESET_FORCE_PLATES');
 		});
-
-		// SpeedMeter Events
-		ipcMain.on('SESSION_RUNNING_SPEEDMETER', (e, d) => {
-			if (this.isSessionRunning) {
-				e.reply('SESSION_RESPONSE_SPEEDMETER', {
-					rows: this.rows[this.nOfCOPChart % this.rows.length].map((i) => Number(i)),
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight,
-					force: Math.random().toFixed(2)
-				});
-				this.nOfCOPChart = this.nOfCOPChart + SKIP_ENTRIES_LINECHART;
-			} else {
-				this.nOfCOPChart = 0;
-				e.reply('SESSION_RESPONSE_LINECHART', {
-					rows: [],
-					force: 0,
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight
-				});
-			}
-		});
-
-		// LineChart Events
-		ipcMain.on('SESSION_RUNNING_LINECHART', (e, d) => {
-			if (this.isSessionRunning) {
-				e.reply('SESSION_RESPONSE_LINECHART', {
-					rows: this.rows[this.nOfStepsLineChart % this.rows.length].map((i) => Number(i)),
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight,
-					force: Math.random().toFixed(2)
-				});
-				this.nOfStepsLineChart = this.nOfStepsLineChart + SKIP_ENTRIES_LINECHART;
-			} else {
-				this.nOfStepsLineChart = 0;
-				e.reply('SESSION_RESPONSE_LINECHART', {
-					rows: [],
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight,
-					force: 0
-				});
-			}
-		});
-
-		// COP Chart Events
-		ipcMain.on('SESSION_RUNNING_COP', (e, d) => {
-			if (this.isSessionRunning) {
-				e.reply('SESSION_RESPONSE_COP', {
-					rows: this.rows[this.nOfCOPChart % this.rows.length].map((i) => Number(i)),
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight
-				});
-				this.nOfCOPChart = this.nOfCOPChart + SKIP_ENTRIES_COPCHART;
-			} else {
-				this.nOfCOPChart = 0;
-				e.reply('SESSION_RESPONSE_COP', {
-					rows: [],
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight
-				});
-			}
-		});
-
-		ipcMain.on('SESSION_RUNNING_TIMELINE', (e, d) => {
-			if (this.isSessionRunning) {
-				e.reply('SESSION_RESPONSE_TIMELINE', {
-					rows: this.rows[this.nOfTimeline % this.rows.length].map((i) => Number(i)),
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight,
-					force: Math.random().toFixed(2)
-				});
-				this.nOfTimeline = this.nOfTimeline + SKIP_ENTRIES_COPCHART;
-			} else {
-				this.nOfTimeline = 0;
-				e.reply('SESSION_RESPONSE_TIMELINE', {
-					rows: [],
-					isSessionRunning: this.isSessionRunning,
-					weight: this.weight,
-					force: 0
-				});
-			}
-		});
-	}
-
-	async fetchDataFromCSV() {
-		try {
-			const csvString = await fs.readFile(path.resolve(__dirname, '../assets/data/run_2belts.csv'));
-			let rows = (await csv.parse(csvString)).filter((_, idx) => idx != 0);
-			return rows;
-		} catch (e) {
-			console.log(e);
-			return [];
-		}
 	}
 };
