@@ -1,11 +1,11 @@
 const { BrowserWindow, ipcMain, dialog } = require('electron');
 const SecondaryWindow = require('./SecondaryWindow');
-const ForcePlatesProcess = require('./ForcePlatesProcess');
+const ForcePlatesProcess = require('../util/ForcePlatesProcess');
 const fs = require('fs').promises;
 const path = require('path');
 const events = require('events');
 var net = require('net');
-const IPCEvents = require('../electron-app/utils/IPCEvents.js');
+const IPCEvents = require('../util/IPCEvents.js');
 
 module.exports = class {
 	constructor() {

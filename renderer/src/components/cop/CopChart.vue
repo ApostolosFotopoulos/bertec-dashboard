@@ -64,7 +64,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-const defaultOptions = require("../../../assets/options/copChart.json");
+const defaultOptions = require("../../../../assets/options/copChart.json");
 
 import VueApexCharts from "vue-apexcharts";
 export default {

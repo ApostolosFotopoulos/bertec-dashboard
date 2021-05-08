@@ -1,15 +1,19 @@
 <template>
-  <v-container class="pa-0 mt-0">
+  <v-container class="mt-0 pa-0">
     <v-row>
       <v-col>
-        <h3>Select a database and a user</h3>
+        <h3>Create a new user</h3>
         <hr class="hr" />
+        <div class="mt-3">
+          <v-alert outlined type="success" text v-if="userCreationAlert">
+            Successfully created a user
+          </v-alert>
+        </div>
       </v-col>
     </v-row>
     <v-row align="center" class="mt-0">
-      <v-col align="center"
+      <v-col align="center" cols="6" offset="3"
         ><v-select
-        v-model="selectedDatabase"
           :items="
             databases.map((d) => ({
               text: d.substr(0, d.lastIndexOf('.')),
@@ -21,33 +25,6 @@
           clearable
           outlined
         ></v-select>
-      </v-col>
-      <v-col align="center"
-        ><v-select
-          v-model="selectedUser"
-          :items="
-            users &&
-            users.map((u) => ({
-              text: u.first_name + ' ' + u.last_name,
-              value: u,
-            }))
-          "
-          label="Users"
-          @input="userChanged"
-          clearable
-          outlined
-        ></v-select>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
-        <h3>Edit a user</h3>
-        <hr class="hr" />
-        <div class="mt-3">
-          <v-alert outlined type="success" text v-if="userEditAlert">
-            Successfully updated a user.
-          </v-alert>
-        </div>
       </v-col>
     </v-row>
     <v-row align="center" class="mt-0">
@@ -196,15 +173,13 @@
         ></v-textarea>
       </v-col>
     </v-row>
-    <div class="updateButtonDiv">
+    <div class="createButtonDiv">
       <v-btn
-        @click="updateUser()"
-        class="updateUserButton"
+        @click="createUser()"
+        class="createUserButton"
         :disabled="
           selectedDatabase === '' ||
           !selectedDatabase ||
-          selectedUser === '' ||
-          !selectedUser ||
           firstName === '' ||
           !firstName ||
           year === '' ||
@@ -223,7 +198,7 @@
           !weight
         "
       >
-        Update
+        Create
       </v-btn>
     </div>
   </v-container>
@@ -231,9 +206,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-import rowsNames from "../../../assets/store/rowsNames.json";
-import moment from "moment";
-
+import rowsNames from "../../../../assets/store/rowsNames.json";
 export default {
   mounted() {
     this.fetchDatabasesInterval = setInterval(() => {
@@ -242,13 +215,6 @@ export default {
     this.fetchTagsInterval = setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
         ipcRenderer.send("FETCH_TAGS_TO_USER_MANAGEMENT", {
-          database: this.selectedDatabase,
-        });
-      }
-    }, 100);
-    this.fetchUsersInterval = setInterval(() => {
-      if (this.selectedDatabase && this.selectedDatabase != "") {
-        ipcRenderer.send("FETCH_ALL_USERS_TO_EDIT", {
           database: this.selectedDatabase,
         });
       }
@@ -266,25 +232,15 @@ export default {
         _this.tags = responseData.tags;
       }
     );
-    ipcRenderer.on("FETCH_ALL_USERS_TO_EDIT_RESPONSE", (_, responseData) => {
-      _this.users = responseData.users;
-    });
-    ipcRenderer.on(
-      "FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT_RESPONSE",
-      (_, responseData) => {
-        //_this.selectedTags = responseData.tags;
-        this.selectedTags = responseData.tags.map((t) => t.name);
-      }
-    );
     ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
       this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
       this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });
   },
+
   beforeDestroy() {
     clearInterval(this.fetchDatabasesInterval);
     clearInterval(this.fetchTagsInterval);
-    clearInterval(this.fetchUsersInterval);
     ipcRenderer.removeListener(
       "FETCH_DATABASES_TO_USER_MANAGEMENT_RESPONSE",
       (_, responseData) => {
@@ -292,15 +248,9 @@ export default {
       }
     );
     ipcRenderer.removeListener(
-      "FETCH_TAGS_TO_USER_MANAGEMENT",
+      "FETCH_TAGS_TO_USER_MANAGEMENT_RESPONSE",
       (_, responseData) => {
         _this.tags = responseData.tags;
-      }
-    );
-    ipcRenderer.removeListener(
-      "FETCH_ALL_USERS_TO_EDIT_RESPONSE",
-      (_, responseData) => {
-        _this.users = responseData.users;
       }
     );
     ipcRenderer.removeListener("CREATE_USER_SESSION", (_, responseData) => {
@@ -310,11 +260,9 @@ export default {
   },
   data() {
     return {
-      userEditAlert: false,
-      databases: [],
+      userCreationAlert: false,
       selectedDatabase: "",
-      users: [],
-      selectedUser: "",
+      databases: [],
       firstName: "",
       lastName: "",
       year: 1950,
@@ -334,7 +282,6 @@ export default {
       selectedTags: [],
       fetchDatabasesInterval: null,
       fetchTagsInterval: null,
-      fetchUsersInterval: null,
     };
   },
   methods: {
@@ -348,53 +295,8 @@ export default {
       let w = this.fz1 + this.fz2;
       this.weight = w.toFixed(2);
     },
-    databaseChanged(d) {
-      if (d) {
-        this.users = [];
-        this.tags = [];
-        this.selectedDatabase = d;
-      } else {
-        this.tags = [];
-        this.users = [];
-        this.selectedDatabase = "";
-      }
-    },
-    userChanged(u) {
-      if (u) {
-        this.selectedUser = u;
-        this.firstName = u.first_name;
-        this.lastName = u.last_name;
-        this.year = u.year;
-        this.height = u.height;
-        this.legLength = u.leg_length;
-        this.sex = u.sex;
-        this.injuryDate = moment(new Date(u.injury_date)).format("YYYY-MM-DD");
-        this.surgeryDate = moment(new Date(u.surgery_date)).format(
-          "YYYY-MM-DD"
-        );
-        this.weight = u.weight;
-        this.otherInfo = u.other_info;
-        ipcRenderer.send("FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT", {
-          database: this.selectedDatabase,
-          userId: this.selectedUser.id,
-        });
-      } else {
-        this.selectedUser = "";
-        this.firstName = "";
-        this.lastName = "";
-        this.year = 1950;
-        this.height = 120;
-        this.legLength = 100;
-        this.sex = "Male";
-        this.injuryDate = "";
-        this.surgeryDate = "";
-        this.weight = 0.0;
-        this.otherInfo = "";
-      }
-    },
-    updateUser() {
-      ipcRenderer.send("UPDATE_USER", {
-        id: this.selectedUser.id,
+    createUser() {
+      ipcRenderer.send("CREATE_USER", {
         database: this.selectedDatabase,
         firstName: this.firstName,
         lastName: this.lastName,
@@ -409,7 +311,6 @@ export default {
         tags: this.selectedTags,
       });
 
-      this.selectedUser = "";
       this.firstName = "";
       this.lastName = "";
       this.year = 1950;
@@ -420,11 +321,20 @@ export default {
       this.surgeryDate = "";
       this.weight = 0.0;
       this.otherInfo = "";
-      this.selectedTags = [] 
-      this.userEditAlert = true;
+      this.selectedTags = [];
+      this.userCreationAlert = true;
       setTimeout(() => {
-        this.userEditAlert   = false;
+        this.userCreationAlert = false;
       }, 3000);
+    },
+    databaseChanged(d) {
+      if (d) {
+        this.tags = [];
+        this.selectedDatabase = d;
+      } else {
+        this.tags = [];
+        this.selectedDatabase = "";
+      }
     },
   },
 };
@@ -455,13 +365,13 @@ textarea::-webkit-scrollbar-track {
 </style>
 
 <style scoped>
-.updateUserButton,
+.createUserButton,
 .getWeightButton {
   height: 38px !important;
   min-height: 38px !important;
   background: #6ab187 !important;
 }
-.updateButtonDiv {
+.createButtonDiv {
   text-align: right;
 }
 </style>

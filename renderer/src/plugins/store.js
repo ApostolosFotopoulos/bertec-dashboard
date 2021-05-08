@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import _ from 'lodash';
-import moment, { max } from 'moment';
-import rowsNames from '../../assets/store/rowsNames.json';
+import moment from 'moment';
+import rowsNames from '../../../assets/store/rowsNames.json';
 Vue.use(Vuex);
 
 export default new Vuex.Store({

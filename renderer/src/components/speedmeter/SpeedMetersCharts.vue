@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import rowNames from "../../../assets/store/rowsNames.json";
+import rowNames from "../../../../assets/store/rowsNames.json";
 const { ipcRenderer } = window.require("electron");
 import VueSpeedometer from "vue-speedometer";
 

@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import rowsNames from "../../../assets/store/rowsNames.json";
+import rowsNames from "../../../../assets/store/rowsNames.json";
 const { ipcRenderer } = window.require("electron");
 
 export default {

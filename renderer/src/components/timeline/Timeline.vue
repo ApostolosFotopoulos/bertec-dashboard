@@ -30,7 +30,7 @@
 const { ipcRenderer } = window.require("electron");
 import VueApexCharts from "vue-apexcharts";
 import AccuracyCard from "./AccuracyCard.vue"
-const defaultOptions = require("../../../assets/options/timeline.json");
+const defaultOptions = require("../../../../assets/options/timeline.json");
 
 export default {
   components: {

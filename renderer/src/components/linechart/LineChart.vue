@@ -28,7 +28,7 @@
 <script>
 import VueApexCharts from "vue-apexcharts";
 const { ipcRenderer } = window.require("electron");
-const defaultLineChartOptions = require("../../../assets/options/lineChart.json");
+const defaultLineChartOptions = require("../../../../assets/options/lineChart.json");
 
 export default {
   components: {
