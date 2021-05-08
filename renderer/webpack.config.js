@@ -1,93 +1,74 @@
-const { VueLoaderPlugin } = require('vue-loader');
-const htmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const webpack = require('webpack');
 
 module.exports = {
-  entry: {
-    main: path.resolve(__dirname, './src/main.js'),
-  },
-  output: {
-    filename: '[name].[contenthash:8].js',
-    path: path.resolve(__dirname, 'dist'),
-    chunkFilename: '[name].[contenthash:8].js',
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
-      },
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader',
-      },
-      {
-        test: /\.(eot|ttf|woff|woff2)(\?\S*)?$/,
-        loader: 'file-loader',
-        options: {
-          name: '[name][contenthash:8].[ext]',
-        },
-      },
-      {
-        test: /\.(png|jpe?g|gif|webm|mp4|svg)$/,
-        loader: 'file-loader',
-        options: {
-          name: '[name][contenthash:8].[ext]',
-          outputPath: 'assets/img',
-          esModule: false,
-        },
-      },
-      {
-        test: /\.css$/,
-        use: [
-          'vue-style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              esModule: false,
-            },
-          },
-        ],
-      },
-    ],
-  },
-  plugins: [
-    new VueLoaderPlugin(),
-    new CleanWebpackPlugin(),
-    // eslint-disable-next-line new-cap
-    new htmlWebpackPlugin({
-      template: path.resolve(__dirname, './public', 'index.html'),
-      favicon: path.resolve(__dirname, './public/favicon.ico'),
-    }),
-  ],
-  resolve: {
-    alias: {
-      vue$: 'vue/dist/vue.runtime.esm.js',
-    },
-    extensions: ['*', '.js', '.vue', '.json'],
-  },
-  optimization: {
-    moduleIds: 'hashed',
-    runtimeChunk: 'single',
-    splitChunks: {
-      minSize: 10000,
-      maxSize: 250000,
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          priority: -10,
-          chunks: 'all',
-        },
-      },
-    },
-  },
-  devServer: {
-    historyApiFallback: true,
-    port: 1337,
-  },
+	entry: [ 'webpack-dev-server/client?http://0.0.0.0:1337', path.resolve(__dirname,'./src/main.js') ],
+	output: {
+		filename: '[name].js',
+		path: path.resolve(__dirname, '../dist'),
+		chunkFilename: '[id].[chunkhash].js'
+	},
+	devServer: {
+		publicPath: '/',
+		hot: true,
+		contentBase: '../dist',
+		port: 1337,
+	},
+	module: {
+		rules: [
+			{
+				test: /\.js$/,
+				exclude: /(node_modules)/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.vue$/,
+				loader: 'vue-loader'
+			},
+			{
+				test: /\.css$/,
+				use: [
+					'vue-style-loader',
+					{
+						loader: 'css-loader',
+						options: {
+							esModule: false
+						}
+					}
+				]
+			},
+			{
+				test: /\.(png|j?g|svg|gif)?$/,
+				use: 'file-loader'
+			}
+		]
+	},
+	resolve: {
+		symlinks: true,
+		alias: {
+			vue$: 'vue/dist/vue.esm.js'
+		}
+	},
+	plugins: [
+		new HtmlWebpackPlugin({
+			template: path.resolve(__dirname, './public/index.html'),
+			filename: 'index.html',
+			inject: true
+		}),
+		new webpack.HotModuleReplacementPlugin(),
+		new VueLoaderPlugin(),
+		new webpack.ProvidePlugin({
+			Vue: [ 'vue/dist/vue.esm.js' ]
+		})
+	],
+	optimization: {
+		splitChunks: {
+			minSize: 10000,
+			maxSize: 250000
+		}
+	}
 };

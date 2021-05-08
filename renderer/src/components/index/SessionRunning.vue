@@ -28,6 +28,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
+const { START_SESSION, STOP_SESSION} = require('../../../../main/util/types')
 export default {
   data() {
     return {
@@ -39,10 +40,10 @@ export default {
     startStopSession() {
       if (this.$store.state.options.isSessionRunning) {
         this.$store.commit("setSessionRunning", false);
-        ipcRenderer.send("STOP_SESSION");
+        ipcRenderer.send(STOP_SESSION);
       } else {
         this.$store.commit("setSessionRunning", true);
-        ipcRenderer.send("START_SESSION", {
+        ipcRenderer.send(START_SESSION, {
           weight: this.$store.state.options.weight,
         });
       }

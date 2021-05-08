@@ -1,24 +1,19 @@
 const { BrowserWindow, ipcMain, dialog } = require('electron');
 const SecondaryWindow = require('./SecondaryWindow');
 const ForcePlatesProcess = require('../util/ForcePlatesProcess');
-const fs = require('fs').promises;
 const path = require('path');
-const events = require('events');
 var net = require('net');
 const IPCEvents = require('../util/IPCEvents.js');
+const { START_SESSION, STOP_SESSION } = require('../util/types');
 
 module.exports = class {
 	constructor() {
 		// Options
 		this.ipcEvents = new IPCEvents();
-		this.filePath = '';
-		(this.mode = 'Walking'), (this.timeout = 60);
 		this.weight = 700;
 		this.dataType = 'Normalized';
 		this.stepsPerMinuteTarget = 200;
-		this.frequency = 100;
 		this.threshold = -1;
-		this.nOfLines = 10;
 		this.socket = null;
 		this.isSessionRunning = false;
 
@@ -41,7 +36,7 @@ module.exports = class {
 		});
 
 		// Start the forceplate process only at windows
-		if (process.platform === "win64" || process.platform == "win32") {
+		if (process.platform === 'win64' || process.platform == 'win32') {
 			new ForcePlatesProcess().createForcePlateProcess();
 		}
 	}
@@ -72,16 +67,35 @@ module.exports = class {
 			this.addSecondaryWindowsEvents();
 			this.startSessionEvents();
 
+			// Close all the secondary windows
 			this.window.on('closed', () => {
 				if (this.cw.window) {
 					this.cw.window.close();
 				}
+				if (this.cpw.window) {
+					this.cpw.window.close();
+				}
 				if (this.linechartw.window) {
 					this.linechartw.window.close();
 				}
+				if (this.timelinew.window) {
+					this.timelinew.window.close();
+				}
+				if (this.usersw.window) {
+					this.usersw.window.close();
+				}
+				if (this.createuserw.window) {
+					this.createuserw.window.close();
+				}
+				if (this.createuserw.window) {
+					this.createuserw.window.close();
+				}
+				if (this.createtagsw.window) {
+					this.createtagsw.window.close();
+				}
 			});
 		} catch (e) {
-			console.log(e);
+			throw new Error(e);
 		}
 	}
 
@@ -106,12 +120,7 @@ module.exports = class {
 		);
 		this.linechartw.addEventListener();
 
-		this.timelinew = new SecondaryWindow(
-			'Timeline',
-			'OPEN_TIMELINE_WINDOW',
-			'CLOSE_TIMELINE_WINDOW',
-			'/timeline'
-		);
+		this.timelinew = new SecondaryWindow('Timeline', 'OPEN_TIMELINE_WINDOW', 'CLOSE_TIMELINE_WINDOW', '/timeline');
 		this.timelinew.addEventListener();
 
 		this.usersw = new SecondaryWindow('Users Dashboard', 'OPEN_USERS_WINDOW', 'CLOSE_USERS_WINDOW', '/users');
@@ -171,7 +180,7 @@ module.exports = class {
 		this.ipcEvents.queryUsersEvent();
 
 		// Session Events
-		ipcMain.on('START_SESSION', (_, d) => {
+		ipcMain.on(START_SESSION, (_, d) => {
 			const { weight } = d;
 
 			console.log(d);
@@ -180,7 +189,7 @@ module.exports = class {
 			this.weight = Number(weight);
 		});
 
-		ipcMain.on('STOP_SESSION', () => {
+		ipcMain.on(STOP_SESSION, () => {
 			// Reset the settings
 			this.isSessionRunning = false;
 		});
