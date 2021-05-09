@@ -88,6 +88,7 @@
 <script>
 import rowsNames from "../../../../assets/store/rowsNames.json";
 const { ipcRenderer } = window.require("electron");
+const { SESSION_OPTIONS,DEVICE_DETAILS, RESET_FORCE_PLATES } = require("../../../../main/util/types");
 
 export default {
   data() {
@@ -118,7 +119,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    ipcRenderer.on("SESSION_RESPONSE_OPTIONS", (_, responseData) => {
+    ipcRenderer.on(SESSION_OPTIONS, (_, responseData) => {
       _this.$store.commit(
         "setLeftPlateValue",
         responseData.rows[
@@ -132,15 +133,14 @@ export default {
         ]
       );
     });
-    ipcRenderer.on("SESSION_DEVICE_DETAILS", (_, responseData) => {
-      //console.log(responseData)
+    ipcRenderer.on(DEVICE_DETAILS, (_, responseData) => {
       _this.$store.commit("setDeviceLeft", responseData.deviceLeft);
       _this.$store.commit("setDeviceRight", responseData.deviceRight);
     });
   },
   methods: {
     resetForcePlate() {
-      ipcRenderer.send("RESET_FORCE_PLATES");
+      ipcRenderer.send(RESET_FORCE_PLATES);
     },
     setButtonStyle() {
       if (

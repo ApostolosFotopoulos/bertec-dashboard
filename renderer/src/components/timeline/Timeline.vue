@@ -1,6 +1,6 @@
 <template>
   <v-card elevation="10" color="#25282F" class="mt-5">
-    <AccuracyCard/>
+    <AccuracyCard />
     <v-row>
       <v-col cols="6">
         <VueApexCharts
@@ -29,13 +29,14 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 import VueApexCharts from "vue-apexcharts";
-import AccuracyCard from "./AccuracyCard.vue"
+import AccuracyCard from "./AccuracyCard.vue";
+const { TIMELINE_SESSION } = require("../../../../main/util/types");
 const defaultOptions = require("../../../../assets/options/timeline.json");
 
 export default {
   components: {
     VueApexCharts,
-    AccuracyCard
+    AccuracyCard,
   },
   created() {
     window.addEventListener("resize", this.resizeHandler);
@@ -158,7 +159,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    ipcRenderer.on("SESSION_RESPONSE_TIMELINE", (_, responseData) => {
+    ipcRenderer.on(TIMELINE_SESSION, (_, responseData) => {
       if (responseData.isSessionRunning) {
         _this.updateVariables(responseData);
       } else {

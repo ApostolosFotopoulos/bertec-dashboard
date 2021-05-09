@@ -40,6 +40,7 @@
 <script>
 import rowNames from "../../../../assets/store/rowsNames.json";
 const { ipcRenderer } = window.require("electron");
+const { SPEEDMETER_SESSION } = require("../../../../main/util/types");
 import VueSpeedometer from "vue-speedometer";
 
 export default {
@@ -63,7 +64,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    ipcRenderer.on("SESSION_RESPONSE_SPEEDMETER", (_, responseData) => {
+    ipcRenderer.on(SPEEDMETER_SESSION, (_, responseData) => {
       if (responseData.isSessionRunning) {
         _this.updateVariables(responseData);
       } else {

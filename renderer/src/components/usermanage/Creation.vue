@@ -207,6 +207,7 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 import rowsNames from "../../../../assets/store/rowsNames.json";
+const {SESSION_OPTIONS} = require('../../../../main/util/types')
 export default {
   mounted() {
     this.fetchDatabasesInterval = setInterval(() => {
@@ -232,7 +233,7 @@ export default {
         _this.tags = responseData.tags;
       }
     );
-    ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
+    ipcRenderer.on(SESSION_OPTIONS, (_, responseData) => {
       this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
       this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });
@@ -253,7 +254,7 @@ export default {
         _this.tags = responseData.tags;
       }
     );
-    ipcRenderer.removeListener("CREATE_USER_SESSION", (_, responseData) => {
+    ipcRenderer.removeListener(SESSION_OPTIONS, (_, responseData) => {
       this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
       this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });

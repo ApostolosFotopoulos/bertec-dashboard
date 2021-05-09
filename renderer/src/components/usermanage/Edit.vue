@@ -9,7 +9,7 @@
     <v-row align="center" class="mt-0">
       <v-col align="center"
         ><v-select
-        v-model="selectedDatabase"
+          v-model="selectedDatabase"
           :items="
             databases.map((d) => ({
               text: d.substr(0, d.lastIndexOf('.')),
@@ -233,6 +233,7 @@
 const { ipcRenderer } = window.require("electron");
 import rowsNames from "../../../../assets/store/rowsNames.json";
 import moment from "moment";
+const { SESSION_OPTIONS } = require("../../../../main/util/types");
 
 export default {
   mounted() {
@@ -276,7 +277,7 @@ export default {
         this.selectedTags = responseData.tags.map((t) => t.name);
       }
     );
-    ipcRenderer.on("CREATE_USER_SESSION", (_, responseData) => {
+    ipcRenderer.on(SESSION_OPTIONS, (_, responseData) => {
       this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
       this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });
@@ -303,7 +304,7 @@ export default {
         _this.users = responseData.users;
       }
     );
-    ipcRenderer.removeListener("CREATE_USER_SESSION", (_, responseData) => {
+    ipcRenderer.removeListener(SESSION_OPTIONS, (_, responseData) => {
       this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
       this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });
@@ -420,10 +421,10 @@ export default {
       this.surgeryDate = "";
       this.weight = 0.0;
       this.otherInfo = "";
-      this.selectedTags = [] 
+      this.selectedTags = [];
       this.userEditAlert = true;
       setTimeout(() => {
-        this.userEditAlert   = false;
+        this.userEditAlert = false;
       }, 3000);
     },
   },

@@ -45,7 +45,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-
+const { WINDOWS_STATUS_RESPONSE } = require("../../../../main/util/types");
 export default {
   data() {
     return {
@@ -56,7 +56,7 @@ export default {
     };
   },
   mounted() {
-    ipcRenderer.on("WINDOWS_STATUS_RESPONSE", (_, responseData) => {
+    ipcRenderer.on(WINDOWS_STATUS_RESPONSE, (_, responseData) => {
       const {
         chartWindowVisible,
         copWindowVisible,

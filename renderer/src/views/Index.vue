@@ -13,7 +13,7 @@
 const { ipcRenderer } = window.require("electron");
 import Trial from "../components/trial/Trial.vue";
 import Setup from "../components/setup/Setup.vue";
-
+const { WINDOWS_STATUS } = require("../../../main/util/types");
 export default {
   components: {
     Trial,
@@ -21,7 +21,7 @@ export default {
   },
   mounted() {
     setInterval(() => {
-      ipcRenderer.send("WINDOWS_STATUS");
+      ipcRenderer.send(WINDOWS_STATUS);
     }, 10);
   },
   data() {
