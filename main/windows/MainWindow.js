@@ -4,7 +4,7 @@ const ForcePlatesProcess = require('../util/ForcePlatesProcess');
 const path = require('path');
 var net = require('net');
 const IPCEvents = require('../util/IPCEvents.js');
-const { START_SESSION, STOP_SESSION } = require('../util/types');
+const { START_SESSION, STOP_SESSION, LINECHART_SESSION, COP_SESSION } = require('../util/types');
 
 module.exports = class {
 	constructor() {
@@ -218,13 +218,13 @@ module.exports = class {
 				// Send the data to the linechart window
 				if (this.linechartw && this.linechartw.window) {
 					if (this.isSessionRunning) {
-						this.linechartw.window.webContents.send('SESSION_RESPONSE_LINECHART', {
+						this.linechartw.window.webContents.send(LINECHART_SESSION, {
 							rows: packetArray,
 							isSessionRunning: this.isSessionRunning,
 							weight: this.weight
 						});
 					} else {
-						this.linechartw.window.webContents.send('SESSION_RESPONSE_LINECHART', {
+						this.linechartw.window.webContents.send(LINECHART_SESSION, {
 							rows: packetArray,
 							isSessionRunning: this.isSessionRunning,
 							weight: this.weight
@@ -235,13 +235,13 @@ module.exports = class {
 				// Send the data to the COP window
 				if (this.cpw && this.cpw.window) {
 					if (this.isSessionRunning) {
-						this.cpw.window.webContents.send('SESSION_RESPONSE_COP', {
+						this.cpw.window.webContents.send(COP_SESSION, {
 							rows: packetArray,
 							isSessionRunning: this.isSessionRunning,
 							weight: this.weight
 						});
 					} else {
-						this.cpw.window.webContents.send('SESSION_RESPONSE_COP', {
+						this.cpw.window.webContents.send(COP_SESSION, {
 							rows: [],
 							isSessionRunning: this.isSessionRunning,
 							weight: this.weight

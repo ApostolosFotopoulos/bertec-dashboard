@@ -65,6 +65,7 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 const defaultOptions = require("../../../../assets/options/copChart.json");
+const { COP_SESSION } = require("../../../../main/util/types");
 
 import VueApexCharts from "vue-apexcharts";
 export default {
@@ -256,7 +257,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    ipcRenderer.on("SESSION_RESPONSE_COP", (_, responseData) => {
+    ipcRenderer.on(COP_SESSION, (_, responseData) => {
       if (responseData.isSessionRunning) {
         _this.updateVariables(responseData);
       } else {

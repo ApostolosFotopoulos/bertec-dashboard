@@ -29,6 +29,7 @@
 import VueApexCharts from "vue-apexcharts";
 const { ipcRenderer } = window.require("electron");
 const defaultLineChartOptions = require("../../../../assets/options/lineChart.json");
+const { LINECHART_SESSION } = require("../../../../main/util/types");
 
 export default {
   components: {
@@ -162,7 +163,7 @@ export default {
   },
   mounted() {
     var _this = this;
-    ipcRenderer.on("SESSION_RESPONSE_LINECHART", (_, responseData) => {
+    ipcRenderer.on(LINECHART_SESSION, (_, responseData) => {
       if (responseData.isSessionRunning) {
         _this.updateVariables(responseData);
       } else {
