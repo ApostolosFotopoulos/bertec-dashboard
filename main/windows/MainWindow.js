@@ -190,12 +190,14 @@ module.exports = class {
     // Database Events
     Events.createDatabaseListener(this.window);
     Events.deleteDatabaseListener(this.window);
+    Events.fetchDatabasesToDeleteListener(this.window);
+    Events.fetchDatabasesToContinueListener(this.window);
     
     // Database Events
     //this.ipcEvents.createDatabaseEvent();
     //this.ipcEvents.deleteDatabaseEvent();
-    this.ipcEvents.fetchDatabasesToDeleteEvent(this.window);
-    this.ipcEvents.fetchDatabasesToContinueToTrialEvent(this.window);
+    //this.ipcEvents.fetchDatabasesToDeleteEvent(this.window);
+    //this.ipcEvents.fetchDatabasesToContinueToTrialEvent(this.window);
     this.ipcEvents.fetchDatabasesToTagManagementEvent(this.createtagsw);
     this.ipcEvents.fetchDatabasesToUserManagementEvent(this.createuserw);
 

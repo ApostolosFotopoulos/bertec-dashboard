@@ -1,13 +1,17 @@
 const glob = require('glob');
-const { CREATE_DATABASE, CREATE_DATABASE_RESPONSE,DELETE_DATABASE,DELETE_DATABASE_RESPONSE } = require('../util/types')
+const {
+  CREATE_DATABASE, CREATE_DATABASE_RESPONSE, DELETE_DATABASE, DELETE_DATABASE_RESPONSE,
+  FETCH_DATABASES_TO_DELETE, FETCH_DATABASES_TO_DELETE_RESPONSE, FETCH_DATABASES_TO_CONTINUE,
+  FETCH_DATABASES_TO_CONTINUE_RESPONSE
+} = require('../util/types')
 const path = require('path')
 const fs = require('fs')
 const { ipcMain } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 
-class Events {  
+class Events {
   static createDatabaseListener(win) {
-    ipcMain.on(CREATE_DATABASE, async(e, d) => {
+    ipcMain.on(CREATE_DATABASE, async (e, d) => {
       try {
         let { database } = d;
 
@@ -21,7 +25,7 @@ class Events {
               resolve(files.map(filePath => path.basename(filePath)));
             });
           })
-          if (files.filter(f => f === database+".db").length > 0) {
+          if (files.filter(f => f === database + ".db").length > 0) {
             if (win && !win.isDestroyed()) {
               console.log("[ERROR]: Database already exists")
               e.reply(CREATE_DATABASE_RESPONSE, { error: true })
@@ -74,6 +78,48 @@ class Events {
               e.reply(DELETE_DATABASE_RESPONSE, { error: true })
             }
           }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static fetchDatabasesToDeleteListener(win) {
+    ipcMain.on(FETCH_DATABASES_TO_DELETE, async (e, d) => {
+      try {
+        let files = await new Promise((resolve, reject) => {
+          glob(path.resolve(__dirname, "../../assets/databases/*.db"), (error, files) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(files.map(filePath => path.basename(filePath)));
+          });
+        })
+        if (win && !win.isDestroyed()) {
+          e.reply(FETCH_DATABASES_TO_DELETE_RESPONSE, { databases: files })
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static fetchDatabasesToContinueListener(win) {
+    ipcMain.on(FETCH_DATABASES_TO_CONTINUE, async (e, d) => {
+      try {
+        let files = await new Promise((resolve, reject) => {
+          glob(path.resolve(__dirname, "../../assets/databases/*.db"), (error, files) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(files.map(filePath => path.basename(filePath)));
+          });
+        })
+        if (win && !win.isDestroyed()) {
+          e.reply(FETCH_DATABASES_TO_CONTINUE_RESPONSE, { databases: files })
         }
       } catch (e) {
         throw new Error(e);

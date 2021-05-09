@@ -75,7 +75,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-
+const { FETCH_DATABASES_TO_CONTINUE ,FETCH_DATABASES_TO_CONTINUE_RESPONSE } = require('../../../../main/util/types')
 export default {
   props: {
     skipDatabase: Function,
@@ -83,7 +83,7 @@ export default {
   },
   mounted() {
     setInterval(() => {
-      ipcRenderer.send("FETCH_DATABASES_TO_CONTINUE");
+      ipcRenderer.send(FETCH_DATABASES_TO_CONTINUE);
     }, 100);
     setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
@@ -94,7 +94,7 @@ export default {
     }, 100);
     var _this = this;
     ipcRenderer.on(
-      "FETCH_DATABASES_TO_CONTINUE_RESPONSE",
+      FETCH_DATABASES_TO_CONTINUE_RESPONSE,
       (_, responseData) => {
         _this.databases = responseData.databases;
       }

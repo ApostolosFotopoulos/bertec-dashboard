@@ -123,7 +123,10 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-const { CREATE_DATABASE ,CREATE_DATABASE_RESPONSE,DELETE_DATABASE,DELETE_DATABASE_RESPONSE } = require('../../../../main/util/types')
+const { 
+  CREATE_DATABASE ,CREATE_DATABASE_RESPONSE,DELETE_DATABASE,DELETE_DATABASE_RESPONSE, FETCH_DATABASES_TO_DELETE, 
+  FETCH_DATABASES_TO_DELETE_RESPONSE
+} = require('../../../../main/util/types')
 
 export default {
   data() {
@@ -142,10 +145,10 @@ export default {
   },
   mounted() {
     setInterval(() => {
-      ipcRenderer.send("FETCH_DATABASES_TO_DELETE");
+      ipcRenderer.send(FETCH_DATABASES_TO_DELETE);
     }, 100);
     const _this = this;
-    ipcRenderer.on("FETCH_DATABASES_TO_DELETE_RESPONSE", (_, responseData) => {
+    ipcRenderer.on(FETCH_DATABASES_TO_DELETE_RESPONSE, (_, responseData) => {
       _this.databases = responseData.databases;
     });
     ipcRenderer.on(CREATE_DATABASE_RESPONSE, (_, responseData) => {
