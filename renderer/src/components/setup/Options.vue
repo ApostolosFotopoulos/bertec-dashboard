@@ -14,15 +14,15 @@
               />
               <v-alert
                 outlined
-                type="success"
+                :type="createAlertError?'error':'success'"
                 text
                 class="text-left"
                 v-if="visibleCreationDatabaseAlert"
               >
-                Successfully created a database.
+                {{createAlertMessage}}
               </v-alert>
               <v-btn
-                :disabled="databaseToCreate === '' || !databaseToCreate"
+                :disabled="databaseToCreate.trim() === '' || !databaseToCreate"
                 @click="createDatabase()"
                 class="createDatabaseButton"
               >
@@ -47,16 +47,16 @@
               ></v-select>
               <v-alert
                 outlined
-                type="success"
+                :type="deleteDatabaseAlertError?'error':'success'"
                 text
                 class="text-left"
                 v-if="visibleDeleteDatabaseAlert"
               >
-                Successfully deleted a database.
+                {{deleteDatabaseAlertMessage}}
               </v-alert>
               <v-btn
                 :disabled="databaseToDelete === '' || !databaseToDelete"
-                @click="deleteDatabase()"
+                @click="openDeleteDialog()"
                 class="deleteDatabaseButton"
               >
                 Delete
@@ -97,19 +97,47 @@
         </v-row>
       </v-card>
     </v-col>
+      <v-dialog
+        v-model="deleteDialog"
+        transition="dialog-top-transition"
+        max-width="600"
+      >
+        <v-card light class="pt-10 pa-3">
+          <v-card-text>
+            <div class="text-h6">Are you sure you want to delete the database?</div>
+          </v-card-text>
+          <v-card-actions class="justify-end">
+            <v-btn
+              text
+              @click="deleteDatabase()"
+            >Yes</v-btn>
+            <v-btn
+              text
+              @click="deleteDialog = false"
+            >No</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
   </v-row>
 </template>
 
 <script>
 const { ipcRenderer } = window.require("electron");
+const { CREATE_DATABASE ,CREATE_DATABASE_RESPONSE,DELETE_DATABASE,DELETE_DATABASE_RESPONSE } = require('../../../../main/util/types')
+
 export default {
   data() {
     return {
       databaseToCreate: "",
       visibleCreationDatabaseAlert: false,
+      createAlertMessage: "",
+      createAlertError:false,
       databases: [],
       databaseToDelete: "",
       visibleDeleteDatabaseAlert: false,
+      deleteDatabaseAlertMessage: "",
+      deleteDatabaseAlertError:false,
+      deleteDialog:false,
     };
   },
   mounted() {
@@ -120,23 +148,35 @@ export default {
     ipcRenderer.on("FETCH_DATABASES_TO_DELETE_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
     });
-  },
-  methods: {
-    createDatabase() {
-      ipcRenderer.send("CREATE_DATABASE", { database: this.databaseToCreate });
-      this.databaseToCreate = "";
-      this.visibleCreationDatabaseAlert = true;
-      setTimeout(() => {
-        this.visibleCreationDatabaseAlert = false;
-      }, 3000);
-    },
-    deleteDatabase() {
-      ipcRenderer.send("DELETE_DATABASE", { database: this.databaseToDelete });
+    ipcRenderer.on(CREATE_DATABASE_RESPONSE, (_, responseData) => {
+        this.databaseToCreate = "";
+        this.visibleCreationDatabaseAlert = true;
+        this.createAlertMessage = responseData.error? "Database already exist with that name" : "Successfully created a database"
+        this.createAlertError = responseData.error? true : false
+        setTimeout(() => {
+          this.visibleCreationDatabaseAlert = false;
+        }, 3000);
+    });
+    ipcRenderer.on(DELETE_DATABASE_RESPONSE, (_, responseData) => {
       this.databaseToDelete = "";
       this.visibleDeleteDatabaseAlert = true;
+      this.deleteDatabaseAlertMessage = responseData.error? "An error occured while deleting the database" : "Successfully deleted the database"
+      this.deleteDatabaseAlertError = responseData.error? true : false
       setTimeout(() => {
         this.visibleDeleteDatabaseAlert = false;
       }, 3000);
+    });
+  },
+  methods: {
+    createDatabase() {
+      ipcRenderer.send(CREATE_DATABASE, { database: this.databaseToCreate });
+    },
+    deleteDatabase() {
+      ipcRenderer.send(DELETE_DATABASE, { database: this.databaseToDelete });
+      this.deleteDialog = false
+    },
+    openDeleteDialog(){
+      this.deleteDialog = true
     },
     openUsersWindow() {
       ipcRenderer.send("OPEN_USERS_WINDOW");

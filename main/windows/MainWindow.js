@@ -3,6 +3,7 @@ const SecondaryWindow = require("./SecondaryWindow");
 const ForcePlatesProcess = require("../util/ForcePlatesProcess");
 const path = require("path");
 var net = require("net");
+const Events = require('../util/Events');
 const IPCEvents = require("../util/IPCEvents.js");
 const {
   START_SESSION,
@@ -28,6 +29,7 @@ module.exports = class {
     this.threshold = -1;
     this.socket = null;
     this.isSessionRunning = false;
+    this.selectedDatabase = "";
 
     // Window Options
     this.cw = null;
@@ -186,8 +188,12 @@ module.exports = class {
     // Start the listener for the IPCEvents
 
     // Database Events
-    this.ipcEvents.createDatabaseEvent();
-    this.ipcEvents.deleteDatabaseEvent();
+    Events.createDatabaseListener(this.window);
+    Events.deleteDatabaseListener(this.window);
+    
+    // Database Events
+    //this.ipcEvents.createDatabaseEvent();
+    //this.ipcEvents.deleteDatabaseEvent();
     this.ipcEvents.fetchDatabasesToDeleteEvent(this.window);
     this.ipcEvents.fetchDatabasesToContinueToTrialEvent(this.window);
     this.ipcEvents.fetchDatabasesToTagManagementEvent(this.createtagsw);

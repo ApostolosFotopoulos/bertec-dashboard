@@ -57,10 +57,10 @@
                 class="newTrialButton"
                 :disabled="
                   !selectedDatabase ||
-                  selectedDatabase === '' ||
+                  selectedDatabase.trim() === '' ||
                   !selectedUser ||
-                  selectedUser === '' ||
-                  trialName === ''
+                  selectedUser.trim() === '' ||
+                  trialName.trim() === ''
                 "
               >
                 New Trial
