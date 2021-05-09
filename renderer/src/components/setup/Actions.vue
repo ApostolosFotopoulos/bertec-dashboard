@@ -57,9 +57,9 @@
                 class="newTrialButton"
                 :disabled="
                   !selectedDatabase ||
-                  selectedDatabase.trim() === '' ||
+                  selectedDatabase === '' ||
                   !selectedUser ||
-                  selectedUser.trim() === '' ||
+                  selectedUser === '' ||
                   trialName.trim() === ''
                 "
               >
@@ -75,7 +75,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-const { FETCH_DATABASES_TO_CONTINUE ,FETCH_DATABASES_TO_CONTINUE_RESPONSE } = require('../../../../main/util/types')
+const { FETCH_DATABASES_TO_CONTINUE ,FETCH_DATABASES_TO_CONTINUE_RESPONSE,FETCH_USERS_TO_CONTINUE, FETCH_USERS_TO_CONTINUE_RESPONSE } = require('../../../../main/util/types')
 export default {
   props: {
     skipDatabase: Function,
@@ -87,7 +87,7 @@ export default {
     }, 100);
     setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
-        ipcRenderer.send("FETCH_ALL_USERS_TO_CONTINUE", {
+        ipcRenderer.send(FETCH_USERS_TO_CONTINUE, {
           database: this.selectedDatabase,
         });
       }
@@ -100,7 +100,7 @@ export default {
       }
     );
     ipcRenderer.on(
-      "FETCH_ALL_USERS_TO_CONTINUE_RESPONSE",
+      FETCH_USERS_TO_CONTINUE_RESPONSE,
       (_, responseData) => {
         _this.users = responseData.users || [];
       }
@@ -120,7 +120,7 @@ export default {
       if(d){
         this.users = []
         this.selectedDatabase = d;
-        ipcRenderer.send("FETCH_ALL_USERS_TO_CONTINUE", { database: d });
+        ipcRenderer.send(FETCH_USERS_TO_CONTINUE, { database: d });
       } else {
         this.users = []
         this.selectedDatabase = "";

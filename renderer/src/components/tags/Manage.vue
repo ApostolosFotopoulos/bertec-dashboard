@@ -30,16 +30,16 @@
           <v-text-field v-model="tagToCreate" label="Tag" outlined clearable />
           <v-alert
             outlined
-            type="success"
+            :type="creationAlertError?'error':'success'"
             text
             class="text-left"
             v-if="visibleCreationAlert"
           >
-            Successfully created a tag.
+            {{creationAlertMessage}}
           </v-alert>
           <v-btn
             :disabled="
-              tagToCreate === '' ||
+              tagToCreate.trim() === '' ||
               selectedDatabase === '' ||
               !selectedDatabase ||
               !tagToCreate
@@ -69,12 +69,12 @@
           ></v-select>
           <v-alert
             outlined
-            type="success"
+            :type="deleteAlertError?'error':'success'"
             text
             class="text-left"
             v-if="visibleDeleteAlert"
           >
-            Successfully deleted a tag.
+            {{deleteAlertMessage}}
           </v-alert>
           <v-btn
             :disabled="
@@ -83,7 +83,7 @@
               !selectedDatabase ||
               !tagToDelete
             "
-            @click="deleteTag()"
+            @click="openDeleteDialog()"
             class="deleteTagButton"
           >
             Delete
@@ -106,33 +106,72 @@
         </div>
       </v-col>
     </v-row>
+    <v-dialog
+      v-model="deleteDialog"
+      transition="dialog-top-transition"
+      max-width="600"
+    >
+      <v-card light class="pt-10 pa-3">
+        <v-card-text>
+          <div class="text-h6">Are you sure you want to delete the tag?</div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn
+            text
+            @click="deleteTag()"
+          >Yes</v-btn>
+          <v-btn
+            text
+            @click="deleteDialog = false"
+          >No</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
 const { ipcRenderer } = window.require("electron");
+const {FETCH_DATABASES_TO_TAGS , FETCH_DATABASES_TO_TAGS_RESPONSE, CREATE_TAG, CREATE_TAG_RESPONSE, DELETE_TAG, DELETE_TAG_RESPONSE, FETCH_TAGS_TO_TAGS, FETCH_TAGS_TO_TAGS_RESPONSE } = require('../../../../main/util/types')
 export default {
   mounted() {
     setInterval(() => {
-      ipcRenderer.send("FETCH_DATABASES_TO_TAG_MANAGEMENT");
+      ipcRenderer.send(FETCH_DATABASES_TO_TAGS);
     }, 100);
     setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
-        ipcRenderer.send("FETCH_TAG_TO_TAG_MANAGEMENT", {
+        ipcRenderer.send(FETCH_TAGS_TO_TAGS, {
           database: this.selectedDatabase,
         });
       }
     }, 100);
     var _this = this;
     ipcRenderer.on(
-      "FETCH_DATABASES_TO_TAG_MANAGEMENT_RESPONSE",
+      FETCH_DATABASES_TO_TAGS_RESPONSE,
       (_, responseData) => {
         _this.databases = responseData.databases;
-        console.log(_this.databases);
       }
     );
+    ipcRenderer.on(CREATE_TAG_RESPONSE,(_, responseData) => { 
+      this.tagToCreate = "";
+      this.visibleCreationAlert = true;
+      this.creationAlertError = responseData.error?true:false
+      this.creationAlertMessage = responseData.error?"An error occured while creating a tag":"Successfully created a tag"
+      setTimeout(() => {
+        this.visibleCreationAlert = false;
+      }, 3000);
+    })
+    ipcRenderer.on(DELETE_TAG_RESPONSE,(_, responseData) => { 
+      this.tagToDelete = "";
+      this.visibleDeleteAlert = true;
+      this.deleteAlertError = responseData.error?true:false
+      this.deleteAlertMessage = responseData.error?"An error occured while deleting a tag":"Successfully deleted the tag"
+      setTimeout(() => {
+        this.visibleDeleteAlert = false;
+      }, 3000);
+    })
     ipcRenderer.on(
-      "FETCH_TAG_TO_TAG_MANAGEMENT_RESPONSE",
+      FETCH_TAGS_TO_TAGS_RESPONSE,
       (_, responseData) => {
         _this.tags = responseData.tags;
       }
@@ -144,9 +183,14 @@ export default {
       selectedDatabase: "",
       tagToCreate: "",
       visibleCreationAlert: false,
+      creationAlertError:false,
+      creationAlertMessage:"",
       tags: [],
       tagToDelete: "",
       visibleDeleteAlert: false,
+      deleteAlertError:false,
+      deleteAlertMessage:"",
+      deleteDialog:false,
       headers: [
         {
           text: "ID",
@@ -161,26 +205,20 @@ export default {
   },
   methods: {
     createTag() {
-      ipcRenderer.send("CREATE_TAG", {
+      ipcRenderer.send(CREATE_TAG, {
         database: this.selectedDatabase,
         tag: this.tagToCreate,
       });
-      this.tagToCreate = "";
-      this.visibleCreationAlert = true;
-      setTimeout(() => {
-        this.visibleCreationAlert = false;
-      }, 3000);
+    },
+    openDeleteDialog(){
+      this.deleteDialog = true
     },
     deleteTag() {
-      ipcRenderer.send("DELETE_TAG", {
+      ipcRenderer.send(DELETE_TAG, {
         database: this.selectedDatabase,
         tagId: this.tagToDelete,
       });
-      this.tagToDelete = "";
-      this.visibleDeleteAlert = true;
-      setTimeout(() => {
-        this.visibleDeleteAlert = false;
-      }, 3000);
+      this.deleteDialog = false
     },
     databaseChanged(d) {
       if (d) {

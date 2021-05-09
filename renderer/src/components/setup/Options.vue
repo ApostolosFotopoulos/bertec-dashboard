@@ -97,27 +97,27 @@
         </v-row>
       </v-card>
     </v-col>
-      <v-dialog
-        v-model="deleteDialog"
-        transition="dialog-top-transition"
-        max-width="600"
-      >
-        <v-card light class="pt-10 pa-3">
-          <v-card-text>
-            <div class="text-h6">Are you sure you want to delete the database?</div>
-          </v-card-text>
-          <v-card-actions class="justify-end">
-            <v-btn
-              text
-              @click="deleteDatabase()"
-            >Yes</v-btn>
-            <v-btn
-              text
-              @click="deleteDialog = false"
-            >No</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+    <v-dialog
+      v-model="deleteDialog"
+      transition="dialog-top-transition"
+      max-width="600"
+    >
+      <v-card light class="pt-10 pa-3">
+        <v-card-text>
+          <div class="text-h6">Are you sure you want to delete the database?</div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn
+            text
+            @click="deleteDatabase()"
+          >Yes</v-btn>
+          <v-btn
+            text
+            @click="deleteDialog = false"
+          >No</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-row>
 </template>
 

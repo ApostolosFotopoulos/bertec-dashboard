@@ -185,35 +185,50 @@ module.exports = class {
   }
 
   startSessionEvents() {
-    // Start the listener for the IPCEvents
 
     // Database Events
     Events.createDatabaseListener(this.window);
     Events.deleteDatabaseListener(this.window);
     Events.fetchDatabasesToDeleteListener(this.window);
     Events.fetchDatabasesToContinueListener(this.window);
+    Events.fetchDatabasesToTagsListener(this.createtagsw);
+    Events.fetchDatabasesToUsersListener(this.createuserw);
+
+    // Users
+    Events.fetchUsersToContinueListener(this.window);
+    Events.fetchUsersToViewListener(this.usersw);
+    Events.fetchUsersToEditListener(this.createuserw);
+    Events.createUserListener(this.createuserw);
+    Events.updateUserListener(this.createuserw);
+
+    // Tags
+    Events.createTagListener(this.createtagsw);
+    Events.deleteTagListener(this.createtagsw);
+    Events.fetchTagsListener(this.createtagsw);
+    Events.fetchTagsToUsersListener(this.createuserw);
+    Events.fetchTagsForSpecificUserListener(this.createuserw);
     
     // Database Events
     //this.ipcEvents.createDatabaseEvent();
     //this.ipcEvents.deleteDatabaseEvent();
     //this.ipcEvents.fetchDatabasesToDeleteEvent(this.window);
     //this.ipcEvents.fetchDatabasesToContinueToTrialEvent(this.window);
-    this.ipcEvents.fetchDatabasesToTagManagementEvent(this.createtagsw);
-    this.ipcEvents.fetchDatabasesToUserManagementEvent(this.createuserw);
+    //this.ipcEvents.fetchDatabasesToTagManagementEvent(this.createtagsw);
+    //this.ipcEvents.fetchDatabasesToUserManagementEvent(this.createuserw);
 
     // Users
-    this.ipcEvents.fetchUsersToContinueToTrialEvent(this.window);
-    this.ipcEvents.createUserEvent();
-    this.ipcEvents.fetchAllUsersToViewEvent(this.usersw);
-    this.ipcEvents.fetchAllUsersToEditEvent(this.createuserw);
-    this.ipcEvents.updateUserEvent();
+    //this.ipcEvents.fetchUsersToContinueToTrialEvent(this.window);
+    //this.ipcEvents.createUserEvent();
+    //this.ipcEvents.fetchAllUsersToViewEvent(this.usersw);
+    //this.ipcEvents.fetchAllUsersToEditEvent(this.createuserw);
+    //this.ipcEvents.updateUserEvent();
 
     // Tags
-    this.ipcEvents.createTagEvent();
-    this.ipcEvents.deleteTagEvent();
-    this.ipcEvents.fetchTagToTagManagementEvent(this.createtagsw);
-    this.ipcEvents.fetchTagToUserManagementEvent(this.createuserw);
-    this.ipcEvents.fetchAllTagsForUserEvent(this.createuserw);
+    //this.ipcEvents.createTagEvent();
+    //this.ipcEvents.deleteTagEvent();
+    //this.ipcEvents.fetchTagToTagManagementEvent(this.createtagsw);
+    //this.ipcEvents.fetchTagToUserManagementEvent(this.createuserw);
+    //this.ipcEvents.fetchAllTagsForUserEvent(this.createuserw);
 
     this.ipcEvents.queryUsersEvent();
 

@@ -5,8 +5,8 @@
         <h3>Create a new user</h3>
         <hr class="hr" />
         <div class="mt-3">
-          <v-alert outlined type="success" text v-if="userCreationAlert">
-            Successfully created a user
+          <v-alert outlined :type="userCreationAlertError?'error':'success'" text v-if="userCreationAlert">
+            {{userCreationAlertMessage}}
           </v-alert>
         </div>
       </v-col>
@@ -24,6 +24,25 @@
           @input="databaseChanged"
           clearable
           outlined
+        ></v-select>
+      </v-col>
+    </v-row>
+    <v-row align="center" class="mt-0">
+      <v-col align="center">
+        <v-text-field
+          v-model="hospitalID"
+          label="Hospital ID"
+          outlined
+          clearable
+        />
+      </v-col>
+      <v-col align="center">
+        <v-select
+          v-model="affectedSide"
+          :items="affectedSideOptions"
+          label="Affected Side"
+          outlined
+          clearable
         ></v-select>
       </v-col>
     </v-row>
@@ -180,8 +199,10 @@
         :disabled="
           selectedDatabase === '' ||
           !selectedDatabase ||
-          firstName === '' ||
+          firstName.trim() === '' ||
           !firstName ||
+          lastName.trim() === '' ||
+          !lastName ||
           year === '' ||
           !year ||
           height === '' ||
@@ -195,7 +216,11 @@
           surgeryDate === '' ||
           !surgeryDate ||
           weight === '' ||
-          !weight
+          !weight ||
+          hospitalID.trim() === '' ||
+          !hospitalID ||
+          affectedSide === '' ||
+          !affectedSide
         "
       >
         Create
@@ -207,30 +232,58 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 import rowsNames from "../../../../assets/store/rowsNames.json";
-const {SESSION_OPTIONS} = require('../../../../main/util/types')
+const { 
+  SESSION_OPTIONS,FETCH_DATABASES_TO_USERS, FETCH_DATABASES_TO_USERS_RESPONSE ,FETCH_TAGS_TO_USERS ,FETCH_TAGS_TO_USERS_RESPONSE,
+  CREATE_USER, CREATE_USER_RESPONSE
+} = require('../../../../main/util/types')
 export default {
   mounted() {
     this.fetchDatabasesInterval = setInterval(() => {
-      ipcRenderer.send("FETCH_DATABASES_TO_USER_MANAGEMENT");
+      ipcRenderer.send(FETCH_DATABASES_TO_USERS);
     }, 100);
     this.fetchTagsInterval = setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
-        ipcRenderer.send("FETCH_TAGS_TO_USER_MANAGEMENT", {
+        ipcRenderer.send(FETCH_TAGS_TO_USERS, {
           database: this.selectedDatabase,
         });
       }
     }, 100);
     var _this = this;
     ipcRenderer.on(
-      "FETCH_DATABASES_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_DATABASES_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.databases = responseData.databases;
       }
     );
     ipcRenderer.on(
-      "FETCH_TAGS_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_TAGS_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.tags = responseData.tags;
+      }
+    );
+    ipcRenderer.on(
+      CREATE_USER_RESPONSE,
+      (_, responseData) => {
+        
+        this.firstName = "";
+        this.lastName = "";
+        this.year = 1950;
+        this.height = 120;
+        this.legLength = 100;
+        this.sex = "Male";
+        this.injuryDate = "";
+        this.surgeryDate = "";
+        this.weight = 0.0;
+        this.otherInfo = "";
+        this.selectedTags = [];
+        this.userCreationAlert = true;
+        this.affectedSide = "Non Affected";
+        this.hospitalID = "";
+        this.userCreationAlertError = responseData.error?true:false
+        this.userCreationAlertMessage = responseData.error?"An error occured while creating a user":"Successfully created a user"
+        setTimeout(() => {
+          this.userCreationAlert = false;
+        }, 3000);
       }
     );
     ipcRenderer.on(SESSION_OPTIONS, (_, responseData) => {
@@ -243,15 +296,40 @@ export default {
     clearInterval(this.fetchDatabasesInterval);
     clearInterval(this.fetchTagsInterval);
     ipcRenderer.removeListener(
-      "FETCH_DATABASES_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_DATABASES_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.databases = responseData.databases;
       }
     );
     ipcRenderer.removeListener(
-      "FETCH_TAGS_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_TAGS_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.tags = responseData.tags;
+      }
+    );
+    ipcRenderer.removeListener(
+      CREATE_USER_RESPONSE,
+      (_, responseData) => {
+        
+        this.firstName = "";
+        this.lastName = "";
+        this.year = 1950;
+        this.height = 120;
+        this.legLength = 100;
+        this.sex = "Male";
+        this.injuryDate = "";
+        this.surgeryDate = "";
+        this.weight = 0.0;
+        this.otherInfo = "";
+        this.selectedTags = [];
+        this.userCreationAlert = true;
+        this.affectedSide = "Non Affected";
+        this.hospitalID = "";
+        this.userCreationAlertError = responseData.error?true:false
+        this.userCreationAlertMessage = responseData.error?"An error occured while creating a user":"Successfully created a user"
+        setTimeout(() => {
+          this.userCreationAlert = false;
+        }, 3000);
       }
     );
     ipcRenderer.removeListener(SESSION_OPTIONS, (_, responseData) => {
@@ -262,15 +340,20 @@ export default {
   data() {
     return {
       userCreationAlert: false,
+      userCreationAlertError:false,
+      userCreationAlertMessage:"",
       selectedDatabase: "",
       databases: [],
       firstName: "",
       lastName: "",
+      hospitalID:"",
       year: 1950,
       height: 120,
       legLength: 100,
       sex: "Male",
       sexOptions: ["Male", "Female"],
+      affectedSide: "Non Affected",
+      affectedSideOptions: ["Left","Right","Left + Right", "Non Affected"],
       injuryDateMenu: false,
       surgeryDateMenu: false,
       injuryDate: "",
@@ -297,7 +380,7 @@ export default {
       this.weight = w.toFixed(2);
     },
     createUser() {
-      ipcRenderer.send("CREATE_USER", {
+      ipcRenderer.send(CREATE_USER, {
         database: this.selectedDatabase,
         firstName: this.firstName,
         lastName: this.lastName,
@@ -310,23 +393,9 @@ export default {
         surgeryDate: this.surgeryDate,
         injuryDate: this.injuryDate,
         tags: this.selectedTags,
+        hospitalID: this.hospitalID,
+        affectedSide: this.affectedSide
       });
-
-      this.firstName = "";
-      this.lastName = "";
-      this.year = 1950;
-      this.height = 120;
-      this.legLength = 100;
-      this.sex = "Male";
-      this.injuryDate = "";
-      this.surgeryDate = "";
-      this.weight = 0.0;
-      this.otherInfo = "";
-      this.selectedTags = [];
-      this.userCreationAlert = true;
-      setTimeout(() => {
-        this.userCreationAlert = false;
-      }, 3000);
     },
     databaseChanged(d) {
       if (d) {
@@ -374,5 +443,6 @@ textarea::-webkit-scrollbar-track {
 }
 .createButtonDiv {
   text-align: right;
+  padding-bottom:5%;
 }
 </style>

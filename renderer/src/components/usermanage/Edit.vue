@@ -26,7 +26,6 @@
         ><v-select
           v-model="selectedUser"
           :items="
-            users &&
             users.map((u) => ({
               text: u.first_name + ' ' + u.last_name,
               value: u,
@@ -44,10 +43,29 @@
         <h3>Edit a user</h3>
         <hr class="hr" />
         <div class="mt-3">
-          <v-alert outlined type="success" text v-if="userEditAlert">
-            Successfully updated a user.
+          <v-alert outlined :type="userEditAlertError?'error':'success'" text v-if="userEditAlert">
+            {{userEditAlertMessage}}
           </v-alert>
         </div>
+      </v-col>
+    </v-row>
+    <v-row align="center" class="mt-0">
+      <v-col align="center">
+        <v-text-field
+          v-model="hospitalID"
+          label="Hospital ID"
+          outlined
+          clearable
+        />
+      </v-col>
+      <v-col align="center">
+        <v-select
+          v-model="affectedSide"
+          :items="affectedSideOptions"
+          label="Affected Side"
+          outlined
+          clearable
+        ></v-select>
       </v-col>
     </v-row>
     <v-row align="center" class="mt-0">
@@ -233,47 +251,77 @@
 const { ipcRenderer } = window.require("electron");
 import rowsNames from "../../../../assets/store/rowsNames.json";
 import moment from "moment";
-const { SESSION_OPTIONS } = require("../../../../main/util/types");
+const { 
+  SESSION_OPTIONS ,FETCH_DATABASES_TO_USERS, FETCH_DATABASES_TO_USERS_RESPONSE , FETCH_USERS_TO_EDIT, FETCH_USERS_TO_EDIT_RESPONSE, 
+  FETCH_TAGS_TO_USERS,FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE, 
+  UPDATE_USER, UPDATE_USER_RESPONSE
+} = require("../../../../main/util/types");
 
 export default {
   mounted() {
     this.fetchDatabasesInterval = setInterval(() => {
-      ipcRenderer.send("FETCH_DATABASES_TO_USER_MANAGEMENT");
+      ipcRenderer.send(FETCH_DATABASES_TO_USERS);
     }, 100);
     this.fetchTagsInterval = setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
-        ipcRenderer.send("FETCH_TAGS_TO_USER_MANAGEMENT", {
+        ipcRenderer.send(FETCH_TAGS_TO_USERS, {
           database: this.selectedDatabase,
         });
       }
     }, 100);
     this.fetchUsersInterval = setInterval(() => {
       if (this.selectedDatabase && this.selectedDatabase != "") {
-        ipcRenderer.send("FETCH_ALL_USERS_TO_EDIT", {
+        ipcRenderer.send(FETCH_USERS_TO_EDIT, {
           database: this.selectedDatabase,
         });
       }
     }, 100);
     var _this = this;
     ipcRenderer.on(
-      "FETCH_DATABASES_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_DATABASES_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.databases = responseData.databases;
       }
     );
     ipcRenderer.on(
-      "FETCH_TAGS_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_TAGS_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.tags = responseData.tags;
       }
     );
-    ipcRenderer.on("FETCH_ALL_USERS_TO_EDIT_RESPONSE", (_, responseData) => {
+    ipcRenderer.on(
+      UPDATE_USER_RESPONSE,
+      (_,responseData) => {
+        this.selectedUser = ""
+        this.firstName = ""
+        this.lastName = ""
+        this.year =  1950
+        this.hospitalID = ""
+        this.height = 120
+        this.legLength = 100
+        this.sex = "Male"
+        this.affectedSide = "Non Affected"
+        this.injuryDate = ""
+        this.surgeryDate = ""
+        this.weight = 0.0
+        this.otherInfo = ""
+        this.tags =  []
+        this.selectedTags = []
+    
+        this.userEditAlert = true;
+        this.userEditAlertError = responseData.error?true:false
+        this.userEditAlertMessage = responseData.error?'An error occured while updating a user':'Successfully updated a user'
+        setTimeout(() => {
+          this.userEditAlert = false;
+        }, 3000);
+      }
+    );
+    ipcRenderer.on(FETCH_USERS_TO_EDIT_RESPONSE, (_, responseData) => {
       _this.users = responseData.users;
     });
     ipcRenderer.on(
-      "FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
       (_, responseData) => {
-        //_this.selectedTags = responseData.tags;
         this.selectedTags = responseData.tags.map((t) => t.name);
       }
     );
@@ -287,21 +335,54 @@ export default {
     clearInterval(this.fetchTagsInterval);
     clearInterval(this.fetchUsersInterval);
     ipcRenderer.removeListener(
-      "FETCH_DATABASES_TO_USER_MANAGEMENT_RESPONSE",
+      FETCH_DATABASES_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.databases = responseData.databases;
       }
     );
     ipcRenderer.removeListener(
-      "FETCH_TAGS_TO_USER_MANAGEMENT",
+      FETCH_TAGS_TO_USERS_RESPONSE,
       (_, responseData) => {
         _this.tags = responseData.tags;
       }
     );
     ipcRenderer.removeListener(
-      "FETCH_ALL_USERS_TO_EDIT_RESPONSE",
+      FETCH_USERS_TO_EDIT_RESPONSE,
       (_, responseData) => {
         _this.users = responseData.users;
+      }
+    );
+    ipcRenderer.removeListener(
+      FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
+      (_, responseData) => {
+        this.selectedTags = responseData.tags.map((t) => t.name);
+      }
+    );
+    ipcRenderer.removeListener(
+      UPDATE_USER_RESPONSE,
+      (_,responseData) => {
+        this.selectedUser = ""
+        this.firstName = ""
+        this.lastName = ""
+        this.year =  1950
+        this.hospitalID = ""
+        this.height = 120
+        this.legLength = 100
+        this.sex = "Male"
+        this.affectedSide = "Non Affected"
+        this.injuryDate = ""
+        this.surgeryDate = ""
+        this.weight = 0.0
+        this.otherInfo = ""
+        this.tags =  []
+        this.selectedTags = []
+    
+        this.userEditAlert = true;
+        this.userEditAlertError = responseData.error?true:false
+        this.userEditAlertMessage = responseData.error?'An error occured while updating a user':'Successfully updated a user'
+        setTimeout(() => {
+          this.userEditAlert = false;
+        }, 3000);
       }
     );
     ipcRenderer.removeListener(SESSION_OPTIONS, (_, responseData) => {
@@ -312,6 +393,8 @@ export default {
   data() {
     return {
       userEditAlert: false,
+      userEditAlertError:false,
+      userEditAlertMessage:"",
       databases: [],
       selectedDatabase: "",
       users: [],
@@ -319,10 +402,13 @@ export default {
       firstName: "",
       lastName: "",
       year: 1950,
+      hospitalID:"",
       height: 120,
       legLength: 100,
       sex: "Male",
       sexOptions: ["Male", "Female"],
+      affectedSide: "Non Affected",
+      affectedSideOptions: ["Left","Right","Left + Right", "Non Affected"],
       injuryDateMenu: false,
       surgeryDateMenu: false,
       injuryDate: "",
@@ -361,6 +447,7 @@ export default {
       }
     },
     userChanged(u) {
+      console.log('USER CHANGED')
       if (u) {
         this.selectedUser = u;
         this.firstName = u.first_name;
@@ -369,32 +456,39 @@ export default {
         this.height = u.height;
         this.legLength = u.leg_length;
         this.sex = u.sex;
-        this.injuryDate = moment(new Date(u.injury_date)).format("YYYY-MM-DD");
+        this.hospitalID = u.hospital_id
+        this.affectedSide = u.affected_side
         this.surgeryDate = moment(new Date(u.surgery_date)).format(
           "YYYY-MM-DD"
         );
+        this.injuryDate = moment(new Date(u.injury_date)).format("YYYY-MM-DD");
         this.weight = u.weight;
         this.otherInfo = u.other_info;
-        ipcRenderer.send("FETCH_ALL_TAGS_FOR_USER_TO_USER_MANAGEMENT", {
+        ipcRenderer.send(FETCH_TAGS_FOR_SPECIFIC_USER, {
           database: this.selectedDatabase,
           userId: this.selectedUser.id,
         });
+        
       } else {
-        this.selectedUser = "";
-        this.firstName = "";
-        this.lastName = "";
-        this.year = 1950;
-        this.height = 120;
-        this.legLength = 100;
-        this.sex = "Male";
-        this.injuryDate = "";
-        this.surgeryDate = "";
-        this.weight = 0.0;
-        this.otherInfo = "";
+        this.selectedUser = ""
+        this.firstName = ""
+        this.lastName = ""
+        this.year =  1950
+        this.hospitalID = ""
+        this.height = 120
+        this.legLength = 100
+        this.sex = "Male"
+        this.affectedSide = "Non Affected"
+        this.injuryDate = ""
+        this.surgeryDate = ""
+        this.weight = 0.0
+        this.otherInfo = ""
+        this.tags =  []
+        this.selectedTags = []
       }
     },
     updateUser() {
-      ipcRenderer.send("UPDATE_USER", {
+      ipcRenderer.send(UPDATE_USER, {
         id: this.selectedUser.id,
         database: this.selectedDatabase,
         firstName: this.firstName,
@@ -408,24 +502,10 @@ export default {
         surgeryDate: this.surgeryDate,
         injuryDate: this.injuryDate,
         tags: this.selectedTags,
+        hospitalID: this.hospitalID,
+        affectedSide: this.affectedSide
       });
-
-      this.selectedUser = "";
-      this.firstName = "";
-      this.lastName = "";
-      this.year = 1950;
-      this.height = 120;
-      this.legLength = 100;
-      this.sex = "Male";
-      this.injuryDate = "";
-      this.surgeryDate = "";
-      this.weight = 0.0;
-      this.otherInfo = "";
-      this.selectedTags = [];
-      this.userEditAlert = true;
-      setTimeout(() => {
-        this.userEditAlert = false;
-      }, 3000);
+      
     },
   },
 };
@@ -464,5 +544,6 @@ textarea::-webkit-scrollbar-track {
 }
 .updateButtonDiv {
   text-align: right;
+  padding-bottom:5%;
 }
 </style>

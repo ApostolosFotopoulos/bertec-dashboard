@@ -119,6 +119,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
+const {FETCH_USERS_TO_VIEW, FETCH_USERS_TO_VIEW_RESPONSE} = require('../../../main/util/types')
 export default {
   mounted() {
     setInterval(() => {
@@ -129,7 +130,7 @@ export default {
     ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
       _this.databases = responseData.databases;
     });
-    ipcRenderer.on("FETCH_ALL_USERS_RESPONSE", (_, responseData) => {
+    ipcRenderer.on(FETCH_USERS_TO_VIEW_RESPONSE, (_, responseData) => {
       console.log(responseData.users);
       _this.users = responseData.users;
     });
@@ -138,7 +139,7 @@ export default {
         console.log(_this.selectedDatabase)
         if(responseData.database != ""){
           _this.selectedDatabase = responseData.database
-          ipcRenderer.send("FETCH_ALL_USERS", { database: _this.selectedDatabase });
+          ipcRenderer.send(FETCH_USERS_TO_VIEW, { database: _this.selectedDatabase });
         }
       }
     });
@@ -219,7 +220,7 @@ export default {
     databaseChanged(d) {
       this.selectedDatabase = d;
       this.users = [];
-      ipcRenderer.send("FETCH_ALL_USERS", { database: d });
+      ipcRenderer.send(FETCH_USERS_TO_VIEW, { database: d });
     },
     applyFilters() {
       console.log({ ...this.search, database: this.selectedDatabase });
