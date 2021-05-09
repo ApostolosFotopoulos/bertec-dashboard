@@ -348,8 +348,12 @@ module.exports = class {
     });
 
     ipcMain.on(RESET_FORCE_PLATES, (e, d) => {
-      console.log("Tried to reset force plate");
-      this.socket.write(RESET_FORCE_PLATES);
+      if (this.socket) {
+        console.log("[STATUS] Tried to reset force plate");
+        this.socket.write(RESET_FORCE_PLATES);
+      } else {
+        console.log("[ERROR] The force plates are not connected")
+      }
     });
   }
 };
