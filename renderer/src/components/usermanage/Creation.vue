@@ -173,7 +173,7 @@
         <v-combobox
           v-model="selectedTags"
           :items="tags.map((t) => t.name)"
-          label="Combobox"
+          label="Tags"
           multiple
           outlined
           chips
