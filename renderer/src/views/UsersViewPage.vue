@@ -70,7 +70,7 @@
         <v-range-slider
           v-model="search.year"
           :max="new Date().getFullYear()"
-          :min="1960"
+          :min="1950"
           hide-details
           thumb-label
         />
@@ -120,10 +120,11 @@
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
               v-model="surgeryRange"
-              label="Surgery DateRange"
+              label="Surgery Date Range"
               outlined
               v-bind="attrs"
               v-on="on"
+              readonly
             ></v-text-field>
           </template>
           <vc-date-picker v-model="search.surgeryRange" is-range @input="surgeryDateChanged"/>
@@ -141,10 +142,11 @@
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
               v-model="injuryRange"
-              label="Injury DateRange"
+              label="Injury Date Range"
               outlined
               v-bind="attrs"
               v-on="on"
+              readonly
             ></v-text-field>
           </template>
           <vc-date-picker v-model="search.injuryRange" is-range @input="injuryDateChanged"/>
@@ -161,12 +163,22 @@
         ></v-combobox>
       </v-col>
       <v-col align="center">
-        <v-btn @click="applyFilters()" class="applyButton" block>
+        <v-btn 
+          @click="applyFilters()" 
+          class="applyButton" 
+          block
+          :disabled="!selectedDatabase || selectedDatabase === ''"
+        >
           <v-icon>mdi-magnify</v-icon>
         </v-btn>
       </v-col>
       <v-col align="center">
-        <v-btn @click="resetFilters()" class="resetButton" block>
+        <v-btn 
+          @click="resetFilters()" 
+          class="resetButton" 
+          block
+          :disabled="!selectedDatabase || selectedDatabase === ''"
+        >
           <v-icon>mdi-restart</v-icon>
         </v-btn>
       </v-col>
@@ -343,7 +355,7 @@
           <v-row align="center">
             <v-col align="center">
               <v-textarea
-                v-model="userDetails.otherInfo"
+                v-model="userDetails.other_info"
                 label="Other Info"
                 outlined
                 readonly
@@ -415,7 +427,7 @@ export default {
       deleteDialog:false,
       selectedDatabase:"",
       databases: [],
-      filters:[],
+      filters:{},
       affectedSideOptions: ["Left","Right","Left + Right", "Non Affected"],
       sexOptions: ["Male", "Female"],
       surgeryDateMenu:false,
@@ -429,7 +441,7 @@ export default {
         lastName: "",
         hospitalID:"",
         affectedSide:"",
-        year: [1960, new Date().getFullYear()],
+        year: [1950, new Date().getFullYear()],
         height:[100, 250],
         legLength:[30,200],
         weight:[300,2000],
@@ -498,7 +510,45 @@ export default {
       }
     },
     applyFilters() {
-
+      let f = {}
+      if(this.search.firstName && this.search.firstName != ""){
+        f.firstName = this.search.firstName
+      }
+      if(this.search.lastName && this.search.lastName != ""){
+        f.lastName = this.search.lastName
+      }
+      if(this.search.hospitalID && this.search.hospitalID != ""){
+        f.hospitalID = this.search.hospitalID
+      }
+      if(this.search.affectedSide && this.search.affectedSide != ""){
+        f.affectedSide = this.search.affectedSide
+      }
+      if(this.search.sex && this.search.sex != ""){
+        f.sex = this.search.sex
+      }
+      f.year = this.search.year
+      f.legLength = this.search.legLength
+      f.weight = this.search.weight
+      f.height = this.search.height
+      if(this.search.selectedTags && this.search.selectedTags.length > 0){
+        f.tags = this.search.selectedTags
+      }
+      if(
+        this.search.surgeryRange && this.search.surgeryRange.start && 
+        this.search.surgeryRange.start != "" && this.search.surgeryRange.end
+        && this.search.surgeryRange.end != ""
+      ){
+        f.surgeryRange = [moment(this.search.surgeryRange.start).format("MM-DD-YYYY"), moment(this.search.surgeryRange.end).format("MM-DD-YYYY")]
+      }
+      if(
+        this.search.injuryRange && this.search.injuryRange.start && 
+        this.search.injuryRange.start != "" && this.search.injuryRange.end
+        && this.search.injuryRange.end != ""
+      ){
+        f.injuryRange = [moment(this.search.injuryRange.start).format("MM-DD-YYYY"), moment(this.search.injuryRange.end).format("MM-DD-YYYY")]
+      }
+      this.filters = f
+      console.log(f)  
     },
     resetFilters() {
       this.search =  {
@@ -506,7 +556,7 @@ export default {
         lastName: "",
         hospitalID:"",
         affectedSide:"",
-        year: [1960, new Date().getFullYear()],
+        year: [1950, new Date().getFullYear()],
         height:[100, 250],
         legLength:[30,200],
         weight:[300,2000],
@@ -523,6 +573,7 @@ export default {
       }
       this.surgeryRange = ""
       this.injuryRange = ""
+      this.applyFilters()
     },
     surgeryDateChanged(d){
       if(d){

@@ -49,13 +49,17 @@ module.exports = class {
     * After the creation it loads the required content.
     */
 		ipcMain.on(this.openWindowEvent, async () => {
-			this.createWindow();
+			if (!this.window) {
+				this.createWindow();
+			}
 		});
 		/**
     * Event listener that handles the window destroy
     */
 		ipcMain.on(this.closeWindowEvent, async () => {
-			this.destroyWindow();
+			if (this.window) {	
+				this.destroyWindow();
+			}
 		});
 	}
 };

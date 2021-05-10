@@ -466,8 +466,102 @@ class Events {
           var db = new sqlite3.Database(
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
-          if (filters.length > 0) {
-            
+          if (Object.keys(filters).length > 0) {
+            let sqlQuery = "select * from users";
+
+            if (filters.firstName) {
+              sqlQuery += sqlQuery.includes("where")
+              ? ` and first_name like '%${filters.firstName}%'`
+              : ` where first_name like '%${filters.firstName}%'`;
+            }
+
+            if (filters.lastName) {
+              sqlQuery += sqlQuery.includes("where")
+              ? ` and last_name like '%${filters.lastName}%'`
+              : ` where last_name like '%${filters.lastName}%'`;
+            }
+
+            if (filters.hospitalID) {
+              sqlQuery += sqlQuery.includes("where")
+              ? ` and hospital_id like '%${filters.hospitalID}%'`
+              : ` where hospital_id like '%${filters.hospitalID}%'`;
+            }
+
+            if (filters.sex) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and sex='${filters.sex}'`
+                : ` where sex='${filters.sex}'`;
+            }
+
+            if (filters.affectedSide) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and affected_side='${filters.affectedSide}'`
+                : ` where affected_side='${filters.affectedSide}'`;
+            }
+
+            if (filters.year) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and year between ${filters.year[0]} and ${filters.year[1]}`
+                : ` where year between ${filters.year[0]} and ${filters.year[1]}`;
+            }
+
+            if (filters.legLength) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and leg_length between ${filters.legLength[0]} and ${filters.legLength[1]}`
+                : ` where leg_length between ${filters.legLength[0]} and ${filters.legLength[1]}`;
+            }
+
+            if (filters.weight) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and weight between ${filters.weight[0]} and ${filters.weight[1]}`
+                : ` where weight between ${filters.weight[0]} and ${filters.weight[1]}`;
+            }
+
+            if (filters.height) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and height between ${filters.height[0]} and ${filters.height[1]}`
+                : ` where height between ${filters.height[0]} and ${filters.height[1]}`;
+            }
+
+            if (filters.surgeryRange) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and surgery_date between '${filters.surgeryRange[0]}' and '${filters.surgeryRange[1]}'`
+                : ` where surgery_date between '${filters.surgeryRange[0]}' and '${filters.surgeryRange[1]}'`;
+            }
+
+            if (filters.injuryRange) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`
+                : ` where injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`;
+            }
+
+            if (filters.injuryRange) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`
+                : ` where injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`;
+            }
+
+            if (filters.tags) {
+              sqlQuery += sqlQuery.includes("where")
+                ? ` and id in (select user_id from tags where name in (${filters.tags.map(t => `'${t}'`).join(",")}))`
+                : ` where id in (select user_id from tags where name in (${filters.tags.map(t => `'${t}'`).join(",")}))`;
+            }
+
+            let users = await new Promise((resolve, reject) => {
+              db.all(sqlQuery, (error, rows) => {
+                if (error) {
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+            db.close();
+
+            if (win && win.window && !win.window.isDestroyed()) {
+              e.reply(FETCH_USERS_TO_VIEW_ALL_RESPONSE, { users })
+            }
+
           } else {
             let users = await new Promise((resolve, reject) => {
               db.all("select * from users", (error, rows) => {
