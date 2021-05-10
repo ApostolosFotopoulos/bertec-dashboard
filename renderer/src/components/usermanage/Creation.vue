@@ -116,6 +116,7 @@
               outlined
               v-bind="attrs"
               v-on="on"
+              readonly
             ></v-text-field>
           </template>
           <v-date-picker
@@ -143,6 +144,7 @@
               outlined
               v-bind="attrs"
               v-on="on"
+              readonly
             ></v-text-field>
           </template>
           <v-date-picker
@@ -265,30 +267,30 @@ export default {
       CREATE_USER_RESPONSE,
       (_, responseData) => {
         
-        this.firstName = "";
-        this.lastName = "";
-        this.year = 1950;
-        this.height = 120;
-        this.legLength = 100;
-        this.sex = "Male";
-        this.injuryDate = "";
-        this.surgeryDate = "";
-        this.weight = 0.0;
-        this.otherInfo = "";
-        this.selectedTags = [];
-        this.userCreationAlert = true;
-        this.affectedSide = "Non Affected";
-        this.hospitalID = "";
-        this.userCreationAlertError = responseData.error?true:false
-        this.userCreationAlertMessage = responseData.error?"An error occured while creating a user":"Successfully created a user"
+        _this.firstName = "";
+        _this.lastName = "";
+        _this.year = 1950;
+        _this.height = 120;
+        _this.legLength = 100;
+        _this.sex = "Male";
+        _this.injuryDate = "";
+        _this.surgeryDate = "";
+        _this.weight = 0.0;
+        _this.otherInfo = "";
+        _this.selectedTags = [];
+        _this.userCreationAlert = true;
+        _this.affectedSide = "Non Affected";
+        _this.hospitalID = "";
+        _this.userCreationAlertError = responseData.error?true:false
+        _this.userCreationAlertMessage = responseData.error?"An error occured while creating a user":"Successfully created a user"
         setTimeout(() => {
-          this.userCreationAlert = false;
+          _this.userCreationAlert = false;
         }, 3000);
       }
     );
     ipcRenderer.on(SESSION_OPTIONS, (_, responseData) => {
-      this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
-      this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
+      _this.fz1 = Number(responseData.rows[rowsNames["FZ1"]]) || 0.0;
+      _this.fz2 = Number(responseData.rows[rowsNames["FZ2"]]) || 0.0;
     });
   },
 

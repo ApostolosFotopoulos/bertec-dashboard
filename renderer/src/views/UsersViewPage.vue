@@ -2,12 +2,12 @@
   <v-container>
     <v-row class="mt-0">
       <v-col>
-        <h3>View all the customers for a specific database</h3>
+        <h3>View all the customers</h3>
         <hr class="hr" />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="2">
+    <v-row align="center">
+      <v-col align="center">
         <v-select
           v-model="selectedDatabase"
           :items="
@@ -17,159 +17,450 @@
             }))
           "
           label="Database"
-          :items-per-page="5"
           @input="databaseChanged"
           outlined
+          clearable
         ></v-select>
       </v-col>
-      <v-col cols="1">
-        <v-text-field v-model="search.firstName" label="Hospital ID" outlined />
+      <v-col align="center">
+        <v-text-field 
+          v-model="search.firstName" 
+          label="First Name" 
+          outlined 
+          clearable
+        />
       </v-col>
-      <v-col cols="2">
-        <v-text-field v-model="search.firstName" label="Firstname" outlined />
+      <v-col align="center">
+        <v-text-field 
+          v-model="search.lastName" 
+          label="Last Name" 
+          outlined 
+          clearable
+        />
       </v-col>
-      <v-col cols="2">
-        <v-text-field v-model="search.lastName" label="Lastname" outlined />
+      <v-col align="center">
+        <v-text-field 
+          v-model="search.hospitalID" 
+          label="Hospital ID" 
+          outlined 
+          clearable
+        />
       </v-col>
-      <v-col cols="1">
+      <v-col align="center">
+        <v-select
+          v-model="search.affectedSide"
+          :items="affectedSideOptions"
+          label="Affected Side"
+          outlined
+          clearable
+        ></v-select>
+      </v-col>
+      <v-col align="center">
         <v-select
           v-model="search.sex"
           :items="sexOptions"
           label="Sex"
           outlined
+          clearable
         ></v-select>
-      </v-col>
-      <v-col cols="2">
-        <v-select
-          v-model="affected"
-          :items="affectedOptions"
-          label="Affected Side"
-          outlined
-        ></v-select>
-      </v-col>
-      <v-col cols="2" align="right">
-        <v-btn @click="applyFilters()" class="applyButton mt-2">
-          <v-icon>mdi-magnify</v-icon>
-        </v-btn>
-        <v-btn @click="resetFilters()" class="resetButton mt-2">
-          <v-icon>mdi-restart</v-icon>
-        </v-btn>
       </v-col>
     </v-row>
-    <v-row class="mt-10" align="center">
-      <v-col cols="2">
+    <v-row align="center">
+      <v-col align="center">
         <v-range-slider
           v-model="search.year"
           :max="new Date().getFullYear()"
           :min="1960"
           hide-details
-          thumb-label="always"
+          thumb-label
         />
         <div class="text-center"> Year of Birth </div>
       </v-col>
-      <v-col cols="2">
-        <v-range-slider
-          v-model="search.weight"
-          :max="2000"
-          :min="300"
-          hide-details
-          thumb-label="always"
-        />
-        <div class="text-center"> Weight (N) </div>
-      </v-col>
-      <v-col cols="2">
+      <v-col align="center">
         <v-range-slider
           v-model="search.height"
           :max="250"
           :min="100"
           hide-details
-          thumb-label="always"
+          thumb-label
         />
         <div class="text-center"> Height (cm) </div>
       </v-col>
-      <v-col cols="2">
+      <v-col align="center">
         <v-range-slider
           v-model="search.legLength"
           :max="200"
           :min="30"
           hide-details
-          thumb-label="always"
+          thumb-label
         />
         <div class="text-center"> Leg Length (cm) </div>
+      </v-col>
+      <v-col align="center">
+        <v-range-slider
+          v-model="search.weight"
+          :max="2000"
+          :min="300"
+          hide-details
+          thumb-label
+        />
+        <div class="text-center"> Weight (N)</div>
+      </v-col>
+    </v-row>
+    <v-row align="center">
+      <v-col align="center">
+        <v-menu
+          ref="surgeryDate"
+          v-model="surgeryDateMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          min-width="auto"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="surgeryRange"
+              label="Surgery DateRange"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <vc-date-picker v-model="search.surgeryRange" is-range @input="surgeryDateChanged"/>
+        </v-menu>
+      </v-col>
+      <v-col align="center">
+        <v-menu
+          ref="injuryDate"
+          v-model="injuryDateMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          min-width="auto"
+        >
+          <template v-slot:activator="{ on, attrs }">
+            <v-text-field
+              v-model="injuryRange"
+              label="Injury DateRange"
+              outlined
+              v-bind="attrs"
+              v-on="on"
+            ></v-text-field>
+          </template>
+          <vc-date-picker v-model="search.injuryRange" is-range @input="injuryDateChanged"/>
+        </v-menu>
+      </v-col>
+      <v-col align="center">
+        <v-combobox
+          v-model="search.selectedTags"
+          :items="tags.map((t) => t.name)"
+          label="Tags"
+          multiple
+          outlined
+          chips
+        ></v-combobox>
+      </v-col>
+      <v-col align="center">
+        <v-btn @click="applyFilters()" class="applyButton" block>
+          <v-icon>mdi-magnify</v-icon>
+        </v-btn>
+      </v-col>
+      <v-col align="center">
+        <v-btn @click="resetFilters()" class="resetButton" block>
+          <v-icon>mdi-restart</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row class="mt-0">
       <v-col>
         <h3>Users</h3>
         <hr class="hr" />
+        <div class="mt-3">
+          <v-alert outlined :type="deleteUserAlertError?'error':'success'" text v-if="deleteUserAlert">
+            {{deleteUserAlertMessage}}
+          </v-alert>
+        </div>
       </v-col>
     </v-row>
-    <v-row class="mt-8">
-      <v-col>
+    <v-row class="mt-8" align="center">
+      <v-col align="center">
         <v-data-table
           light
+          :items-per-page="5"
           :headers="headers"
           :items="users"
           class="elevation-1"
-        ></v-data-table>
+        >
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon medium class="mr-2" @click="openDetailsDialog(item)">mdi-magnify</v-icon>
+            <v-icon medium @click="openDeleteDialog(item)">mdi-delete-outline</v-icon>
+          </template>
+        </v-data-table>
       </v-col>
     </v-row>
+    <v-dialog
+      v-model="deleteDialog"
+      transition="dialog-top-transition"
+      max-width="600"
+    >
+      <v-card light class="pt-10 pa-3">
+        <v-card-text>
+          <div class="text-h6">Are you sure you want to delete the user?</div>
+        </v-card-text>
+        <v-card-actions class="justify-end">
+          <v-btn
+            text
+            @click="deleteUser()"
+          >Yes</v-btn>
+          <v-btn
+            text
+            @click="deleteDialog = false"
+          >No</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog
+      v-model="userDetailsDialog"
+      fullscreen
+      hide-overlay
+      transition="dialog-bottom-transition"
+      scrollable
+      class="p-3"
+    >
+      <v-card tile color="#25282f">
+        <div class="text-right pt-4 pr-4">
+          <v-btn
+            icon
+            dark
+            @click="userDetailsDialog = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+        <v-container>
+          <v-row class="mt-0">
+            <v-col>
+              <h3>See the details of the user</h3>
+              <hr class="hr" />
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.hospital_id"
+                label="Hospital ID"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.first_name"
+                label="First Name"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.last_name"
+                label="Last Name"
+                outlined
+                readonly
+              />
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.affected_side"
+                label="Affected Side"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.year"
+                label="Year of Birth"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.height"
+                label="Height (cm)"
+                outlined
+                readonly
+              />
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.leg_length"
+                label="Leg Length (cm)"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.sex"
+                label="Sex"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.weight"
+                label="Weight (N)"
+                outlined
+                readonly
+              />
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.surgery_date"
+                label="Surgery Date"
+                outlined
+                readonly
+              />
+            </v-col>
+            <v-col align="center">
+              <v-text-field
+                v-model="userDetails.injury_date"
+                label="Injury Date"
+                outlined
+                readonly
+              />
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col align="center">
+              <v-textarea
+                v-model="userDetails.otherInfo"
+                label="Other Info"
+                outlined
+                readonly
+                no-resize
+                rows="4"
+              />
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
 const { ipcRenderer } = window.require("electron");
-const {FETCH_USERS_TO_VIEW, FETCH_USERS_TO_VIEW_RESPONSE} = require('../../../main/util/types')
+const { 
+  FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL,FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
+  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE
+} = require('../../../main/util/types')
+import moment from 'moment'
+
 export default {
   mounted() {
     setInterval(() => {
-      ipcRenderer.send("FETCH_ALL_DATABASES");
+      ipcRenderer.send(FETCH_DATABASES_TO_VIEW_ALL);
     }, 10);
-    
+
+    setInterval(() => {
+      if (this.selectedDatabase && this.selectedDatabase != "") {
+        ipcRenderer.send(FETCH_TAGS_TO_VIEW_ALL, {
+          database: this.selectedDatabase,
+        });
+      }
+      if (this.selectedDatabase && this.selectedDatabase != "") {
+        ipcRenderer.send(FETCH_USERS_TO_VIEW_ALL, {
+          database: this.selectedDatabase,
+          filters: this.filters,
+        });
+      }
+    }, 100);
     var _this = this;
-    ipcRenderer.on("FETCH_ALL_DATABASES_RESPONSE", (_, responseData) => {
+    ipcRenderer.on(FETCH_TAGS_TO_VIEW_ALL_RESPONSE, (_, responseData) => {
+      _this.tags = responseData.tags;
+    });
+    ipcRenderer.on(FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, (_, responseData) => {
       _this.databases = responseData.databases;
     });
-    ipcRenderer.on(FETCH_USERS_TO_VIEW_RESPONSE, (_, responseData) => {
-      console.log(responseData.users);
+    ipcRenderer.on(FETCH_USERS_TO_VIEW_ALL_RESPONSE, (_, responseData) => {
       _this.users = responseData.users;
     });
-    ipcRenderer.on("FETCH_SELECTED_DATABASE_RESPONSE", (_, responseData) => {
-      if(_this.selectedDatabase  === ""){
-        console.log(_this.selectedDatabase)
-        if(responseData.database != ""){
-          _this.selectedDatabase = responseData.database
-          ipcRenderer.send(FETCH_USERS_TO_VIEW, { database: _this.selectedDatabase });
-        }
-      }
+    ipcRenderer.on(DELETE_USER_RESPONSE, (_, responseData) => {
+      _this.deleteUserAlert = true;
+      _this.deleteUserAlertError = responseData.error?true:false
+      _this.deleteUserAlertMessage = responseData.error?"An error occured while creating a user":"Successfully deleted a user"
+      setTimeout(() => {
+        _this.deleteUserAlert = false;
+      }, 3000);
     });
   },
   data() {
     return {
+      userDetailsDialog:false,
+      userDetails:{},
+      deleteUserAlert: false,
+      deleteUserAlertError:false,
+      deleteUserAlertMessage:"",
+      userToDelete:{},
+      deleteDialog:false,
+      selectedDatabase:"",
       databases: [],
-      users: [],
-      selectedDatabase: "",
+      filters:[],
+      affectedSideOptions: ["Left","Right","Left + Right", "Non Affected"],
+      sexOptions: ["Male", "Female"],
+      surgeryDateMenu:false,
+      surgeryRange:"",
+      injuryDateMenu: false,
+      injuryRange: "",
+      tags:[],
+      users:[],
+      search: {
+        firstName: "",
+        lastName: "",
+        hospitalID:"",
+        affectedSide:"",
+        year: [1960, new Date().getFullYear()],
+        height:[100, 250],
+        legLength:[30,200],
+        weight:[300,2000],
+        sex:"",
+        surgeryRange: {
+          start: "",
+          end: ""
+        },
+        injuryRange: {
+          start: "",
+          end: ""
+        },
+        selectedTags:[]
+      },
       headers: [
         {
           text: "Hospital ID",
           sortable: false,
-          value: "hospital_code",
+          value: "hospital_id",
         },
         {
           text: "Firstname",
-          value: "firstName",
+          value: "first_name",
         },
         {
           text: "Lastname",
-          value: "lastName",
+          value: "last_name",
         },
         {
           text: "Year of Birth",
           value: "year",
-        },
-        {
-          text: "Other Info",
-          value: "other_info",
         },
         {
           text: "Sex",
@@ -180,64 +471,85 @@ export default {
           value: "height",
         },
         {
-          text: "Leg Length (cm)",
-          value: "leg_length",
-        },
-        {
           text: "Weight (N)",
           value: "weight",
           sortable: false,
         },
-        {
-          text: "Affected Side",
-          value: "affected_side",
-          sortable: false,
-        },
-        {
-          text: "Injury Date",
-          value: "injury_date",
-        },
-        {
-          text: "Surgery Date",
-          value: "surgery_date",
+        { 
+          text: "Actions", 
+          value: "actions", 
+          sortable: false 
         },
       ],
-      sexOptions: ["Male", "Female", "All"],
-      affected:"Not Affected",
-      affectedOptions: ["Left","Right","Left + Right","Not Affected"],
-      search: {
-        firstName: "",
-        lastName: "",
-        year: [1960, new Date().getFullYear()],
-        weight: [300, 2000],
-        sex: "All",
-        height: [100, 250],
-        legLength: [30, 200],
-      },
     };
   },
   methods: {
     databaseChanged(d) {
-      this.selectedDatabase = d;
-      this.users = [];
-      ipcRenderer.send(FETCH_USERS_TO_VIEW, { database: d });
+      if(d){
+        this.selectedDatabase = d
+        this.users = []
+        this.tags = []
+        this.resetFilters();
+      } else {
+        this.selectedDatabase = ""
+        this.users = []
+        this.tags = []
+        this.resetFilters();
+      }
     },
     applyFilters() {
-      console.log({ ...this.search, database: this.selectedDatabase });
-      ipcRenderer.send("QUERY_USERS", { ...this.search });
+
     },
     resetFilters() {
-      (this.search = {
+      this.search =  {
         firstName: "",
         lastName: "",
-        year: [1900, new Date().getFullYear()],
-        weight: [30, 300],
-        sex: "All",
-        height: [100, 250],
-        legLength: [30, 200],
-      }),
-      ipcRenderer.send("QUERY_USERS", { ...this.search });
+        hospitalID:"",
+        affectedSide:"",
+        year: [1960, new Date().getFullYear()],
+        height:[100, 250],
+        legLength:[30,200],
+        weight:[300,2000],
+        sex:"",
+        surgeryRange: {
+          start: "",
+          end: ""
+        },
+        injuryRange: {
+          start: "",
+          end: ""
+        },
+        selectedTags:[]
+      }
+      this.surgeryRange = ""
+      this.injuryRange = ""
     },
+    surgeryDateChanged(d){
+      if(d){
+        this.surgeryRange = `${moment(d.start).format("DD/MM/YYYY")} - ${moment(d.end).format("DD/MM/YYYY")}`
+      } else {
+        this.surgeryRange = ""
+      }
+    },
+    injuryDateChanged(d){
+      if(d){
+        this.injuryRange = `${moment(d.start).format("DD/MM/YYYY")} - ${moment(d.end).format("DD/MM/YYYY")}`
+      } else {
+        this.injuryRange = ""
+      }
+    },
+    deleteUser(){
+      ipcRenderer.send(DELETE_USER,{ database: this.selectedDatabase, userId: this.userToDelete.id })
+      this.deleteDialog = false
+    },
+    openDeleteDialog(u){
+      this.userToDelete = u
+      this.deleteDialog = true
+    },
+    openDetailsDialog(u){
+      this.userDetails = u
+      this.userDetailsDialog = true
+    }
   },
 };
 </script>
@@ -250,6 +562,24 @@ export default {
 .v-text-field__details {
   display: none !important;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+textarea::-webkit-scrollbar {
+  background-color: transparent !important;
+  width: 0px;
+}
+textarea::-webkit-scrollbar-track {
+  background-color: transparent;
+  width: 0px;
+}
 </style>
 
 <style scoped>
@@ -261,6 +591,6 @@ export default {
 .resetButton {
   height: 38px !important;
   min-height: 38px !important;
-  background: #ffa505 !important;
+  background: #f4a261 !important;
 }
 </style>

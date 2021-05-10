@@ -6,7 +6,9 @@ const {
   FETCH_DATABASES_TO_USERS, FETCH_DATABASES_TO_USERS_RESPONSE, FETCH_USERS_TO_CONTINUE, FETCH_USERS_TO_CONTINUE_RESPONSE,
   FETCH_USERS_TO_VIEW, FETCH_USERS_TO_VIEW_RESPONSE, FETCH_USERS_TO_EDIT, FETCH_USERS_TO_EDIT_RESPONSE, CREATE_USER, CREATE_USER_RESPONSE,
   UPDATE_USER, UPDATE_USER_RESPONSE, CREATE_TAG, CREATE_TAG_RESPONSE, DELETE_TAG, DELETE_TAG_RESPONSE, FETCH_TAGS_TO_TAGS, FETCH_TAGS_TO_TAGS_RESPONSE,
-  FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE
+  FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
+  FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
+  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER,DELETE_USER_RESPONSE
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
@@ -174,6 +176,27 @@ class Events {
     });
   }
 
+  static fetchDatabasesToViewAllListener(win) {
+    ipcMain.on(FETCH_DATABASES_TO_VIEW_ALL, async (e, d) => {
+      try {
+        let files = await new Promise((resolve, reject) => {
+          glob(path.resolve(__dirname, "../../assets/databases/*.db"), (error, files) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            resolve(files.map(filePath => path.basename(filePath)));
+          });
+        })
+        if (win && win.window && !win.window.isDestroyed()) {
+          e.reply(FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, { databases: files })
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
   static fetchUsersToContinueListener(win) {
     ipcMain.on(FETCH_USERS_TO_CONTINUE, async (e, d) => {
       try {
@@ -322,6 +345,7 @@ class Events {
       }
     });
   }
+
   static updateUserListener(win) {
     ipcMain.on(UPDATE_USER, async (e, d) => {
       try {
@@ -386,6 +410,79 @@ class Events {
             e.reply(UPDATE_USER_RESPONSE, { error: false })
           } else {
             e.reply(UPDATE_USER_RESPONSE, { error: true })
+          }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static deleteUserListener(win) {
+    ipcMain.on(DELETE_USER, async (e, d) => {
+      try {
+        let { database, userId } = d
+        if (database && userId) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+
+          let isUserDeleted = await new Promise((resolve, reject) => {
+            db.run(`delete from users where id=${userId}`, function (error) {
+              if (error) {
+                reject(false);
+                return
+              }
+              resolve(true)
+            });
+          })
+
+          let isTagsDeleted = await new Promise((resolve, reject) => {
+            db.run(`delete from tags where user_id=${userId}`, function (error) {
+              if (error) {
+                reject(false);
+                return
+              }
+              resolve(true)
+            });
+          })
+          if (isUserDeleted && isTagsDeleted && win && win.window && !win.window.isDestroyed()) {
+            e.reply(DELETE_USER_RESPONSE, { error: false });
+          } else {
+            e.reply(DELETE_USER_RESPONSE, { error: true });
+          }
+          db.close();
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+  static fetchUsersToViewAllListener(win) {
+    ipcMain.on(FETCH_USERS_TO_VIEW_ALL, async (e, d) => {
+      try {
+        let { database, filters } = d
+        if (database && filters) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+          if (filters.length > 0) {
+            
+          } else {
+            let users = await new Promise((resolve, reject) => {
+              db.all("select * from users", (error, rows) => {
+                if (error) {
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+            db.close();
+            
+            if (win && win.window && !win.window.isDestroyed()) {
+              e.reply(FETCH_USERS_TO_VIEW_ALL_RESPONSE, { users })
+            }
           }
         }
       } catch (e) {
@@ -477,6 +574,35 @@ class Events {
           db.close();
           if (win && win.window && !win.window.isDestroyed()) {
             e.reply(FETCH_TAGS_TO_TAGS_RESPONSE, { tags });
+          }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    })
+  }
+  
+  static fetchTagsToViewAllListener(win) {
+    ipcMain.on(FETCH_TAGS_TO_VIEW_ALL, async (e, d) => {
+      try {
+        let { database } = d;
+        if (database) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+
+          let tags = await new Promise((resolve, reject) => {
+            db.all(`select * from tags where user_id=-1`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          })
+          db.close();
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply(FETCH_TAGS_TO_VIEW_ALL_RESPONSE, { tags });
           }
         }
       } catch (e) {

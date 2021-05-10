@@ -193,6 +193,7 @@ module.exports = class {
     Events.fetchDatabasesToContinueListener(this.window);
     Events.fetchDatabasesToTagsListener(this.createtagsw);
     Events.fetchDatabasesToUsersListener(this.createuserw);
+    Events.fetchDatabasesToViewAllListener(this.usersw);
 
     // Users
     Events.fetchUsersToContinueListener(this.window);
@@ -200,6 +201,8 @@ module.exports = class {
     Events.fetchUsersToEditListener(this.createuserw);
     Events.createUserListener(this.createuserw);
     Events.updateUserListener(this.createuserw);
+    Events.fetchUsersToViewAllListener(this.usersw);
+    Events.deleteUserListener(this.usersw);
 
     // Tags
     Events.createTagListener(this.createtagsw);
@@ -207,6 +210,7 @@ module.exports = class {
     Events.fetchTagsListener(this.createtagsw);
     Events.fetchTagsToUsersListener(this.createuserw);
     Events.fetchTagsForSpecificUserListener(this.createuserw);
+    Events.fetchTagsToViewAllListener(this.usersw);
     
     // Database Events
     //this.ipcEvents.createDatabaseEvent();
