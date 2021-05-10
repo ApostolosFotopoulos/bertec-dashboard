@@ -201,11 +201,24 @@
           :items-per-page="5"
           :headers="headers"
           :items="users"
+          :expanded.sync="expanded"
+          show-expand
           class="elevation-1"
         >
           <template v-slot:[`item.actions`]="{ item }">
             <v-icon medium class="mr-2" @click="openDetailsDialog(item)">mdi-magnify</v-icon>
             <v-icon medium @click="openDeleteDialog(item)">mdi-delete-outline</v-icon>
+          </template>
+          <template v-slot:expanded-item="{ headers, item }">
+            <td class="pa-5" :colspan="headers.length">
+              <v-data-table
+                light
+                :items-per-page="5"
+                :headers="innerHeaders"
+                :items="item.trials"
+                class="elevation-1"
+              />
+            </td>
           </template>
         </v-data-table>
       </v-col>
@@ -406,6 +419,7 @@ export default {
     });
     ipcRenderer.on(FETCH_USERS_TO_VIEW_ALL_RESPONSE, (_, responseData) => {
       _this.users = responseData.users;
+      console.log(_this.users)
     });
     ipcRenderer.on(DELETE_USER_RESPONSE, (_, responseData) => {
       _this.deleteUserAlert = true;
@@ -418,6 +432,7 @@ export default {
   },
   data() {
     return {
+      expanded:[],
       userDetailsDialog:false,
       userDetails:{},
       deleteUserAlert: false,
@@ -492,7 +507,22 @@ export default {
           value: "actions", 
           sortable: false 
         },
+        { 
+          text: '', 
+          value: 'data-table-expand'
+        },
       ],
+      innerHeaders:[
+        {
+          text: "ID",
+          value: "id",
+        },
+          {
+          text: "Trial",
+          value: "name",
+          sortable: false,
+        }
+      ]
     };
   },
   methods: {

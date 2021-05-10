@@ -8,13 +8,27 @@ const {
   UPDATE_USER, UPDATE_USER_RESPONSE, CREATE_TAG, CREATE_TAG_RESPONSE, DELETE_TAG, DELETE_TAG_RESPONSE, FETCH_TAGS_TO_TAGS, FETCH_TAGS_TO_TAGS_RESPONSE,
   FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
-  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER,DELETE_USER_RESPONSE
+  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER,DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
 const { ipcMain } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
+
+function groupBy(list, keyGetter) {
+  const map = new Map();
+  list.forEach((item) => {
+    const key = keyGetter(item);
+    const collection = map.get(key);
+    if (!collection) {
+      map.set(key, [item]);
+    } else {
+      collection.push(item);
+    }
+  });
+  return map;
+}
 
 class Events {
   static createDatabaseListener(win) {
@@ -50,6 +64,9 @@ class Events {
                 );
                 db.run(
                   "create table tags(id integer primary key autoincrement, name text, user_id integer)"
+                );
+                db.run(
+                  "create table trials(id integer primary key autoincrement, name text, user_id integer)"
                 );
               });
               db.close();
@@ -556,6 +573,23 @@ class Events {
                 resolve(rows)
               });
             })
+
+            let trials = await new Promise((resolve, reject) => {
+              db.all(`select * from trials where user_id in (${users.map(u => u.id)})`, (error, rows) => {
+                if (error) {
+                  console.log(error)
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+
+            trials = groupBy(trials, trial => trial.user_id)
+            users = users.map(u => {
+              const t = trials.get(u.id)
+              return {...u, trials: t}
+            })
             db.close();
 
             if (win && win.window && !win.window.isDestroyed()) {
@@ -580,6 +614,7 @@ class Events {
           }
         }
       } catch (e) {
+        console.log(e)
         throw new Error(e);
       }
     });
@@ -755,6 +790,31 @@ class Events {
           if (win && win.window && !win.window.isDestroyed()) {
             e.reply(FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE, { tags });
           }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static createTrialListener(win) {
+    ipcMain.on(CREATE_TRIAL, async (e, d) => {
+      try {
+        let { database, userId, trial } = d;
+        if (database, userId && trial) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+          await new Promise((resolve, reject) => {
+            db.run(`insert into trials(name, user_id) values('${trial}',${userId})`, function (error, rows) {
+              if (error) {
+                reject(false);
+                return
+              }
+              resolve(true)
+            });
+          });
+          db.close();
         }
       } catch (e) {
         throw new Error(e);

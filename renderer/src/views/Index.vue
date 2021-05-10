@@ -13,7 +13,7 @@
 const { ipcRenderer } = window.require("electron");
 import Trial from "../components/trial/Trial.vue";
 import Setup from "../components/setup/Setup.vue";
-const { WINDOWS_STATUS } = require("../../../main/util/types");
+const { WINDOWS_STATUS, CREATE_TRIAL } = require("../../../main/util/types");
 export default {
   components: {
     Trial,
@@ -34,10 +34,11 @@ export default {
     skipDatabase() {
       this.isDatabaseReady = true;
     },
-    continueToMain(d, u) {
+    continueToMain(d, u, t) {
       this.$store.commit("setDatabase", d);
       this.$store.commit("setUser", u);
       this.$store.commit("setWeight", u.weight);
+      ipcRenderer.send(CREATE_TRIAL,{ database: d, userId: u.id , trial: t})
       this.isDatabaseReady = true;
     },
     backToDatabase() {

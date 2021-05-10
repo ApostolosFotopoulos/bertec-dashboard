@@ -53,7 +53,7 @@
                 Real Time
               </v-btn>
               <v-btn
-                @click="continueToMain(selectedDatabase, selectedUser)"
+                @click="continueToMain(selectedDatabase, selectedUser, trialName)"
                 class="newTrialButton"
                 :disabled="
                   !selectedDatabase ||

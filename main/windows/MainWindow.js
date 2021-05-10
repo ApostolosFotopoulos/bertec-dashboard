@@ -212,29 +212,8 @@ module.exports = class {
     Events.fetchTagsForSpecificUserListener(this.createuserw);
     Events.fetchTagsToViewAllListener(this.usersw);
     
-    // Database Events
-    //this.ipcEvents.createDatabaseEvent();
-    //this.ipcEvents.deleteDatabaseEvent();
-    //this.ipcEvents.fetchDatabasesToDeleteEvent(this.window);
-    //this.ipcEvents.fetchDatabasesToContinueToTrialEvent(this.window);
-    //this.ipcEvents.fetchDatabasesToTagManagementEvent(this.createtagsw);
-    //this.ipcEvents.fetchDatabasesToUserManagementEvent(this.createuserw);
-
-    // Users
-    //this.ipcEvents.fetchUsersToContinueToTrialEvent(this.window);
-    //this.ipcEvents.createUserEvent();
-    //this.ipcEvents.fetchAllUsersToViewEvent(this.usersw);
-    //this.ipcEvents.fetchAllUsersToEditEvent(this.createuserw);
-    //this.ipcEvents.updateUserEvent();
-
-    // Tags
-    //this.ipcEvents.createTagEvent();
-    //this.ipcEvents.deleteTagEvent();
-    //this.ipcEvents.fetchTagToTagManagementEvent(this.createtagsw);
-    //this.ipcEvents.fetchTagToUserManagementEvent(this.createuserw);
-    //this.ipcEvents.fetchAllTagsForUserEvent(this.createuserw);
-
-    this.ipcEvents.queryUsersEvent();
+    // Trials
+    Events.createTrialListener(this.window);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {
