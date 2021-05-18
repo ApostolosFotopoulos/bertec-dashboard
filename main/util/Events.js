@@ -8,7 +8,8 @@ const {
   UPDATE_USER, UPDATE_USER_RESPONSE, CREATE_TAG, CREATE_TAG_RESPONSE, DELETE_TAG, DELETE_TAG_RESPONSE, FETCH_TAGS_TO_TAGS, FETCH_TAGS_TO_TAGS_RESPONSE,
   FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
-  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER,DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE
+  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
+  CREATE_SESSION
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
@@ -66,7 +67,10 @@ class Events {
                   "create table tags(id integer primary key autoincrement, name text, user_id integer)"
                 );
                 db.run(
-                  "create table trials(id integer primary key autoincrement, name text, user_id integer)"
+                  "create table sessions(id integer primary key autoincrement, name text, user_id integer)"
+                );
+                db.run(
+                  "create table trials(id integer primary key autoincrement, name text, session_id integer)"
                 );
               });
               db.close();
@@ -797,6 +801,31 @@ class Events {
     });
   }
 
+  static createSessionListener(win) {
+    ipcMain.on(CREATE_SESSION, async (e, d) => {
+      try {
+        let { database, userId, session } = d;
+        if (database, userId && session) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../assets/databases/${database}`)
+          );
+          await new Promise((resolve, reject) => {
+            db.run(`insert into sessions(name, user_id) values('${session}',${userId})`, function (error, rows) {
+              if (error) {
+                reject(false);
+                return
+              }
+              resolve(true)
+            });
+          });
+          db.close();
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+  
   static createTrialListener(win) {
     ipcMain.on(CREATE_TRIAL, async (e, d) => {
       try {

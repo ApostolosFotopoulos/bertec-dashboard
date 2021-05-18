@@ -5,18 +5,18 @@
       :skipDatabase="skipDatabase"
       :continueToMain="continueToMain"
     />
-    <Trial v-else :backToDatabase="backToDatabase" />
+    <Session v-else :backToDatabase="backToDatabase" />
   </div>
 </template>
 
 <script>
 const { ipcRenderer } = window.require("electron");
-import Trial from "../components/trial/Trial.vue";
+import Session from "../components/session/Session.vue";
 import Setup from "../components/setup/Setup.vue";
-const { WINDOWS_STATUS, CREATE_TRIAL } = require("../../../main/util/types");
+const { WINDOWS_STATUS, CREATE_SESSION } = require("../../../main/util/types");
 export default {
   components: {
-    Trial,
+    Session,
     Setup,
   },
   mounted() {
@@ -34,11 +34,11 @@ export default {
     skipDatabase() {
       this.isDatabaseReady = true;
     },
-    continueToMain(d, u, t) {
+    continueToMain(d, u, s) {
       this.$store.commit("setDatabase", d);
       this.$store.commit("setUser", u);
       this.$store.commit("setWeight", u.weight);
-      ipcRenderer.send(CREATE_TRIAL,{ database: d, userId: u.id , trial: t})
+      ipcRenderer.send(CREATE_SESSION,{ database: d, userId: u.id , session: s})
       this.isDatabaseReady = true;
     },
     backToDatabase() {

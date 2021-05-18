@@ -41,8 +41,8 @@
         <v-row>
           <v-col>
             <v-text-field
-              v-model="trialName"
-              label="Trial name"
+              v-model="session"
+              label="Session"
               outlined
               clearable
             />
@@ -53,17 +53,17 @@
                 Real Time
               </v-btn>
               <v-btn
-                @click="continueToMain(selectedDatabase, selectedUser, trialName)"
-                class="newTrialButton"
+                @click="continueToMain(selectedDatabase, selectedUser, session)"
+                class="newSessionButton"
                 :disabled="
                   !selectedDatabase ||
                   selectedDatabase === '' ||
                   !selectedUser ||
                   selectedUser === '' ||
-                  trialName.trim() === ''
+                  session.trim() === ''
                 "
               >
-                New Trial
+                New Session
               </v-btn>
             </div>
           </v-col>
@@ -110,7 +110,7 @@ export default {
     return {
       databases: [],
       selectedDatabase: "",
-      trialName: "",
+      session: "",
       users: [],
       selectedUser: "",
     };
@@ -139,7 +139,7 @@ export default {
   min-height: 38px !important;
   background: #f4a261 !important;
 }
-.newTrialButton {
+.newSessionButton {
   height: 38px !important;
   min-height: 38px !important;
   background: #6ab187 !important;

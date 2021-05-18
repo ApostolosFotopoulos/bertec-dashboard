@@ -4,7 +4,6 @@ const ForcePlatesProcess = require("../util/ForcePlatesProcess");
 const path = require("path");
 var net = require("net");
 const Events = require('../util/Events');
-const IPCEvents = require("../util/IPCEvents.js");
 const {
   START_SESSION,
   STOP_SESSION,
@@ -22,7 +21,6 @@ const {
 module.exports = class {
   constructor() {
     // Options
-    this.ipcEvents = new IPCEvents();
     this.weight = 700;
     this.dataType = "Normalized";
     this.stepsPerMinuteTarget = 200;
@@ -211,9 +209,12 @@ module.exports = class {
     Events.fetchTagsToUsersListener(this.createuserw);
     Events.fetchTagsForSpecificUserListener(this.createuserw);
     Events.fetchTagsToViewAllListener(this.usersw);
+
+    // Session
+    Events.createSessionListener(this.window);
     
     // Trials
-    Events.createTrialListener(this.window);
+    //Events.createTrialListener(this.window);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {

@@ -94,6 +94,17 @@
               </v-btn>
             </div>
           </v-col>
+          <v-col cols="4">
+            <h3>Sessions</h3>
+            <div class="mt-3">
+              <v-btn
+                class="manageSessionsButton"
+                block
+              >
+                Manage
+              </v-btn>
+            </div>
+          </v-col>
         </v-row>
       </v-card>
     </v-col>
@@ -218,6 +229,11 @@ export default {
 .manageTagsButton {
   height: 38px !important;
   min-height: 38px !important;
-  background: #f4a261 !important;
+  background: #6ab187 !important;
+}
+.manageSessionsButton{
+  height: 38px !important;
+  min-height: 38px !important;
+  background: #6ab187 !important;
 }
 </style>
