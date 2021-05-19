@@ -325,14 +325,7 @@ class Events {
               db.run(
                 `insert into users(first_name, last_name, year, other_info, sex, height, leg_length, hospital_id, affected_side, weight, surgery_date, injury_date, created_at,updated_at)` +
                 `values('${firstName}', '${lastName}', ${year}, '${otherInfo}', '${sex}', ${height}, ${legLength},'${hospitalID}','${affectedSide}', ${weight},` +
-                `'${moment(new Date(surgeryDate)).format(
-                  "DD-MM-YYYY"
-                )}','${moment(new Date(injuryDate)).format(
-                  "DD-MM-YYYY"
-                )}','${moment(new Date()).format("DD-MM-YYYY")}', '${moment(
-                  new Date()
-                ).format("DD-MM-YYYY")}')`,
-                [],
+                `'${new Date(surgeryDate)}','${new Date(injuryDate)}','${new Date()}','${new Date()}')`,[],
                 async function (error) {
                   if (error) {
                     reject(false);

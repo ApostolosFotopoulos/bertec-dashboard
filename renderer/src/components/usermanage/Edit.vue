@@ -139,6 +139,7 @@
               v-bind="attrs"
               v-on="on"
               readonly
+              clearable
             ></v-text-field>
           </template>
           <v-date-picker
@@ -167,6 +168,7 @@
               v-bind="attrs"
               v-on="on"
               readonly
+              clearable
             ></v-text-field>
           </template>
           <v-date-picker
