@@ -1,7 +1,7 @@
 <template>
   <v-row>
     <v-col>
-      <v-card class="pa-3 mt-3" color="#25282F">
+      <div class="pa-3 mt-3">
         <v-row>
           <v-col>
             <h3>Select a user from a database to continue</h3>
@@ -68,7 +68,7 @@
             </div>
           </v-col>
         </v-row>
-      </v-card>
+      </div>
     </v-col>
   </v-row>
 </template>
