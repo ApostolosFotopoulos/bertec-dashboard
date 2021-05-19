@@ -67,10 +67,10 @@ class Events {
                   "create table tags(id integer primary key autoincrement, name text, user_id integer)"
                 );
                 db.run(
-                  "create table sessions(id integer primary key autoincrement, name text, user_id integer)"
+                  "create table sessions(id integer primary key autoincrement, name text, user_id integer, created_at date)"
                 );
                 db.run(
-                  "create table trials(id integer primary key autoincrement, name text, session_id integer)"
+                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date)"
                 );
               });
               db.close();
@@ -571,8 +571,8 @@ class Events {
               });
             })
 
-            let trials = await new Promise((resolve, reject) => {
-              db.all(`select * from trials where user_id in (${users.map(u => u.id)})`, (error, rows) => {
+            let sessions = await new Promise((resolve, reject) => {
+              db.all(`select * from sessions where user_id in (${users.map(u => u.id)})`, (error, rows) => {
                 if (error) {
                   console.log(error)
                   reject([]);
@@ -582,10 +582,28 @@ class Events {
               });
             })
 
-            trials = groupBy(trials, trial => trial.user_id)
+            let trialsCount = await new Promise((resolve, reject) => {
+              db.all(`select count(id) as n ,id as trial_id, session_id from trials where session_id in (${sessions.map(s => s.id)}) group by session_id`, (error, rows) => {
+                if (error) {
+                  console.log(error)
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+
+            sessions = groupBy(sessions, session => session.user_id)
             users = users.map(u => {
-              const t = trials.get(u.id)
-              return {...u, trials: t}
+              let sess = sessions.get(u.id)
+              sess = sess.map(s => {
+                return {
+                  ...s,
+                  created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY"),
+                  trial_count: (trialsCount.find(t=> t.session_id === s.id )).n
+                }
+              })
+              return { ...u, sessions: sess }
             })
             db.close();
 
@@ -803,8 +821,9 @@ class Events {
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
           await new Promise((resolve, reject) => {
-            db.run(`insert into sessions(name, user_id) values('${session}',${userId})`, function (error, rows) {
+            db.run(`insert into sessions(name, user_id, created_at) values('${session}',${userId},'${new Date()}')`, function (error, rows) {
               if (error) {
+                console.log(error)
                 reject(false);
                 return
               }

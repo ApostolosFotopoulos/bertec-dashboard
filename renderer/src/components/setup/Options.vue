@@ -76,7 +76,7 @@
             </div>
             <div class="mt-3">
               <v-btn @click="openUsersWindow()" class="viewUsersButton" block>
-                View All
+                View
               </v-btn>
             </div>
           </v-col>
