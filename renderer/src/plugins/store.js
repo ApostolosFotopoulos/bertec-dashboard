@@ -10,7 +10,8 @@ export default new Vuex.Store({
 		options: {
 			database: '',
 			user: {},
-			filePath: '',
+			session: -1,
+			trial:"",
 			mode: 'Walking',
 			timeout: 60,
 			weight: 700,
@@ -148,6 +149,12 @@ export default new Vuex.Store({
 		}
 	},
 	mutations: {
+		setTrial(state, trial) {
+			state.options.trial = trial
+		},
+		setSession(state,session) {
+			state.options.session = session
+		},
 		setDatabase(state, database) {
 			state.options.database = database;
 		},

@@ -38,7 +38,7 @@
             :value="$store.state.options.timeout"
             label="Time (sec)"
             outlined
-            :disabled="$store.state.options.isSessionRunning"
+            :disabled="isTrialRunning"
           />
         </v-col>
         <v-col cols="2">
@@ -49,14 +49,15 @@
           >
           <v-btn
             elevation="25"
+            :disabled="this.$store.state.options.session == -1"
             :class="
-              $store.state.options.isSessionRunning
+              isTrialRunning
                 ? 'stopButton v-input__control mt-15'
                 : 'startButton v-input__control mt-15'
             "
-            @click="() => startStopSession()"
+            @click="() => startStopTrial()"
           >
-            {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+            {{ isTrialRunning ? "Stop" : "Start" }}
           </v-btn>
         </v-col>
       </v-row>
@@ -69,6 +70,8 @@ const { ipcRenderer } = window.require("electron");
 import SpeedMetersCharts from "../components/speedmeter/SpeedMetersCharts.vue";
 import Statistics from "../components/speedmeter/Statistics.vue";
 import History from "../components/speedmeter/History.vue";
+import moment from 'moment';
+const { CREATE_TRIAL, CREATE_TRIAL_RESPONSE} = require("../../../main/util/types");
 
 export default {
   components: {
@@ -76,9 +79,41 @@ export default {
     Statistics,
     History,
   },
-  mounted() {
-    //setInterval(()=>{ ipcRenderer.send('SESSION_RUNNING_SPEEDMETER') },1)
+  data(){
+    return{
+      isTrialRunning:false,
+      timeoutInstance: null,
+    }
   },
+  mounted(){
+    ipcRenderer.on(CREATE_TRIAL_RESPONSE,(_,responseData)=>{
+        this.isTrialRunning = true
+        console.log(responseData.trial)
+        this.$store.commit("setTrial",responseData.trial)
+        this.timeoutInstance = setTimeout(()=>{
+          this.isTrialRunning = false
+          this.$store.commit("setTrial","")
+        },this.$store.state.options.timeout*1000)
+    })
+  },
+  methods:{
+    startStopTrial(){
+      if(this.isTrialRunning){
+        clearTimeout(this.timeoutInstance);
+        this.isTrialRunning = false;
+        this.$store.commit("setTrial","")
+      } else {
+        console.log(this.$store.state.options.session)
+        if(this.$store.state.options.session != -1){
+          ipcRenderer.send(CREATE_TRIAL,{ 
+            session: this.$store.state.options.session,
+            database: this.$store.state.options.database, 
+            userId: this.$store.state.options.user.id,
+          })
+        }
+      }
+    },
+  }
 };
 </script>
 

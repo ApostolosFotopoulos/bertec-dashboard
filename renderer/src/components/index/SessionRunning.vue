@@ -45,6 +45,9 @@ export default {
         this.$store.commit("setSessionRunning", true);
         ipcRenderer.send(START_SESSION, {
           weight: this.$store.state.options.weight,
+          session: this.$store.state.options.session,
+          database: this.$store.state.options.database,
+          user: this.$store.state.options.user,
         });
       }
     },

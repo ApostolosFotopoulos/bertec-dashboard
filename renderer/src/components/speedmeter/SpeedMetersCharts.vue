@@ -40,7 +40,7 @@
 <script>
 import rowNames from "../../../../assets/store/rowsNames.json";
 const { ipcRenderer } = window.require("electron");
-const { SPEEDMETER_SESSION } = require("../../../../main/util/types");
+const { SPEEDMETER_SESSION, UPDATE_TRIAL } = require("../../../../main/util/types");
 import VueSpeedometer from "vue-speedometer";
 
 export default {
@@ -75,11 +75,20 @@ export default {
   methods: {
     updateVariables(responseData) {
       this.$store.commit("setWeight", responseData.weight);
+      this.$store.commit("setSession", responseData.session);
+      this.$store.commit("setDatabase", responseData.database);
+      this.$store.commit("setUser", responseData.user);
       this.$store.commit("setForceFZ1", responseData.rows[rowNames["FZ1"]]);
       this.$store.commit("setForceFZ2", responseData.rows[rowNames["FZ2"]]);
       this.$store.commit("setLeftPlateAtSpeedmeter", responseData.rows);
       this.$store.commit("setRightPlateAtSpeedmeter", responseData.rows);
       this.$store.commit("calculatefootAsymmetries");
+
+      if(this.$store.state.options.trial != ""){
+        console.log('Trial running.....')
+        //console.log(this.$store.state.options.trial)
+        ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
+      }
     },
   },
 };

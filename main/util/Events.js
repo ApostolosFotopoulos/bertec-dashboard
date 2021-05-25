@@ -9,13 +9,14 @@ const {
   FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
-  CREATE_SESSION
+  CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
 const { ipcMain } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
+const { writeFileSyncRecursive } = require('./helpers');
 
 function groupBy(list, keyGetter) {
   const map = new Map();
@@ -70,7 +71,7 @@ class Events {
                   "create table sessions(id integer primary key autoincrement, name text, user_id integer, created_at date)"
                 );
                 db.run(
-                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date)"
+                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date, user_id integer)"
                 );
               });
               db.close();
@@ -388,13 +389,7 @@ class Events {
           let isUpdatedUser = await new Promise((resolve, reject) => {
             db.run(
               `update users set first_name='${firstName}', last_name='${lastName}', year=${year}, sex='${sex}',hospital_id='${hospitalID}',affected_side='${affectedSide}', height=${height},` +
-              ` leg_length=${legLength} , weight=${weight}, other_info='${otherInfo}' , surgery_date='${moment(
-                new Date(surgeryDate)
-              ).format("DD-MM-YYYY")}', injury_date='${moment(
-                new Date(injuryDate)
-              ).format("DD-MM-YYYY")}', updated_at='${moment(new Date()).format(
-                "DD-MM-YYYY"
-              )}' where id = ${id}`
+              ` leg_length=${legLength} , weight=${weight}, other_info='${otherInfo}' , surgery_date='${new Date(surgeryDate)}', injury_date='${new Date(injuryDate)}', updated_at='${new Date()}' where id = ${id}`
               , function (error) {
                 if (error) {
                   reject(false);
@@ -600,7 +595,7 @@ class Events {
                 return {
                   ...s,
                   created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY"),
-                  trial_count: (trialsCount.find(t=> t.session_id === s.id )).n
+                  trial_count: (trialsCount.find(t=> t.session_id === s.id ))?(trialsCount.find(t=> t.session_id === s.id )).n:0
                 }
               })
               return { ...u, sessions: sess }
@@ -820,17 +815,20 @@ class Events {
           var db = new sqlite3.Database(
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
-          await new Promise((resolve, reject) => {
+          let sessionId = await new Promise((resolve, reject) => {
             db.run(`insert into sessions(name, user_id, created_at) values('${session}',${userId},'${new Date()}')`, function (error, rows) {
               if (error) {
                 console.log(error)
-                reject(false);
+                reject(-1);
                 return
               }
-              resolve(true)
+              resolve(this.lastID)
             });
           });
           db.close();
+          if (win && !win.isDestroyed()) {
+            e.reply(CREATE_SESSION_RESPONSE, { session: sessionId });
+          }
         }
       } catch (e) {
         throw new Error(e);
@@ -841,21 +839,42 @@ class Events {
   static createTrialListener(win) {
     ipcMain.on(CREATE_TRIAL, async (e, d) => {
       try {
-        let { database, userId, trial } = d;
-        if (database, userId && trial) {
+        let { database, userId, session } = d;
+        console.log(d)
+        if (database && userId && session) {
           var db = new sqlite3.Database(
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
+          let trial = `session_${session}_trial_${moment(new Date()).format("DD-MM-YYYY HH:mm:ss")}.csv`
           await new Promise((resolve, reject) => {
-            db.run(`insert into trials(name, user_id) values('${trial}',${userId})`, function (error, rows) {
+            db.run(`insert into trials(name, user_id,session_id,created_at) values('${trial}',${userId},${session},'${new Date()}')`, function (error) {
               if (error) {
-                reject(false);
+                console.log(error)
+                reject(-1);
                 return
               }
-              resolve(true)
+              resolve(this.lastID)
             });
           });
           db.close();
+          
+          writeFileSyncRecursive(path.resolve(__dirname, `../../assets/trials/${database.replace(".db", "")}/${trial}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
+          if (win && !win.isDestroyed()) {
+            e.reply(CREATE_TRIAL_RESPONSE, { trial: trial })
+          }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static updateTrialDataListener(win) {
+    ipcMain.on(UPDATE_TRIAL, async (e, d) => {
+      try {
+        let { database, trial, data } = d;
+        if (database && trial && data) {
+          fs.appendFile(path.resolve(__dirname, `../../assets/trials/${database.replace(".db","")}/${trial}`),data.join(",")+"\n",()=>{})
         }
       } catch (e) {
         throw new Error(e);
@@ -863,4 +882,5 @@ class Events {
     });
   }
 }
+
 module.exports = Events;

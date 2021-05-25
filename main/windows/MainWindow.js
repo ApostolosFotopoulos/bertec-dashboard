@@ -4,6 +4,8 @@ const ForcePlatesProcess = require("../util/ForcePlatesProcess");
 const path = require("path");
 var net = require("net");
 const Events = require('../util/Events');
+const sqlite3 = require("sqlite3").verbose();
+
 const {
   START_SESSION,
   STOP_SESSION,
@@ -22,6 +24,9 @@ module.exports = class {
   constructor() {
     // Options
     this.weight = 700;
+    this.session = "";
+    this.database = "";
+    this.user = -1;
     this.dataType = "Normalized";
     this.stepsPerMinuteTarget = 200;
     this.threshold = -1;
@@ -214,22 +219,69 @@ module.exports = class {
     Events.createSessionListener(this.window);
     
     // Trials
-    //Events.createTrialListener(this.window);
+    Events.createTrialListener(this.window);
+    Events.updateTrialDataListener(this.window);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {
-      const { weight } = d;
+      const { weight, session, database, user } = d;
 
       console.log(d);
       // Setup the default setting to start the session
       this.isSessionRunning = true;
       this.weight = Number(weight);
+      this.session = session;
+      this.database = database;
+      this.user = user;
     });
 
     ipcMain.on(STOP_SESSION, () => {
       // Reset the settings
       this.isSessionRunning = false;
+      this.session = "";
+      this.database = "";
+      this.user = -1;
+
+      if (this.cw.window) {
+        this.cw.window.close();
+      }
+      if (this.cpw.window) {
+        this.cpw.window.close();
+      }
+      if (this.linechartw.window) {
+        this.linechartw.window.close();
+      }
+      if (this.timelinew.window) {
+        this.timelinew.window.close();
+      }
     });
+
+    //// TESTING PURPOSE PLEASE REMOVE //////
+    setInterval(() => {
+      if (this.cw && this.cw.window) {
+        if (this.isSessionRunning) {
+          this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+            rows: [19.505222,96.193161,637.660889,417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+            force: Math.random().toFixed(2),
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
+        } else {
+          this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+            rows: [],
+            force: 0,
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
+        }
+      }
+    })
 
     // Listen for TCP Packets to forward them to the dashboard
     this.server.on("connection", (socket) => {
@@ -259,12 +311,18 @@ module.exports = class {
               rows: packetArray,
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
             });
           } else {
             this.linechartw.window.webContents.send(LINECHART_SESSION, {
               rows: packetArray,
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
             });
           }
         }
@@ -276,12 +334,18 @@ module.exports = class {
               rows: packetArray,
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
             });
           } else {
             this.cpw.window.webContents.send(COP_SESSION, {
               rows: [],
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
             });
           }
         }
@@ -294,6 +358,9 @@ module.exports = class {
               force: Math.random().toFixed(2),
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
             });
           } else {
             this.cw.window.webContents.send(SPEEDMETER_SESSION, {
@@ -301,6 +368,9 @@ module.exports = class {
               force: 0,
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
             });
           }
         }
@@ -315,6 +385,9 @@ module.exports = class {
                 force: Math.random().toFixed(2),
                 isSessionRunning: this.isSessionRunning,
                 weight: this.weight,
+                session: this.session,
+                database: this.database,
+                user: this.user,
               }
             );
           } else {
@@ -325,6 +398,9 @@ module.exports = class {
                 force: 0,
                 isSessionRunning: this.isSessionRunning,
                 weight: this.weight,
+                session: this.session,
+                database: this.database,
+                user: this.user,
               }
             );
           }
@@ -337,6 +413,9 @@ module.exports = class {
             isSessionRunning: this.isSessionRunning,
             weight: this.weight,
             filePath: this.filePath,
+            session: this.session,
+            database: this.database,
+            user: this.user,
           });
 
           // Send the device serial to the dashboard
