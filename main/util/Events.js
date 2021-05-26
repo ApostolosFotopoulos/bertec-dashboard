@@ -845,7 +845,7 @@ class Events {
           var db = new sqlite3.Database(
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
-          let trial = `session_${session}_trial_${moment(new Date()).format("DD-MM-YYYY HH:mm:ss")}.csv`
+          let trial = `session_${session}_trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}.csv`
           await new Promise((resolve, reject) => {
             db.run(`insert into trials(name, user_id,session_id,created_at) values('${trial}',${userId},${session},'${new Date()}')`, function (error) {
               if (error) {
@@ -858,12 +858,14 @@ class Events {
           });
           db.close();
           
+
           writeFileSyncRecursive(path.resolve(__dirname, `../../assets/trials/${database.replace(".db", "")}/${trial}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
           if (win && !win.isDestroyed()) {
             e.reply(CREATE_TRIAL_RESPONSE, { trial: trial })
           }
         }
       } catch (e) {
+        console.log(e)
         throw new Error(e);
       }
     });
@@ -873,8 +875,9 @@ class Events {
     ipcMain.on(UPDATE_TRIAL, async (e, d) => {
       try {
         let { database, trial, data } = d;
+        //console.log(data)
         if (database && trial && data) {
-          fs.appendFile(path.resolve(__dirname, `../../assets/trials/${database.replace(".db","")}/${trial}`),data.join(",")+"\n",()=>{})
+          fs.appendFile(path.resolve(__dirname, `../../assets/trials/${database.replace(".db", "")}/${trial}`),data.join(",")+"\n",()=>{})
         }
       } catch (e) {
         throw new Error(e);
