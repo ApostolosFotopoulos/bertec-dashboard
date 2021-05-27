@@ -70,7 +70,6 @@ const { ipcRenderer } = window.require("electron");
 import SpeedMetersCharts from "../components/speedmeter/SpeedMetersCharts.vue";
 import Statistics from "../components/speedmeter/Statistics.vue";
 import History from "../components/speedmeter/History.vue";
-import moment from 'moment';
 const { CREATE_TRIAL, CREATE_TRIAL_RESPONSE} = require("../../../main/util/types");
 
 export default {

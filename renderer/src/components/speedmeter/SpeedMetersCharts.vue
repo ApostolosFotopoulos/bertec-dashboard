@@ -85,8 +85,6 @@ export default {
       this.$store.commit("calculatefootAsymmetries");
 
       if(this.$store.state.options.trial != ""){
-        console.log('Trial running.....')
-        //console.log(this.$store.state.options.trial)
         ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
       }
     },

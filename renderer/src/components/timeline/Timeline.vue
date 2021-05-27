@@ -30,7 +30,7 @@
 const { ipcRenderer } = window.require("electron");
 import VueApexCharts from "vue-apexcharts";
 import AccuracyCard from "./AccuracyCard.vue";
-const { TIMELINE_SESSION } = require("../../../../main/util/types");
+const { TIMELINE_SESSION, UPDATE_TRIAL } = require("../../../../main/util/types");
 const defaultOptions = require("../../../../assets/options/timeline.json");
 
 export default {
@@ -174,8 +174,15 @@ export default {
     updateVariables(responseData) {
       this.$store.commit("setWeight", responseData.weight);
       this.$store.commit("setLeftPlateAtTimeline", responseData.rows);
-      //console.log(this.$store.state.timeline.leftPlateSeries)
       this.$store.commit("setRightPlateAtTimeline", responseData.rows);
+      this.$store.commit("setSession", responseData.session);
+      this.$store.commit("setDatabase", responseData.database);
+      this.$store.commit("setUser", responseData.user);
+
+      if(this.$store.state.options.trial != ""){
+        ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
+      }
+
       if (this.$store.state.timeline.shouldUpdateLeft) {
         this.updateLeftChart();
         this.$store.commit("setShouldUpdateLeftAtTimeline", false);

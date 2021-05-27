@@ -18,8 +18,6 @@
           >Reset</v-btn
         >
         <v-text-field
-          v-bind="attrs"
-          v-on="on"
           class="mt-4"
           @change="(v) => $store.commit('setNofGroupPoints', Number(v))"
           :value="$store.state.copChart.nOfGroupPoints"
@@ -38,14 +36,15 @@
         />
         <v-btn
           elevation="25"
+          :disabled="this.$store.state.options.session == -1"
           :class="
-            $store.state.options.isSessionRunning
-              ? 'stopButton v-input__control'
-              : 'startButton v-input__control'
+            isTrialRunning
+              ? 'stopButton v-input__control mt-1'
+              : 'startButton v-input__control mt-1'
           "
-          @click="() => startStopSession()"
+          @click="() => startStopTrial()"
         >
-          {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
+          {{ isTrialRunning ? "Stop" : "Start" }}
         </v-btn>
       </v-col>
       <v-col cols="5">
@@ -65,7 +64,7 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 const defaultOptions = require("../../../../assets/options/copChart.json");
-const { COP_SESSION } = require("../../../../main/util/types");
+const { COP_SESSION, CREATE_TRIAL, UPDATE_TRIAL, CREATE_TRIAL_RESPONSE } = require("../../../../main/util/types");
 
 import VueApexCharts from "vue-apexcharts";
 export default {
@@ -80,6 +79,8 @@ export default {
   },
   data() {
     return {
+      isTrialRunning: false,
+      timeoutInstance: null,
       height: 0.75 * window.innerHeight,
       leftFootChart: {
         ...defaultOptions,
@@ -264,16 +265,47 @@ export default {
         _this.$store.commit("resetCOPChartState");
       }
     });
+    ipcRenderer.on(CREATE_TRIAL_RESPONSE, (_, responseData) => {
+      this.isTrialRunning = true;
+      this.$store.commit("setTrial", responseData.trial);
+      this.timeoutInstance = setTimeout(() => {
+        this.isTrialRunning = false;
+        this.$store.commit("setTrial", "");
+      }, this.$store.state.options.timeout * 1000);
+    });
   },
   methods: {
     resizeHandler(e) {
       this.height = 0.75 * window.innerHeight;
     },
     updateVariables(responseData) {
-      console.log(responseData.rows);
+  
       this.$store.commit("setWeight", responseData.weight);
       this.$store.commit("setLeftPlateAtCOP", responseData.rows);
       this.$store.commit("setRightPlateAtCOP", responseData.rows);
+      this.$store.commit("setSession", responseData.session);
+      this.$store.commit("setDatabase", responseData.database);
+      this.$store.commit("setUser", responseData.user);
+
+      if(this.$store.state.options.trial != ""){
+        ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
+      }
+    },
+    startStopTrial(){
+      if(this.isTrialRunning){
+        clearTimeout(this.timeoutInstance);
+        this.isTrialRunning = false;
+        this.$store.commit("setTrial","")
+      } else {
+        console.log(this.$store.state.options.session)
+        if(this.$store.state.options.session != -1){
+          ipcRenderer.send(CREATE_TRIAL,{ 
+            session: this.$store.state.options.session,
+            database: this.$store.state.options.database, 
+            userId: this.$store.state.options.user.id,
+          })
+        }
+      }
     },
   },
 };

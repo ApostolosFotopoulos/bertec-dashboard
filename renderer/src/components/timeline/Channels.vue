@@ -8,7 +8,7 @@
           :value="$store.state.timeline.leftPlateChannel"
           :items="leftForcePlateChannels"
           label="Channels"
-          solo
+          outlined
         ></v-select>
       </v-col>
       <v-col>
@@ -18,7 +18,7 @@
           :value="$store.state.timeline.rightPlateChannel"
           :items="rightForcePlateChannels"
           label="Channels"
-          solo
+          outlined
         ></v-select>
       </v-col>
       <v-col>
@@ -34,7 +34,7 @@
           :value="$store.state.timeline.dataType"
           :items="dataTypes"
           label="Data Type"
-          solo
+          outlined
         ></v-select>
       </v-col>
       <v-col>
@@ -61,7 +61,7 @@
       <v-col>
         <v-btn
           @click="$store.commit('resetTimelineState')"
-          class="resetButton v-input__control mt-3"
+          class="resetButton v-input__control mt-4"
           >Reset</v-btn
         >
       </v-col>
@@ -105,24 +105,30 @@
           outlined
         />
       </v-col>
-    <v-col cols="2" class="pt-0 mt-0">
-      <v-btn
-        elevation="25"
-        :class="
-          $store.state.options.isSessionRunning
-            ? 'stopButton v-input__control'
-            : 'startButton v-input__control'
-        "
-        @click="() => startStopSession()"
-      >
-        {{ $store.state.options.isSessionRunning ? "Stop" : "Start" }}
-      </v-btn>
-    </v-col>
+      <v-col cols="2" class="pt-0 mt-0">
+        <v-btn
+          elevation="25"
+          :disabled="this.$store.state.options.session == -1"
+          :class="
+            isTrialRunning
+              ? 'stopButton v-input__control mt-1'
+              : 'startButton v-input__control mt-1'
+          "
+          @click="() => startStopTrial()"
+        >
+          {{ isTrialRunning ? "Stop" : "Start" }}
+        </v-btn>
+      </v-col>
     </v-row>
   </div>
 </template>
 
 <script>
+const { ipcRenderer } = window.require("electron");
+const {
+  CREATE_TRIAL,
+  CREATE_TRIAL_RESPONSE,
+} = require("../../../../main/util/types");
 export default {
   data() {
     return {
@@ -149,7 +155,36 @@ export default {
         "COPY2",
         "COPXY2",
       ],
+      isTrialRunning: false,
+      timeoutInstance: null,
     };
+  },
+  mounted() {
+    ipcRenderer.on(CREATE_TRIAL_RESPONSE, (_, responseData) => {
+      this.isTrialRunning = true;
+      this.$store.commit("setTrial", responseData.trial);
+      this.timeoutInstance = setTimeout(() => {
+        this.isTrialRunning = false;
+        this.$store.commit("setTrial", "");
+      }, this.$store.state.options.timeout * 1000);
+    });
+  },
+  methods: {
+    startStopTrial() {
+      if (this.isTrialRunning) {
+        clearTimeout(this.timeoutInstance);
+        this.isTrialRunning = false;
+        this.$store.commit("setTrial", "");
+      } else {
+        if (this.$store.state.options.session != -1) {
+          ipcRenderer.send(CREATE_TRIAL, {
+            session: this.$store.state.options.session,
+            database: this.$store.state.options.database,
+            userId: this.$store.state.options.user.id,
+          });
+        }
+      }
+    },
   },
 };
 </script>
