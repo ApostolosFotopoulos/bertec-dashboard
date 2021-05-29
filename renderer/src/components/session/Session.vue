@@ -11,7 +11,7 @@
       </v-col>
       <v-col align="right" v-if="Object.keys($store.state.options.user).length != 0">
         <span class="mr-3"> {{ $store.state.options.user.first_name + " "+ $store.state.options.user.last_name }} </span>
-        <v-avatar color="#d32d41">
+        <v-avatar color="#f4a261">
           <span class="white--text headline">
             {{
               $store.state.options.user.first_name[0] +
@@ -71,6 +71,6 @@ export default {
 .backButton {
   height: 38px !important;
   min-height: 38px !important;
-  background: #ffa505 !important;
+  background: #f4a261 !important;
 }
 </style>

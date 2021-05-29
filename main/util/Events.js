@@ -71,7 +71,7 @@ class Events {
                   "create table sessions(id integer primary key autoincrement, name text, user_id integer, created_at date)"
                 );
                 db.run(
-                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date, user_id integer)"
+                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date, user_id integer, filename text)"
                 );
               });
               db.close();
@@ -577,8 +577,8 @@ class Events {
               });
             })
 
-            let trialsCount = await new Promise((resolve, reject) => {
-              db.all(`select count(id) as n ,id as trial_id, session_id from trials where session_id in (${sessions.map(s => s.id)}) group by session_id`, (error, rows) => {
+            let trials = await new Promise((resolve, reject) => {
+              db.all(`select * from trials where session_id in (${sessions.map(s => s.id)})`, (error, rows) => {
                 if (error) {
                   console.log(error)
                   reject([]);
@@ -587,21 +587,23 @@ class Events {
                 resolve(rows)
               });
             })
-
+            
             sessions = groupBy(sessions, session => session.user_id)
             users = users.map(u => {
               let sess = sessions.get(u.id)
               sess = sess.map(s => {
                 return {
                   ...s,
-                  created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY"),
-                  trial_count: (trialsCount.find(t=> t.session_id === s.id ))?(trialsCount.find(t=> t.session_id === s.id )).n:0
+                  created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY HH:mm:ss"),
+                  trials:  trials.filter(t=> t.session_id === s.id).map(t => ({...t,created_at: moment(new Date(t.created_at)).format("DD-MM-YYYY HH:mm:ss")})),
+                  trial_count: trials.filter(t=> t.session_id === s.id).length,
                 }
               })
               return { ...u, sessions: sess }
             })
             db.close();
 
+            
             if (win && win.window && !win.window.isDestroyed()) {
               e.reply(FETCH_USERS_TO_VIEW_ALL_RESPONSE, { users })
             }
@@ -845,9 +847,10 @@ class Events {
           var db = new sqlite3.Database(
             path.resolve(__dirname, `../../assets/databases/${database}`)
           );
-          let trial = `session_${session}_trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}.csv`
+          let filename = `session_${session}_trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}.csv`
+          let trial = `trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}`
           await new Promise((resolve, reject) => {
-            db.run(`insert into trials(name, user_id,session_id,created_at) values('${trial}',${userId},${session},'${new Date()}')`, function (error) {
+            db.run(`insert into trials(filename,name, user_id,session_id,created_at) values('${filename}','${trial}',${userId},${session},'${new Date()}')`, function (error) {
               if (error) {
                 console.log(error)
                 reject(-1);
@@ -859,9 +862,9 @@ class Events {
           db.close();
           
 
-          writeFileSyncRecursive(path.resolve(__dirname, `../../assets/trials/${database.replace(".db", "")}/${trial}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
+          writeFileSyncRecursive(path.resolve(__dirname, `../../assets/trials/${database.replace(".db", "")}/${filename}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
           if (win && !win.isDestroyed()) {
-            e.reply(CREATE_TRIAL_RESPONSE, { trial: trial })
+            e.reply(CREATE_TRIAL_RESPONSE, { trial: filename })
           }
         }
       } catch (e) {

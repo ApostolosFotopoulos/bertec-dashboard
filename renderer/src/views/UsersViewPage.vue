@@ -382,8 +382,22 @@
               :items-per-page="5"
               :headers="innerHeaders"
               :items="item.sessions"
+              :expanded.sync="expandedInner"
+              show-expand
               class="elevation-1"
             >
+              <template v-slot:expanded-item="{ headers, item }">
+                <td class="pa-5" :colspan="headers.length">
+                  <v-data-table
+                    light
+                    :items-per-page="5"
+                    :headers="innerInnerHeaders"
+                    :items="item.trials"
+                    class="elevation-1"
+                  >
+                  </v-data-table>
+                </td>
+              </template>
             </v-data-table>
           </td>
         </template>
@@ -550,6 +564,27 @@ export default {
           value: "created_at",
           sortable: false,
         },
+        {
+          text: "",
+          value: "data-table-expand",
+        },
+      ],
+      innerInnerHeaders: [
+        {
+          text: "ID",
+          value: "id",
+        },
+        {
+          text: "Trial",
+          value: "name",
+          sortable: false,
+        },
+        {
+          text: "Created At",
+          value: "created_at",
+          sortable: false,
+        },
+
       ],
     };
   },
