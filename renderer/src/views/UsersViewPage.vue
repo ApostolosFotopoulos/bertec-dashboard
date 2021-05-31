@@ -42,7 +42,7 @@ const {
   DELETE_USER,
   DELETE_USER_RESPONSE,
 } = require("../../../main/util/types");
-// import moment from "moment";
+import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
 import UsersTable from "../components/usersview/UsersTable.vue";
 import UserDetails from "../components/usersview/UserDetails.vue";

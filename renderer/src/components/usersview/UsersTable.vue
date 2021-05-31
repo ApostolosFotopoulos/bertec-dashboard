@@ -4,6 +4,16 @@
       <v-col>
         <h3>Users</h3>
         <hr class="hr" />
+        <div class="mt-3">
+          <v-alert
+            outlined
+            :type="deleteUserAlertError ? 'error' : 'success'"
+            text
+            v-if="deleteUserAlert"
+          >
+            {{ deleteUserAlertMessage }}
+          </v-alert>
+        </div>
       </v-col>
     </v-row>
     <v-dialog
@@ -67,6 +77,9 @@
 </template>
 
 <script>
+const { ipcRenderer } = window.require("electron");
+const { DELETE_USER_RESPONSE } = require("../../../../main/util/types");
+
 export default {
   props: {
     users: Array,
@@ -76,8 +89,23 @@ export default {
     deleteUser: Function,
     userDeleteDialog: Boolean,
   },
+  mounted(){
+    ipcRenderer.on(DELETE_USER_RESPONSE, (_, responseData) => {
+      this.deleteUserAlert = true;
+      this.deleteUserAlertError = responseData.error ? true : false;
+      this.deleteUserAlertMessage = responseData.error
+        ? "An error occured while creating a user"
+        : "Successfully deleted a user";
+      setTimeout(() => {
+        this.deleteUserAlert = false;
+      }, 3000);
+    });
+  },
   data(){
     return{
+      deleteUserAlert:false,
+      deleteUserAlertError:false,
+      deleteUserAlertMessage:"",
       userExpandedRows:[],
       sessionExpandedRows:[],
       userHeaders: [
