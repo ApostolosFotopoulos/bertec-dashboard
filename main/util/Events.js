@@ -508,43 +508,37 @@ class Events {
                 : ` where affected_side='${filters.affectedSide}'`;
             }
 
-            if (filters.year) {
+            if (filters.year && filters.year.length  == 2) {
               sqlQuery += sqlQuery.includes("where")
                 ? ` and year between ${filters.year[0]} and ${filters.year[1]}`
                 : ` where year between ${filters.year[0]} and ${filters.year[1]}`;
             }
 
-            if (filters.legLength) {
+            if (filters.legLength && filters.legLength.length  == 2) {
               sqlQuery += sqlQuery.includes("where")
                 ? ` and leg_length between ${filters.legLength[0]} and ${filters.legLength[1]}`
                 : ` where leg_length between ${filters.legLength[0]} and ${filters.legLength[1]}`;
             }
 
-            if (filters.weight) {
+            if (filters.weight && filters.weight.length  == 2) {
               sqlQuery += sqlQuery.includes("where")
                 ? ` and weight between ${filters.weight[0]} and ${filters.weight[1]}`
                 : ` where weight between ${filters.weight[0]} and ${filters.weight[1]}`;
             }
 
-            if (filters.height) {
+            if (filters.height && filters.height.length  == 2) {
               sqlQuery += sqlQuery.includes("where")
                 ? ` and height between ${filters.height[0]} and ${filters.height[1]}`
                 : ` where height between ${filters.height[0]} and ${filters.height[1]}`;
             }
 
-            if (filters.surgeryRange) {
+            if (filters.surgeryRange && filters.surgeryRange.length  == 2) {
               sqlQuery += sqlQuery.includes("where")
                 ? ` and surgery_date between '${filters.surgeryRange[0]}' and '${filters.surgeryRange[1]}'`
                 : ` where surgery_date between '${filters.surgeryRange[0]}' and '${filters.surgeryRange[1]}'`;
             }
 
-            if (filters.injuryRange) {
-              sqlQuery += sqlQuery.includes("where")
-                ? ` and injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`
-                : ` where injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`;
-            }
-
-            if (filters.injuryRange) {
+            if (filters.injuryRange && filters.injuryRange.length  == 2) {
               sqlQuery += sqlQuery.includes("where")
                 ? ` and injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`
                 : ` where injury_date between '${filters.injuryRange[0]}' and '${filters.injuryRange[1]}'`;
@@ -590,7 +584,7 @@ class Events {
             
             sessions = groupBy(sessions, session => session.user_id)
             users = users.map(u => {
-              let sess = sessions.get(u.id)
+              let sess = sessions.get(u.id) || []
               sess = sess.map(s => {
                 return {
                   ...s,
@@ -617,6 +611,43 @@ class Events {
                 }
                 resolve(rows)
               });
+            })
+
+            let sessions = await new Promise((resolve, reject) => {
+              db.all(`select * from sessions where user_id in (${users.map(u => u.id)})`, (error, rows) => {
+                if (error) {
+                  console.log(error)
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+
+            let trials = await new Promise((resolve, reject) => {
+              db.all(`select * from trials where session_id in (${sessions.map(s => s.id)})`, (error, rows) => {
+                if (error) {
+                  console.log(error)
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+            
+            sessions = groupBy(sessions, session => session.user_id)
+            users = users.map(u => {
+              let sess = sessions.get(u.id) || []
+              
+              sess = sess.map(s => {
+                return {
+                  ...s,
+                  created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY HH:mm:ss"),
+                  trials:  trials.filter(t=> t.session_id === s.id).map(t => ({...t,created_at: moment(new Date(t.created_at)).format("DD-MM-YYYY HH:mm:ss")})),
+                  trial_count: trials.filter(t=> t.session_id === s.id).length,
+                }
+              })
+              return { ...u, sessions: sess }
             })
             db.close();
             
