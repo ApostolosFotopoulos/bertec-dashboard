@@ -18,6 +18,9 @@ const { ipcMain, dialog } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
 const { writeFileSyncRecursive } = require('./helpers');
+const puppeteer = require('puppeteer');
+var parse = require('csv-parse');
+
 
 function groupBy(list, keyGetter) {
   const map = new Map();
@@ -1071,6 +1074,101 @@ class Events {
             });
           });
           db.close();
+
+           // Open the dialog to get the filepath where the user wants to save the csv
+          let file = await dialog.showSaveDialog(win,{
+            title: 'Select to location to save the pdf',
+            buttonLabel: 'Save',
+            properties: []
+          })
+
+          // Transfer data to the new file
+          if (!file.canceled) {
+            //var html = fs.readFileSync(path.resolve(__dirname, '../../assets/test.html'));
+            // console.log(html)
+            let records = await new Promise((resolve, reject) => {
+              fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true }, function (error, records) {
+                if (error) {
+                  reject([])
+                  return
+                }
+                resolve(records);
+              }));
+            });
+            
+            records = records.slice(0, 30);
+            let html = `
+              <html>
+              <head>
+              <title>Our Funky HTML Page</title>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+              <meta name="description" content="Our first page">
+              <meta name="keywords" content="html tutorial template">
+              </head>
+                <body>
+                <canvas id="bar-chart"></canvas>
+                </body>
+                <script>
+                // Bar chart
+                new Chart(document.getElementById("bar-chart"), {
+                  type: 'line',
+                  data: {
+                      labels: [${records.map((r,idx)=>`${idx}`)}],
+                      datasets: [{
+                          label: 'Series 1', // Name the series
+                          data: [${records.map((r,idx)=>r["Fz1"])}], // Specify the data values array
+                          fill: false,
+                          borderColor: '#2196f3', // Add custom color border (Line)
+                          backgroundColor: '#2196f3', // Add custom color background (Points and Fill)
+                          borderWidth: 1 // Specify bar border width
+                      }]},
+                  options: {
+                    responsive: true, // Instruct chart js to respond nicely.
+                    maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                display: false
+                            }
+                        }]
+                    }
+                  }
+                });
+                </script>
+              </html>
+            `
+            //var template = handlebars.compile(html);
+            var finalHtml = encodeURIComponent(html);
+            console.log(finalHtml)
+            var options = {
+              format: 'A4',
+            headerTemplate: "<p></p>",
+            footerTemplate: "<p></p>",
+            displayHeaderFooter: false,
+            margin: {
+                top: "40px",
+                bottom: "100px"
+            },
+            printBackground: true,
+              path: file.filePath,
+              preferCSSPageSize: true,
+          }
+
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox'],
+            headless: true
+        });
+        const page = await browser.newPage();
+        await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
+            waitUntil: 'networkidle0'
+        });
+              await page.emulateMediaType("print");
+        await page.pdf(options);
+        await browser.close();
+
+        console.log('Done: invoice.pdf is created!')
+          }
+
           console.log(trial)
         }
       } catch (e) {

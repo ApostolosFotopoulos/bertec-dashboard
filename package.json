@@ -16,9 +16,12 @@
   "dependencies": {
     "apexcharts": "^3.24.0",
     "core-js": "^3.8.3",
+    "csv-parse": "^4.15.4",
     "glob": "^7.1.7",
+    "handlebars": "^4.7.7",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
+    "puppeteer": "^10.0.0",
     "sqlite3": "^5.0.2",
     "uuid": "^3.4.0",
     "v-calendar": "^2.3.0",
