@@ -9,7 +9,8 @@ const {
   FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
-  CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL
+  CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
+  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
@@ -869,6 +870,60 @@ class Events {
     });
   }
   
+  static deleteSessionListener(win) {
+    ipcMain.on(DELETE_SESSION, async (e, d) => {
+      try {
+        let { database, sessionId } = d;
+        if (database, sessionId) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../.meta/databases/${database}`)
+          );
+
+          // Get all the trials from the session
+          let trials = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where session_id=${sessionId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+        
+          // Delete the session
+          await new Promise((resolve, reject) => {
+            db.all(`delete from sessions where id=${sessionId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          })
+
+          // Delete the session and all the trials
+          for (var i = 0; i < trials.length; i++){
+            await new Promise((resolve, reject) => {
+              db.all(`delete from trials where id=${trials[i].id}`, function (error, rows) {
+                if (error) {
+                  reject([]);
+                  return
+                }
+                resolve(rows)
+              });
+            })
+            fs.unlink(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trials[i].filename}`), () => { })
+          }
+
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply(DELETE_SESSION_RESPONSE, { error: false });
+          }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
   static createTrialListener(win) {
     ipcMain.on(CREATE_TRIAL, async (e, d) => {
       try {
@@ -905,6 +960,84 @@ class Events {
     });
   }
 
+  static deleteTrialListener(win) {
+    ipcMain.on(DELETE_TRIAL, async (e, d) => {
+      try {
+        let { database, trialId } = d;
+        if (database && trialId) {
+
+          // Find the trial and the details
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../.meta/databases/${database}`)
+          );
+          let [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+
+          // Delete the trial from the database
+          let { filename } = trial
+          await new Promise((resolve, reject) => {
+            db.run(`delete from trials where id=${trialId}`, function (error) {
+              if (error) {
+                reject(true);
+                return;
+              }
+              resolve(true);
+            });
+          })
+          db.close();
+
+          // Delete the file
+          fs.unlink(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), () => { })
+          
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply(DELETE_TRIAL_RESPONSE, { error: false });
+          }
+        }
+        
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static updateTrialDetailsListener(win) {
+    ipcMain.on(UPDATE_TRIAL_DETAILS, async (e, d) => {
+      try {
+        let { database, trialId, trialName } = d;
+        console.log(d)
+        if (database && trialId && trialName) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../.meta/databases/${database}`)
+          );
+          await new Promise((resolve, reject) => {
+            db.run(
+              `update trials set name='${trialName}' where id=${trialId}`
+              , function (error) {
+                if (error) {
+                  reject(false);
+                  return;
+                }
+                resolve(true);
+            });
+          })
+          db.close();
+          
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply(UPDATE_TRIAL_DETAILS_RESPONSE, { error: false });
+          }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
   static updateTrialDataListener(win) {
     ipcMain.on(UPDATE_TRIAL, async (e, d) => {
       try {

@@ -31,6 +31,25 @@
             </div>
           </v-col>
           <v-col>
+            <h3>Users</h3>
+            <div class="mt-3">
+              <v-btn
+                @click="openUserManagementWindow()"
+                class="manageUserButton"
+                block
+              >
+                Manage
+              </v-btn>
+            </div>
+            <div class="mt-3">
+              <v-btn @click="openUsersWindow()" class="viewUsersButton" block>
+                View
+              </v-btn>
+            </div>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
             <h3>Delete a Database</h3>
             <div class="mt-3 text-right">
               <v-select
@@ -64,41 +83,11 @@
             </div>
           </v-col>
           <v-col>
-            <h3>Users</h3>
-            <div class="mt-3">
-              <v-btn
-                @click="openUserManagementWindow()"
-                class="manageUserButton"
-                block
-              >
-                Manage
-              </v-btn>
-            </div>
-            <div class="mt-3">
-              <v-btn @click="openUsersWindow()" class="viewUsersButton" block>
-                View
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="4">
-            <h3>Tags</h3>
+            <h3 class="mt-3">Tags</h3>
             <div class="mt-3">
               <v-btn
                 @click="openTagManagementWindow()"
                 class="manageTagsButton"
-                block
-              >
-                Manage
-              </v-btn>
-            </div>
-          </v-col>
-          <v-col cols="4">
-            <h3>Sessions</h3>
-            <div class="mt-3">
-              <v-btn
-                class="manageSessionsButton"
                 block
               >
                 Manage

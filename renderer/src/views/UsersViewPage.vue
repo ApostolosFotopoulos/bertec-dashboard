@@ -19,12 +19,28 @@
       :openUserDeleteDialog="openUserDeleteDialog"
       :closeUserDeleteDialog="closeUserDeleteDialog"
       :userDeleteDialog="userDeleteDialog"
+      :deleteTrialDialog="deleteTrialDialog"
       :deleteUser="deleteUser"
+      :deleteTrial="deleteTrial"
+      :openDeleteTrialDialog="openDeleteTrialDialog"
+      :closeDeleteTrialDialog="closeDeleteTrialDialog"
+      :deleteSessionDialog="deleteSessionDialog"
+      :openDeleteSessionDialog="openDeleteSessionDialog"
+      :closeDeleteSessionDialog="closeDeleteSessionDialog"
+      :deleteSession="deleteSession"
+      :openEditTrialDialog="openEditTrialDialog"
+      :downloadTrial="downloadTrial"
     />
     <UserDetails
       :userDetails="userDetails"
       :userDetailsDialog="userDetailsDialog"
       :closeUserDetailsDialog="closeUserDetailsDialog"
+    />
+    <EditTrialModal
+      :trialToEdit="trialToEdit"
+      :editTrialDialog="editTrialDialog"
+      :editTrial="editTrial"
+      :closeEditTrialDialog="closeEditTrialDialog"
     />
   </div>
 </template>
@@ -40,18 +56,22 @@ const {
   FETCH_USERS_TO_VIEW_ALL,
   FETCH_USERS_TO_VIEW_ALL_RESPONSE,
   DELETE_USER,
-  DELETE_USER_RESPONSE,
+  DELETE_TRIAL,
+  DELETE_SESSION,
+  UPDATE_TRIAL_DETAILS,
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
 import UsersTable from "../components/usersview/UsersTable.vue";
 import UserDetails from "../components/usersview/UserDetails.vue";
+import EditTrialModal from '../components/usersview/EditTrialModal.vue';
 
 export default {
   components: {
     UsersTableFilters,
     UsersTable,
-    UserDetails
+    UserDetails,
+    EditTrialModal
   },
   mounted() {
     setInterval(() => {
@@ -106,6 +126,12 @@ export default {
       userDetailsDialog:false,
       userToDelete:{},
       userDeleteDialog:false,
+      deleteTrialDialog:false,
+      trialToDelete:{},
+      deleteSessionDialog:false,
+      sessionToDelete:{},
+      editTrialDialog:false,
+      trialToEdit:{},
       search: {
         firstName: "",
         lastName: "",
@@ -249,6 +275,59 @@ export default {
     closeUserDetailsDialog(){
       this.userDetails = {};
       this.userDetailsDialog = false;
+    },
+    openDeleteTrialDialog(t){
+      this.trialToDelete = t;
+      this.deleteTrialDialog = true;
+    },
+    closeDeleteTrialDialog(){
+      this.trialToDelete = {};
+      this.deleteTrialDialog = false;
+    },
+    deleteTrial(){
+      console.log(this.trialToDelete)
+      ipcRenderer.send(DELETE_TRIAL, {
+        database: this.selectedDatabase,
+        trialId: this.trialToDelete.id,
+      });
+      this.deleteTrialDialog = false;
+    },
+    openDeleteSessionDialog(s){
+      this.sessionToDelete = s;
+      this.deleteSessionDialog = true;
+    },
+    closeDeleteSessionDialog(){
+      this.sessionToDelete = {};
+      this.deleteSessionDialog = false;
+    },
+    deleteSession(){
+      console.log('Delete session')
+      ipcRenderer.send(DELETE_SESSION, {
+        database: this.selectedDatabase,
+        sessionId: this.sessionToDelete.id,
+      });
+      this.deleteSessionDialog = false;
+    },
+    openEditTrialDialog(t){
+      this.trialToEdit = t;
+      this.editTrialDialog = true;
+    },
+    closeEditTrialDialog(){
+      this.trialToEdit = {};
+      this.editTrialDialog = false;
+    },
+    editTrial(){
+      console.log('edit trial')
+      console.log(this.trialToEdit);
+      ipcRenderer.send(UPDATE_TRIAL_DETAILS, {
+        database: this.selectedDatabase,
+        trialId: this.trialToEdit.id,
+        trialName: this.trialToEdit.name,
+      });
+    },
+    downloadTrial(t){
+      console.log('Download trial....')
+      console.log(t)
     }
   },
 };

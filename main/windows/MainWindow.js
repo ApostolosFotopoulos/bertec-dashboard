@@ -217,10 +217,13 @@ module.exports = class {
 
     // Session
     Events.createSessionListener(this.window);
+    Events.deleteSessionListener(this.usersw);
     
     // Trials
     Events.createTrialListener(this.window);
     Events.updateTrialDataListener(this.window);
+    Events.updateTrialDetailsListener(this.usersw);
+    Events.deleteTrialListener(this.usersw);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {
