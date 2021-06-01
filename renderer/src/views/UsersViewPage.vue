@@ -59,6 +59,7 @@ const {
   DELETE_TRIAL,
   DELETE_SESSION,
   UPDATE_TRIAL_DETAILS,
+  DOWNLOAD_TRIAL,
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
@@ -328,6 +329,10 @@ export default {
     downloadTrial(t){
       console.log('Download trial....')
       console.log(t)
+      ipcRenderer.send(DOWNLOAD_TRIAL, {
+        database: this.selectedDatabase,
+        trialId: t.id,
+      });
     }
   },
 };

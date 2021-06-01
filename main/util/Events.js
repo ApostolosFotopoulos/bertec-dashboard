@@ -10,11 +10,11 @@ const {
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
   CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
-  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE
+  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
-const { ipcMain } = require("electron");
+const { ipcMain, dialog } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
 const { writeFileSyncRecursive } = require('./helpers');
@@ -1047,6 +1047,63 @@ class Events {
           fs.appendFile(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial}`),data.join(",")+"\n",()=>{})
         }
       } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
+  static downloadTrialListener(win) {
+    ipcMain.on(DOWNLOAD_TRIAL, async (e, d) => {
+      try {
+        let { database, trialId } = d;
+        if (database && trialId) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../.meta/databases/${database}`)
+          );
+
+          // Find the trial and the details
+          let [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+          db.close();
+
+          // Open the dialog to get the filepath where the user wants to save the csv
+          let file = await dialog.showSaveDialog(win,{
+            title: 'Select to save the trial data',
+            buttonLabel: 'Save',
+            properties: []
+          })
+
+          // Transfer data to the new file
+          if (!file.canceled) {
+            await new Promise((resolve, reject) => {
+              fs.writeFile(file.filePath, "", (error) => {
+                if (error) {
+                  reject(false);
+                  return
+                }
+                resolve(true);
+              })
+            });
+            await new Promise((resolve, reject) => {
+              fs.copyFile(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`), file.filePath, (error) => {
+                if (error) {
+                  reject(false);
+                  return
+                }
+                resolve(true);
+              })
+            });
+          }
+        }
+      } catch (e) {
+        co
         throw new Error(e);
       }
     });

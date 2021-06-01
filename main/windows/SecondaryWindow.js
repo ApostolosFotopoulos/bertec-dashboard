@@ -22,6 +22,7 @@ module.exports = class {
 			webPreferences: {
 				contextIsolation: false,
 				nodeIntegration: true,
+				enableRemoteModule: true,
 				devTools: process.env.NODE_ENV === 'development'
 			}
 		});

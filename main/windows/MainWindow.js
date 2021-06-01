@@ -71,6 +71,7 @@ module.exports = class {
           contextIsolation: false,
           nodeIntegration: true,
           devTools: true,
+          enableRemoteModule: true,
         },
       });
 
@@ -224,6 +225,7 @@ module.exports = class {
     Events.updateTrialDataListener(this.window);
     Events.updateTrialDetailsListener(this.usersw);
     Events.deleteTrialListener(this.usersw);
+    Events.downloadTrialListener(this.usersw);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {
