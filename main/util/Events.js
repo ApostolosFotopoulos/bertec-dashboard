@@ -10,7 +10,7 @@ const {
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
   CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
-  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL
+  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
@@ -1052,6 +1052,32 @@ class Events {
     });
   }
 
+  static exportTrialReportListener(win) {
+    ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
+      try {
+        let { database, trialId } = d;
+        console.log(d)
+        if (database && trialId) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../.meta/databases/${database}`)
+          );
+          let [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+          db.close();
+          console.log(trial)
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
   static downloadTrialListener(win) {
     ipcMain.on(DOWNLOAD_TRIAL, async (e, d) => {
       try {

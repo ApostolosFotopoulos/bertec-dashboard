@@ -30,6 +30,7 @@
       :deleteSession="deleteSession"
       :openEditTrialDialog="openEditTrialDialog"
       :downloadTrial="downloadTrial"
+      :exportTrialReport="exportTrialReport"
     />
     <UserDetails
       :userDetails="userDetails"
@@ -60,6 +61,7 @@ const {
   DELETE_SESSION,
   UPDATE_TRIAL_DETAILS,
   DOWNLOAD_TRIAL,
+  EXPORT_TRIAL_REPORT,
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
@@ -330,6 +332,12 @@ export default {
       console.log('Download trial....')
       console.log(t)
       ipcRenderer.send(DOWNLOAD_TRIAL, {
+        database: this.selectedDatabase,
+        trialId: t.id,
+      });
+    },
+    exportTrialReport(t){
+      ipcRenderer.send(EXPORT_TRIAL_REPORT, {
         database: this.selectedDatabase,
         trialId: t.id,
       });

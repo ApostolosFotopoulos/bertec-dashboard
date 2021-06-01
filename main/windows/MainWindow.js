@@ -226,6 +226,7 @@ module.exports = class {
     Events.updateTrialDetailsListener(this.usersw);
     Events.deleteTrialListener(this.usersw);
     Events.downloadTrialListener(this.usersw);
+    Events.exportTrialReportListener(this.userw);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {

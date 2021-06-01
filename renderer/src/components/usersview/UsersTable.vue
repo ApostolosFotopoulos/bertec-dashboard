@@ -101,8 +101,8 @@
                 >
                   <template v-slot:[`item.actions`]="{ item }">
                     <v-icon medium class="mr-2" @click="() => openEditTrialDialog(item)">mdi-pencil-outline</v-icon>
-                    <v-icon medium class="mr-2" @click="downloadTrial(item)">mdi-download-outline</v-icon>
-                    <v-icon medium class="mr-2">mdi-file-pdf-outline</v-icon>
+                    <v-icon medium class="mr-2" @click="() => downloadTrial(item)">mdi-download-outline</v-icon>
+                    <v-icon medium class="mr-2" @click="() => exportTrialReport(item)">mdi-file-pdf-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => openDeleteTrialDialog(item)">mdi-delete-outline</v-icon>
                   </template>
                 </v-data-table>
@@ -136,7 +136,8 @@ export default {
     closeDeleteSessionDialog: Function,
     deleteSession:Function,
     openEditTrialDialog: Function,
-    downloadTrial: Function
+    downloadTrial: Function,
+    exportTrialReport: Function,
   },
   mounted(){
     ipcRenderer.on(DELETE_USER_RESPONSE, (_, responseData) => {
