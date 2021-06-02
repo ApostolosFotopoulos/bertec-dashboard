@@ -1046,7 +1046,8 @@ class Events {
       try {
         let { database, trial, data } = d;
         //console.log(data)
-        if (database && trial && data) {
+        if (database && trial && data && data.length == 18) {
+          //console.log(data)
           fs.appendFile(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial}`),data.join(",")+"\n",()=>{})
         }
       } catch (e) {
@@ -1089,7 +1090,7 @@ class Events {
             let records = await new Promise((resolve, reject) => {
               fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true }, function (error, records) {
                 if (error) {
-                  reject([])
+                  reject(error)
                   return
                 }
                 resolve(records);
@@ -1097,6 +1098,7 @@ class Events {
             });
             
             records = records.slice(0, 30);
+            console.log(records)
             let html = `
               <html>
               <head>
@@ -1172,6 +1174,7 @@ class Events {
           console.log(trial)
         }
       } catch (e) {
+        console.log(e)
         throw new Error(e);
       }
     });
