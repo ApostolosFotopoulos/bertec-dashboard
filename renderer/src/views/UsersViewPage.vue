@@ -31,6 +31,7 @@
       :openEditTrialDialog="openEditTrialDialog"
       :downloadTrial="downloadTrial"
       :exportTrialReport="exportTrialReport"
+      :loadingTrialIdx="loadingTrialIdx"
     />
     <UserDetails
       :userDetails="userDetails"
@@ -62,6 +63,7 @@ const {
   UPDATE_TRIAL_DETAILS,
   DOWNLOAD_TRIAL,
   EXPORT_TRIAL_REPORT,
+  EXPORT_TRIAL_REPORT_RESPONSE
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
@@ -115,6 +117,11 @@ export default {
         this.users = [];
       }
     });
+
+    ipcRenderer.on(EXPORT_TRIAL_REPORT_RESPONSE, (_, responseData) => {
+      console.log('RESPONSEE.....')
+      this.loadingTrialIdx = -1
+    });
   },
   data() {
     return {
@@ -135,6 +142,7 @@ export default {
       sessionToDelete:{},
       editTrialDialog:false,
       trialToEdit:{},
+      loadingTrialIdx:-1,
       search: {
         firstName: "",
         lastName: "",
@@ -337,6 +345,9 @@ export default {
       });
     },
     exportTrialReport(t){
+      console.log(t)
+      this.loadingTrialIdx = t.id
+      console.log(this.loadingTrialIdx)
       ipcRenderer.send(EXPORT_TRIAL_REPORT, {
         database: this.selectedDatabase,
         trialId: t.id,

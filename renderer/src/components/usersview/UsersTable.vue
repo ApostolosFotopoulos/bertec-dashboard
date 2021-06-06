@@ -102,7 +102,8 @@
                   <template v-slot:[`item.actions`]="{ item }">
                     <v-icon medium class="mr-2" @click="() => openEditTrialDialog(item)">mdi-pencil-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => downloadTrial(item)">mdi-download-outline</v-icon>
-                    <v-icon medium class="mr-2" @click="() => exportTrialReport(item)">mdi-file-pdf-outline</v-icon>
+                    <v-progress-circular v-if="loadingTrialIdx && loadingTrialIdx == item.id" indeterminate color="blue"></v-progress-circular>
+                    <v-icon medium class="mr-2" v-else @click="() => exportTrialReport(item)">mdi-file-pdf-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => openDeleteTrialDialog(item)">mdi-delete-outline</v-icon>
                   </template>
                 </v-data-table>
@@ -138,6 +139,7 @@ export default {
     openEditTrialDialog: Function,
     downloadTrial: Function,
     exportTrialReport: Function,
+    loadingTrialIdx: Number,
   },
   mounted(){
     ipcRenderer.on(DELETE_USER_RESPONSE, (_, responseData) => {

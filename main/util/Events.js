@@ -10,14 +10,14 @@ const {
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
   CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
-  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT
+  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
 const { ipcMain, dialog } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const { writeFileSyncRecursive } = require('./helpers');
+const { writeFileSyncRecursive, formDataToChartSeries } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
 
@@ -593,7 +593,7 @@ class Events {
                 return {
                   ...s,
                   created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY HH:mm:ss"),
-                  trials:  trials.filter(t=> t.session_id === s.id).map(t => ({...t,created_at: moment(new Date(t.created_at)).format("DD-MM-YYYY HH:mm:ss")})),
+                  trials:  trials.filter(t=> t.session_id === s.id).map(t => ({...t, created_at: moment(new Date(t.created_at)).format("DD-MM-YYYY HH:mm:ss")})),
                   trial_count: trials.filter(t=> t.session_id === s.id).length,
                 }
               })
@@ -647,7 +647,7 @@ class Events {
                 return {
                   ...s,
                   created_at: moment(new Date(s.created_at)).format("DD-MM-YYYY HH:mm:ss"),
-                  trials:  trials.filter(t=> t.session_id === s.id).map(t => ({...t,created_at: moment(new Date(t.created_at)).format("DD-MM-YYYY HH:mm:ss")})),
+                  trials:  trials.filter(t=> t.session_id === s.id).map(t => ({...t, created_at: moment(new Date(t.created_at)).format("DD-MM-YYYY HH:mm:ss")})),
                   trial_count: trials.filter(t=> t.session_id === s.id).length,
                 }
               })
@@ -1058,6 +1058,134 @@ class Events {
 
   static exportTrialReportListener(win) {
     ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
+      let { database, trialId } = d;
+      if (database && trialId){
+
+        // Fetch the trial from the database
+        var db = new sqlite3.Database(
+          path.resolve(__dirname, `../../.meta/databases/${database}`)
+        );
+        let [trial] = await new Promise((resolve, reject) => {
+          db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+            if (error) {
+              reject([]);
+              return
+            }
+            resolve(rows)
+          });
+        });
+
+        let [user] = await new Promise((resolve, reject) => {
+          db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
+            if (error) {
+              reject([]);
+              return
+            }
+            resolve(rows)
+          });
+        });
+        db.close();
+        console.log(trial, user)
+        
+        // Open the dialog to get the filepath where the user wants to save the pdf
+        let file = await dialog.showSaveDialog(win,{
+          title: 'Select to location to save the pdf',
+          buttonLabel: 'Save',
+          properties: []
+        })
+
+        if (!file.canceled) {
+          let records = await new Promise((resolve, reject) => {
+            fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true }, function (error, records) {
+              if (error) {
+                reject(error)
+                return
+              }
+              resolve(records);
+            }));
+          });
+          
+          let right = formDataToChartSeries(records, user.weight);
+            let html = `
+              <html>
+              <head>
+              <title>Our Funky HTML Page</title>
+              <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+              <meta name="description" content="Our first page">
+              <meta name="keywords" content="html tutorial template">
+              </head>
+                <body>
+                <canvas id="bar-chart"></canvas>
+                </body>
+                <script>
+                // Bar chart
+                new Chart(document.getElementById("bar-chart"), {
+                  type: 'line',
+                  data: {
+                    labels: [${right[1].data.map((d,id)=>id)}],
+                    datasets: ${JSON.stringify(right.map((r,idx) => {
+                      return {
+                        label: 'Series '+idx, // Name the series
+                        data: r.data, // Specify the data values array
+                        fill: false,
+                        borderColor: '#2196f3', // Add custom color border (Line)
+                        backgroundColor: '#2196f3', // Add custom color background (Points and Fill)
+                        borderWidth: 1 // Specify bar border width
+                      }
+                    }))}
+                  },
+                  options: {
+                    responsive: true, // Instruct chart js to respond nicely.
+                    maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                display: false
+                            }
+                        }]
+                    }
+                  }
+                });
+                </script>
+              </html>
+            `
+            console.log(html)
+            var finalHtml = encodeURIComponent(html);
+            var options = {
+              format: 'A4',
+              headerTemplate: "<p></p>",
+              footerTemplate: "<p></p>",
+              displayHeaderFooter: false,
+              margin: {
+                  top: "40px",
+                  bottom: "100px"
+              },
+              printBackground: true,
+              path: file.filePath,
+              preferCSSPageSize: true,
+            }
+
+            const browser = await puppeteer.launch({
+                args: ['--no-sandbox'],
+                headless: true
+            });
+            const page = await browser.newPage();
+            await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
+                waitUntil: 'networkidle0'
+            });
+            await page.emulateMediaType("print");
+            await page.pdf(options);
+            await browser.close();
+
+          console.log('Done: PDF is created!');
+        }
+        e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
+      }
+    });
+  }
+
+  /*static exportTrialReportListener(win) {
+    ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
       try {
         let { database, trialId } = d;
         console.log(d)
@@ -1178,7 +1306,8 @@ class Events {
         throw new Error(e);
       }
     });
-  }
+  }*/
+
   static downloadTrialListener(win) {
     ipcMain.on(DOWNLOAD_TRIAL, async (e, d) => {
       try {
