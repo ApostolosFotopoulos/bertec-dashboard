@@ -17,7 +17,7 @@ const fs = require('fs')
 const { ipcMain, dialog } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const { writeFileSyncRecursive, formDataToChartSeries } = require('./helpers');
+const { writeFileSyncRecursive, formDataToChartSeries, formChartJS } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
 
@@ -1105,51 +1105,31 @@ class Events {
             }));
           });
           
-          let right = formDataToChartSeries(records, user.weight);
-            let html = `
-              <html>
-              <head>
-              <title>Our Funky HTML Page</title>
-              <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-              <meta name="description" content="Our first page">
-              <meta name="keywords" content="html tutorial template">
-              </head>
-                <body>
-                <canvas id="bar-chart"></canvas>
-                </body>
-                <script>
-                // Bar chart
-                new Chart(document.getElementById("bar-chart"), {
-                  type: 'line',
-                  data: {
-                    labels: [${right[1].data.map((d,id)=>id)}],
-                    datasets: ${JSON.stringify(right.map((r,idx) => {
-                      return {
-                        label: 'Series '+idx, // Name the series
-                        data: r.data, // Specify the data values array
-                        fill: false,
-                        borderColor: '#2196f3', // Add custom color border (Line)
-                        backgroundColor: '#2196f3', // Add custom color background (Points and Fill)
-                        borderWidth: 1 // Specify bar border width
-                      }
-                    }))}
-                  },
-                  options: {
-                    responsive: true, // Instruct chart js to respond nicely.
-                    maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                display: false
-                            }
-                        }]
-                    }
-                  }
-                });
-                </script>
-              </html>
-            `
-            console.log(html)
+          let fz = formDataToChartSeries(records, user.weight, 'Fz1', 'Fz2');
+          let copx = formDataToChartSeries(records, user.weight, 'Copx1', 'Copx2');
+          let html = `
+            <html>
+            <head>
+            <title>Our Funky HTML Page</title>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+            <meta name="description" content="Our first page">
+            <meta name="keywords" content="html tutorial template">
+            </head>
+              <body>
+                <canvas id="left-foot-fz"></canvas>
+                <canvas id="right-foot-fz"></canvas>
+                <canvas id="left-foot-cop"></canvas>
+                <canvas id="right-foot-cop"></canvas>
+              </body>
+              <script>
+              ${formChartJS(fz.left,'left-foot-fz')}
+              ${formChartJS(fz.right, 'right-foot-fz')}
+              ${formChartJS(copx.left, 'left-foot-cop')}
+              ${formChartJS(copx.right, 'right-foot-cop')}
+              </script>
+            </html>
+          `
+            //console.log(html)
             var finalHtml = encodeURIComponent(html);
             var options = {
               format: 'A4',
@@ -1183,130 +1163,6 @@ class Events {
       }
     });
   }
-
-  /*static exportTrialReportListener(win) {
-    ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
-      try {
-        let { database, trialId } = d;
-        console.log(d)
-        if (database && trialId) {
-          var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
-          );
-          let [trial] = await new Promise((resolve, reject) => {
-            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
-              if (error) {
-                reject([]);
-                return
-              }
-              resolve(rows)
-            });
-          });
-          db.close();
-
-           // Open the dialog to get the filepath where the user wants to save the csv
-          let file = await dialog.showSaveDialog(win,{
-            title: 'Select to location to save the pdf',
-            buttonLabel: 'Save',
-            properties: []
-          })
-
-          // Transfer data to the new file
-          if (!file.canceled) {
-            //var html = fs.readFileSync(path.resolve(__dirname, '../../assets/test.html'));
-            // console.log(html)
-            let records = await new Promise((resolve, reject) => {
-              fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true }, function (error, records) {
-                if (error) {
-                  reject(error)
-                  return
-                }
-                resolve(records);
-              }));
-            });
-            
-            records = records.slice(0, 30);
-            console.log(records)
-            let html = `
-              <html>
-              <head>
-              <title>Our Funky HTML Page</title>
-              <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-              <meta name="description" content="Our first page">
-              <meta name="keywords" content="html tutorial template">
-              </head>
-                <body>
-                <canvas id="bar-chart"></canvas>
-                </body>
-                <script>
-                // Bar chart
-                new Chart(document.getElementById("bar-chart"), {
-                  type: 'line',
-                  data: {
-                      labels: [${records.map((r,idx)=>`${idx}`)}],
-                      datasets: [{
-                          label: 'Series 1', // Name the series
-                          data: [${records.map((r,idx)=>r["Fz1"])}], // Specify the data values array
-                          fill: false,
-                          borderColor: '#2196f3', // Add custom color border (Line)
-                          backgroundColor: '#2196f3', // Add custom color background (Points and Fill)
-                          borderWidth: 1 // Specify bar border width
-                      }]},
-                  options: {
-                    responsive: true, // Instruct chart js to respond nicely.
-                    maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                display: false
-                            }
-                        }]
-                    }
-                  }
-                });
-                </script>
-              </html>
-            `
-            //var template = handlebars.compile(html);
-            var finalHtml = encodeURIComponent(html);
-            console.log(finalHtml)
-            var options = {
-              format: 'A4',
-            headerTemplate: "<p></p>",
-            footerTemplate: "<p></p>",
-            displayHeaderFooter: false,
-            margin: {
-                top: "40px",
-                bottom: "100px"
-            },
-            printBackground: true,
-              path: file.filePath,
-              preferCSSPageSize: true,
-          }
-
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox'],
-            headless: true
-        });
-        const page = await browser.newPage();
-        await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
-            waitUntil: 'networkidle0'
-        });
-              await page.emulateMediaType("print");
-        await page.pdf(options);
-        await browser.close();
-
-        console.log('Done: invoice.pdf is created!')
-          }
-
-          console.log(trial)
-        }
-      } catch (e) {
-        console.log(e)
-        throw new Error(e);
-      }
-    });
-  }*/
 
   static downloadTrialListener(win) {
     ipcMain.on(DOWNLOAD_TRIAL, async (e, d) => {

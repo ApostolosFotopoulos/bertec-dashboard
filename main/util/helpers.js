@@ -28,25 +28,26 @@ function writeFileSyncRecursive(filename, content, charset) {
   fs.writeFileSync(root + filepath, content, charset);
 }
 
-const formDataToChartSeries = (records, weight) =>{
-  //console.log(records)
+const formDataToChartSeries = (records, weight,leftColumn,rightColumn) => {
   var frequency = 100;
 
   var rightPlateRows = 0
   var rightSteps = 0
   var isRightPlateLocked = false;
-  var rightPlateSeries = [{ data: []}]
-  var rightPlateFinalSeries = [{ data: []}]
+  var rightPlateSeries = [{ data: [] }]
+  var rightPlateFinalSeries = [{ data: [] }]
   
   var leftPlateRows = 0
+  var leftSteps = 0
+  var isLeftPlateLocked = false;
   var leftPlateSeries = [{ data: [] }]
   var leftPlateFinalSeries = [{ data: [] }]
-  var isLeftPlateLocked = false;
 
-  for (var i = 0; i < records.length; i++){
+  for (var i = 0; i < records.length; i++) {
     var fz1 = Number(records[i]['Fz1']);
     var fz2 = Number(records[i]['Fz2']);
-    var entryRight = Number(records[i]['Fz2'])
+    var entryLeft = Number(records[i][leftColumn])
+    var entryRight = Number(records[i][rightColumn])
     var threshold = Number(0.05 * weight);
     
     if (isRightPlateLocked) {
@@ -76,12 +77,86 @@ const formDataToChartSeries = (records, weight) =>{
         rightPlateSeries[rightPlateRows].data.push(entryRight);
       }
     }
+
+    if (isLeftPlateLocked) {
+      if (fz1 > threshold) {
+        leftSteps += 1;
+        leftPlateSeries[leftPlateRows].data.push(entryLeft);
+      }
+        
+      if (fz1 < threshold) {
+        isLeftPlateLocked = false;
+        if (leftSteps > 0.2 * frequency) {
+
+          let s = leftPlateFinalSeries;
+          leftPlateFinalSeries = s;
+          s.push({
+            data: []
+          });
+          leftPlateSeries = s;
+          leftPlateRows += 1;
+        } else {
+          leftPlateSeries[leftPlateRows].data = [];
+        }
+      }
+    } else {
+      if (fz1 > threshold) {
+        isLeftPlateLocked = true;
+        leftPlateSeries[leftPlateRows].data.push(entryLeft);
+      }
+    }
   }
 
-  return rightPlateFinalSeries;
+
+  return {
+    left: leftPlateFinalSeries,
+    right: rightPlateFinalSeries,
+  };
 }
 
+const formChartJS = (row, id) => {
+  return ` 
+    new Chart(document.getElementById('${id}'), {
+      type: 'line',
+      data: {
+        labels: [${row[1].data.map((d, id) => id)}],
+        datasets: ${JSON.stringify(row.map((r, idx) => {
+          return {
+              data: r.data,
+              fill: false,
+              borderColor: '#2196f3',
+              backgroundColor: '#2196f3',
+              borderWidth: 1
+            }
+          }))}
+      },
+      options: {
+        responsive: true, // Instruct chart js to respond nicely.
+        maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+        elements: {
+          point:{
+            radius: 0
+          }
+        },
+        scales: {
+          xAxes: [{
+              ticks: {
+                  display: false
+              },
+              gridLines : {
+                  display : false
+              }
+          }]
+        },
+        legend: {
+          display: false
+        }
+      }
+    });
+  `;
+}
 module.exports = {
   writeFileSyncRecursive,
-  formDataToChartSeries
+  formDataToChartSeries,
+  formChartJS
 }
