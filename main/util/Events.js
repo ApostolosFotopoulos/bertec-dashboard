@@ -17,7 +17,7 @@ const fs = require('fs')
 const { ipcMain, dialog } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const { writeFileSyncRecursive, formDataToChartSeries, formChartJS } = require('./helpers');
+const { writeFileSyncRecursive, formChartData, generateHTML } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
 
@@ -1096,7 +1096,7 @@ class Events {
 
         if (!file.canceled) {
           let records = await new Promise((resolve, reject) => {
-            fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true }, function (error, records) {
+            fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true }, function (error, records) {
               if (error) {
                 reject(error)
                 return
@@ -1104,58 +1104,37 @@ class Events {
               resolve(records);
             }));
           });
-          
-          let fz = formDataToChartSeries(records, user.weight, 'Fz1', 'Fz2');
-          let copx = formDataToChartSeries(records, user.weight, 'Copx1', 'Copx2');
-          let html = `
-            <html>
-            <head>
-            <title>Our Funky HTML Page</title>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-            <meta name="description" content="Our first page">
-            <meta name="keywords" content="html tutorial template">
-            </head>
-              <body>
-                <canvas id="left-foot-fz"></canvas>
-                <canvas id="right-foot-fz"></canvas>
-                <canvas id="left-foot-cop"></canvas>
-                <canvas id="right-foot-cop"></canvas>
-              </body>
-              <script>
-              ${formChartJS(fz.left,'left-foot-fz')}
-              ${formChartJS(fz.right, 'right-foot-fz')}
-              ${formChartJS(copx.left, 'left-foot-cop')}
-              ${formChartJS(copx.right, 'right-foot-cop')}
-              </script>
-            </html>
-          `
-            //console.log(html)
-            var finalHtml = encodeURIComponent(html);
-            var options = {
-              format: 'A4',
-              headerTemplate: "<p></p>",
-              footerTemplate: "<p></p>",
-              displayHeaderFooter: false,
-              margin: {
-                  top: "40px",
-                  bottom: "100px"
-              },
-              printBackground: true,
-              path: file.filePath,
-              preferCSSPageSize: true,
-            }
 
-            const browser = await puppeteer.launch({
-                args: ['--no-sandbox'],
-                headless: true
-            });
-            const page = await browser.newPage();
-            await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
-                waitUntil: 'networkidle0'
-            });
-            await page.emulateMediaType("print");
-            await page.pdf(options);
-            await browser.close();
+          // Format the data from the csv to linecharts
+          let fx = formChartData(records, user.weight, 'Fx1', 'Fx2');
+          let fy = formChartData(records, user.weight, 'Fy1', 'Fy2');
+          let fz = formChartData(records, user.weight, 'Fz1', 'Fz2');
+
+          // Generate the html for the pdf
+          let html = generateHTML(fx,fy,fz)
+          var finalHtml = encodeURIComponent(html);
+          var options = {
+            format: 'A4',
+            headerTemplate: "<p></p>",
+            footerTemplate: "<p></p>",
+            displayHeaderFooter: false,
+            printBackground: true,
+            path: file.filePath,
+            preferCSSPageSize: true,
+          }
+
+          // Create the pdf using puppeteer
+          const browser = await puppeteer.launch({
+              args: ['--no-sandbox'],
+              headless: true
+          });
+          const page = await browser.newPage();
+          await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
+              waitUntil: 'networkidle0'
+          });
+          await page.emulateMediaType("print");
+          await page.pdf(options);
+          await browser.close();
 
           console.log('Done: PDF is created!');
         }
