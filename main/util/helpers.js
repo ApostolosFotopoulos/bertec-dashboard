@@ -113,9 +113,10 @@ const formChartData = (records, weight,leftColumn,rightColumn) => {
     right: rightPlateFinalSeries,
   };
 }
-
-const formChartJS = (row, id, color) => {
+/*
+const formLineChartJS = (row, id, color) => {
   return ` 
+  
     new Chart(document.getElementById('${id}'), {
       type: 'line',
       data: {
@@ -131,8 +132,8 @@ const formChartJS = (row, id, color) => {
           }))}
       },
       options: {
-        responsive: true, // Instruct chart js to respond nicely.
-        maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+        animation: false,
+        responsive: true, // Instruct chart js to respond nicely
         elements: {
           point:{
             radius: 0
@@ -150,6 +151,110 @@ const formChartJS = (row, id, color) => {
         },
         legend: {
           display: false
+        }
+      }
+    });
+  `;
+}*/
+
+const formLineChartJS = (row, id, color) => {
+  return `
+      var options = {
+        series:${JSON.stringify(row.map((r, idx) => {
+        return {
+            data: r.data,
+            name: "",
+          }
+        }))},
+        dataLabels:{
+          enabled:false,
+          show:false
+        },
+        grid:{
+          padding:{
+            top:0,
+            right:0,
+            bottom:0,
+            left:10,
+          }
+        },
+        chart: {
+          toolbar:{
+            show:false,
+          },
+          animations:{
+            enabled:false,
+          },
+          type:"line",
+        },
+        xaxis: {
+          forceNiceScale: true,
+          labels:{
+            formatter: (val) => {
+              if (val.toFixed(0) % 10 == 0) {
+                return val.toFixed(0);
+              }
+            },
+            show:true,
+          },
+          type:"category",
+        },
+        yaxis: {
+          forceNiceScale: true,
+          labels:{
+            formatter: (val) => {
+              return val.toFixed(0);
+            },
+            show:true,
+          },
+        },
+        stroke: {
+          curve: 'straight',
+          width:1,
+        },
+        legend:{
+          show:false
+        },
+        colors: [
+          ({ value, seriesIndex, w }) => {
+            return '${color}';
+          },
+        ],
+      };
+
+      var chart = new ApexCharts(document.querySelector("#${id}"), options);
+      chart.render();
+  `;
+}
+
+
+
+const formCOPChartJS = (row, id, color) => {
+  return ` 
+    new Chart(document.getElementById('${id}'), {
+      type: 'scatter',
+      data: {
+        labels: ['1','2','3'],
+        datasets:${JSON.stringify(row.map((r, idx) => {
+          return {
+              data: [r],
+              fill: false,
+              borderColor: color,
+              backgroundColor: color,
+              borderWidth: 1
+            }
+          }))}
+      },
+      options: {
+        responsive: true, // Instruct chart js to respond nicely.
+        legend: {
+          display: false
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            position: 'top'
+          }
         }
       }
     });
@@ -180,7 +285,7 @@ const generateHTML = (fx,fy,fz) => {
           margin-right: auto;
         }
       </style>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
       </head>
       <body>
         <div class="container p-5">
@@ -227,66 +332,10 @@ const generateHTML = (fx,fy,fz) => {
           </div>
           <div class="columns is-vcentered is-centered">
             <div class="column has-text-centered">
-              <canvas id="left-foot-fx"></canvas>
+              <div id="left-foot-fx" style="height:200px; width:400px;"></div>
             </div>
             <div class="column has-text-centered">
-              <canvas id="right-foot-fx"></canvas>
-            </div>
-          </div>
-          <h1 class="title is-4">Fy</h1>
-          <div class="columns is-vcentered is-centered">
-            <div class="column has-text-centered">
-              <h1 class="title is-5">Left Foot</h1>
-            </div>
-            <div class="column has-text-centered">
-              <h1 class="title is-5">Right Foot</h1>
-            </div>
-          </div>
-          <div class="columns is-vcentered is-centered">
-            <div class="column has-text-centered">
-              <canvas id="left-foot-fy"></canvas>
-            </div>
-            <div class="column has-text-centered">
-              <canvas id="right-foot-fy"></canvas>
-            </div>
-          </div>
-          <h1 class="title is-4">Fz</h1>
-          <div class="columns is-vcentered is-centered">
-            <div class="column has-text-centered">
-              <h1 class="title is-5">Left Foot</h1>
-            </div>
-            <div class="column has-text-centered">
-              <h1 class="title is-5">Right Foot</h1>
-            </div>
-          </div>
-          <div class="columns is-vcentered is-centered">
-            <div class="column has-text-centered">
-              <canvas id="left-foot-fz-2"></canvas>
-            </div>
-            <div class="column has-text-centered">
-              <canvas id="right-foot-fz-2"></canvas>
-            </div>
-          </div>
-        </div>
-        <div class="container p-5 has-text-centered" style="margin-top:25%">
-          <h1 class="title is-4">Timeline</h1>
-        </div>
-        <div class="container p-5">
-          <h1 class="title is-4">Fx</h1>
-          <div class="columns is-vcentered is-centered"> 
-            <div class="column has-text-centered">
-              <h1 class="title is-5">Left Foot</h1>
-            </div>
-            <div class="column has-text-centered">
-              <h1 class="title is-5">Right Foot</h1>
-            </div>
-          </div>
-          <div class="columns is-vcentered is-centered">
-            <div class="column has-text-centered">
-              <canvas id="left-foot-fx"></canvas>
-            </div>
-            <div class="column has-text-centered">
-              <canvas id="right-foot-fx"></canvas>
+              <div id="right-foot-fx" style="height:200px; width:400px;"></div>
             </div>
           </div>
           <h1 class="title is-4">Fy</h1>
@@ -300,13 +349,13 @@ const generateHTML = (fx,fy,fz) => {
           </div>
           <div class="columns is-vcentered is-centered">
             <div class="column has-text-centered">
-              <canvas id="left-foot-fy"></canvas>
+              <div id="left-foot-fy" style="height:200px; width:400px;"></div>
             </div>
             <div class="column has-text-centered">
-              <canvas id="right-foot-fy"></canvas>
+              <div id="right-foot-fy" style="height:200px; width:400px;"></div>
             </div>
           </div>
-          <h1 class="title is-4">Fz</h1>
+          <h1 class="title is-4 pt-5" style="margin-top:40%">Fz</h1>
           <div class="columns is-vcentered is-centered">
             <div class="column has-text-centered">
               <h1 class="title is-5">Left Foot</h1>
@@ -317,20 +366,20 @@ const generateHTML = (fx,fy,fz) => {
           </div>
           <div class="columns is-vcentered is-centered">
             <div class="column has-text-centered">
-              <canvas id="left-foot-fz-2"></canvas>
+              <div id="left-foot-fz" style="height:200px; width:400px;"></div>
             </div>
             <div class="column has-text-centered">
-              <canvas id="right-foot-fz-2"></canvas>
+              <div id="right-foot-fz" style="height:200px; width:400px;"></div>
             </div>
           </div>
         </div>
         <script>
-          ${formChartJS(fx.left,'left-foot-fx','#d32d41')}
-          ${formChartJS(fx.right, 'right-foot-fx','#6ab187')}
-          ${formChartJS(fy.left,'left-foot-fy','#d32d41')}
-          ${formChartJS(fy.right, 'right-foot-fy','#6ab187')}
-          ${formChartJS(fz.left,'left-foot-fz-2','#d32d41')}
-          ${formChartJS(fz.right, 'right-foot-fz-2','#6ab187')}
+          ${formLineChartJS(fx.left, 'left-foot-fx', '#d32d41')}
+          ${formLineChartJS(fx.right, 'right-foot-fx', '#6ab187')}
+          ${formLineChartJS(fy.left, 'left-foot-fy', '#d32d41')}
+          ${formLineChartJS(fy.right, 'right-foot-fy', '#6ab187')}
+          ${formLineChartJS(fz.left, 'left-foot-fz', '#d32d41')}
+          ${formLineChartJS(fz.right,'right-foot-fz','#6ab187')}
         </script>
       </body>
     </html>
@@ -339,6 +388,7 @@ const generateHTML = (fx,fy,fz) => {
 module.exports = {
   writeFileSyncRecursive,
   formChartData,
-  formChartJS,
+  formLineChartJS,
+  formCOPChartJS,
   generateHTML,
 }
