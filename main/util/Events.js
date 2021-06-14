@@ -17,7 +17,7 @@ const fs = require('fs')
 const { ipcMain, dialog } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const { writeFileSyncRecursive, formChartData, generateHTML } = require('./helpers');
+const { writeFileSyncRecursive, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
 
@@ -1106,12 +1106,20 @@ class Events {
           });
 
           // Format the data from the csv to linecharts
-          let fx = formChartData(records, user.weight, 'Fx1', 'Fx2');
-          let fy = formChartData(records, user.weight, 'Fy1', 'Fy2');
-          let fz = formChartData(records, user.weight, 'Fz1', 'Fz2');
+          let fx = formLineChartData(records, user.weight, 'Fx1', 'Fx2');
+          let fy = formLineChartData(records, user.weight, 'Fy1', 'Fy2');
+          let fz = formLineChartData(records, user.weight, 'Fz1', 'Fz2');
+
+          // Format the data from the csv to cop points
+          let cop = formCOPChartData(records, user.weight);
+
+          // Format the data from the csv to timeline points
+          let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', 10, 10, 200);
+          let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', 10, 10, 200);
+          let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', 10, 10, 200);
 
           // Generate the html for the pdf
-          let html = generateHTML(fx,fy,fz)
+          let html = generateHTML(fx,fy,fz,cop)
           var finalHtml = encodeURIComponent(html);
           var options = {
             format: 'A4',
