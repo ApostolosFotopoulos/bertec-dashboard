@@ -1,5 +1,5 @@
 const fs = require('fs')
-const rowsNames = require('../../assets/store/rowsNames.json');
+var commandExists = require('command-exists');
 function writeFileSyncRecursive(filename, content, charset) {
   let filepath = filename.replace(/\\/g,'/');  
 
@@ -278,8 +278,8 @@ var rightPlateMax = -1;
   }
 
   return {
-    left: leftPlateSeries,
-    right: rightPlateSeries,
+    left: leftPlateSeries[0].data,
+    right: rightPlateSeries[0].data,
     isInsideLeftRange,
     isInsideRightRange,
   };
@@ -438,9 +438,75 @@ const formCOPChartJS = (row, id, color) => {
   `;
 }
 
+const formTimelineChartJS = (row, id, color) => {
+  return `
+      var options = {
+        series:[{
+          name:"",
+          data:${JSON.stringify(row)},
+        }],
+        dataLabels:{
+          enabled:false,
+          show:false
+        },
+        grid:{
+          padding:{
+            top:0,
+            right:0,
+            bottom:0,
+            left:10,
+          }
+        },
+        chart: {
+          toolbar:{
+            show:false,
+          },
+          animations:{
+            enabled:false,
+          },
+          type:"line",
+        },
+        xaxis: {
+          forceNiceScale: true,
+          labels:{
+            formatter: (val) => {
+              return val.toFixed(0);
+            },
+            show:true,
+          },
+          type:"category",
+        },
+        yaxis: {
+          forceNiceScale: true,
+          labels:{
+            formatter: (val) => {
+              return val.toFixed(0);
+            },
+            show:true,
+          },
+        },
+        stroke: {
+          curve: 'straight',
+          width:1,
+        },
+        legend:{
+          show:false
+        },
+        colors: [
+          ({ value, seriesIndex, w }) => {
+            return '${color}';
+          },
+        ],
+      };
+
+      var chart = new ApexCharts(document.querySelector("#${id}"), options);
+      chart.render();
+  `;
+}
+
 const formMeasurements = () => {
   return `
-    <div class="container p-1">
+    <div class="container p-1 mt-4">
       <h1 class="title is-6 has-text-centered">Measurements</h1>
       <table>
         <tr>
@@ -472,7 +538,7 @@ const formMeasurements = () => {
   `
 }
 
-const generateHTML = (fx,fy,fz,cop) => {
+const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => {
   return `
     <html lang="en">
       <head>
@@ -599,6 +665,36 @@ const generateHTML = (fx,fy,fz,cop) => {
             <div id="right-foot-cop" style="width:400px;"></div>
           </div>
         </div>
+        <div class="container">
+          <h1 class="title is-6 has-text-centered">Timeline Charts</h1>
+          <h1 class="title is-6 p-0">Fx</h1>
+          <div class="columns is-vcentered is-centered p-0">
+            <div class="column has-text-centered p-0">
+              <div id="left-foot-timeline-fx" style="height:200px; width:400px;"></div>
+            </div>
+            <div class="column has-text-centered p-0">
+              <div id="right-timeline-fx" style="height:200px; width:400px;"></div>
+            </div>
+          </div>
+          <h1 class="title is-6 pt-6" style="margin-top:20%;">Fy</h1>
+          <div class="columns is-vcentered is-centered p-0">
+            <div class="column has-text-centered p-0">
+              <div id="left-foot-timeline-fy" style="height:200px; width:400px;"></div>
+            </div>
+            <div class="column has-text-centered p-0">
+              <div id="right-timeline-fy" style="height:200px; width:400px;"></div>
+            </div>
+          </div>
+          <h1 class="title is-6 pt-6">Fz</h1>
+          <div class="columns is-vcentered is-centered p-0">
+            <div class="column has-text-centered p-0">
+              <div id="left-foot-timeline-fz" style="height:200px; width:400px;"></div>
+            </div>
+            <div class="column has-text-centered p-0">
+              <div id="right-timeline-fz" style="height:200px; width:400px;"></div>
+            </div>
+          </div>
+        </div>
         ${formMeasurements()}
         <script>
           ${formLineChartJS(fx.left, 'left-foot-fx', '#d32d41')}
@@ -608,7 +704,13 @@ const generateHTML = (fx,fy,fz,cop) => {
           ${formLineChartJS(fz.left, 'left-foot-fz', '#d32d41')}
           ${formLineChartJS(fz.right, 'right-foot-fz', '#6ab187')}
           ${formCOPChartJS(cop.left, 'left-foot-cop', '#d32d41')}
-          ${formCOPChartJS(cop.right,'right-foot-cop','#6ab187')}
+          ${formCOPChartJS(cop.right, 'right-foot-cop', '#6ab187')}
+          ${formTimelineChartJS(timelineFX.left, 'left-foot-timeline-fx', '#d32d41')}
+          ${formTimelineChartJS(timelineFX.right, 'right-timeline-fx', '#6ab187')}
+          ${formTimelineChartJS(timelineFΥ.left, 'left-foot-timeline-fy', '#d32d41')}
+          ${formTimelineChartJS(timelineFΥ.right, 'right-timeline-fy', '#6ab187')}
+          ${formTimelineChartJS(timelineFΖ.left, 'left-foot-timeline-fz', '#d32d41')}
+          ${formTimelineChartJS(timelineFΖ.right, 'right-timeline-fz', '#6ab187')}
         </script>
       </body>
     </html>
@@ -619,6 +721,7 @@ module.exports = {
   formLineChartData,
   formCOPChartData,
   formTimelineChartData,
+  formTimelineChartJS,
   formMeasurements,
   formLineChartJS,
   formCOPChartJS,

@@ -20,6 +20,8 @@ const moment = require("moment");
 const { writeFileSyncRecursive, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
+const { exec } = require('child_process');
+var commandExists = require('command-exists');
 
 
 function groupBy(list, keyGetter) {
@@ -1119,7 +1121,7 @@ class Events {
           let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', 10, 10, 200);
 
           // Generate the html for the pdf
-          let html = generateHTML(fx,fy,fz,cop)
+          let html = generateHTML(fx,fy,fz,cop,timelineFX,timelineFΥ,timelineFΖ)
           var finalHtml = encodeURIComponent(html);
           var options = {
             format: 'A4',
@@ -1143,6 +1145,29 @@ class Events {
           await page.emulateMediaType("print");
           await page.pdf(options);
           await browser.close();
+
+          // Open pdf with chrome or firefox
+          let isChromeIsAvailable = await new Promise((resolve, reject) => {
+            commandExists('google-chrome').then(function (command) {
+              return resolve(true)
+            }).catch(function () {
+              reject(false)
+            });
+          });
+
+          let isFireFoxAvailable = await new Promise((resolve, reject) => {
+            commandExists('firefox').then(function (command) {
+              return resolve(true)
+            }).catch(function () {
+              reject(false)
+            });
+          });
+
+          if (isChromeIsAvailable) {
+            exec('google-chrome ' + file.filePath);
+          } else if(isFireFoxAvailable){
+            exec('firefox ' + file.filePath);
+          }
 
           console.log('Done: PDF is created!');
         }
