@@ -224,6 +224,7 @@ module.exports = class {
     Events.createTrialListener(this.window);
     Events.updateTrialDataListener(this.window);
     Events.updateTrialDetailsListener(this.usersw);
+    Events.updateTrialZonesAndThresholdListener(this.timelinew)
     Events.deleteTrialListener(this.usersw);
     Events.downloadTrialListener(this.usersw);
     Events.exportTrialReportListener(this.userw);
@@ -263,105 +264,105 @@ module.exports = class {
     });
 
     //// TESTING PURPOSE PLEASE REMOVE //////
-    // setInterval(() => {
-    //   if (this.linechartw && this.linechartw.window) {
-    //     if (this.isSessionRunning) {
-    //       this.linechartw.window.webContents.send(LINECHART_SESSION, {
-    //         rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     } else {
-    //       this.linechartw.window.webContents.send(LINECHART_SESSION, {
-    //         rows: [],
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     }
-    //   }
+    setInterval(() => {
+      if (this.linechartw && this.linechartw.window) {
+        if (this.isSessionRunning) {
+          this.linechartw.window.webContents.send(LINECHART_SESSION, {
+            rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
+        } else {
+          this.linechartw.window.webContents.send(LINECHART_SESSION, {
+            rows: [],
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
+        }
+      }
       
-    //   if (this.cw && this.cw.window) {
-    //     if (this.isSessionRunning) {
-    //       this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-    //         rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //         force: Math.random().toFixed(2),
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     } else {
-    //       this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-    //         rows: [],
-    //         force: 0,
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     }
-    //   }
+      if (this.cw && this.cw.window) {
+        if (this.isSessionRunning) {
+          this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+            rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+            force: Math.random().toFixed(2),
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
+        } else {
+          this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+            rows: [],
+            force: 0,
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
+        }
+      }
 
-    //   // Send the data to the timeline window
-    //     if (this.timelinew && this.timelinew.window) {
-    //       if (this.isSessionRunning) {
-    //         this.timelinew.window.webContents.send(
-    //           TIMELINE_SESSION,
-    //           {
-    //             rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //             force: Math.random().toFixed(2),
-    //             isSessionRunning: this.isSessionRunning,
-    //             weight: this.weight,
-    //             session: this.session,
-    //             database: this.database,
-    //             user: this.user,
-    //           }
-    //         );
-    //       } else {
-    //         this.timelinew.window.webContents.send(
-    //           TIMELINE_SESSION,
-    //           {
-    //             rows: [],
-    //             force: 0,
-    //             isSessionRunning: this.isSessionRunning,
-    //             weight: this.weight,
-    //             session: this.session,
-    //             database: this.database,
-    //             user: this.user,
-    //           }
-    //         );
-    //       }
-    //     }
-    //     if (this.cpw && this.cpw.window) {
-    //       if (this.isSessionRunning) {
-    //         this.cpw.window.webContents.send(COP_SESSION, {
-    //           rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       } else {
-    //         this.cpw.window.webContents.send(COP_SESSION, {
-    //           rows: [],
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       }
-    //     }
-    // })
+      // Send the data to the timeline window
+        if (this.timelinew && this.timelinew.window) {
+          if (this.isSessionRunning) {
+            this.timelinew.window.webContents.send(
+              TIMELINE_SESSION,
+              {
+                rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+                force: Math.random().toFixed(2),
+                isSessionRunning: this.isSessionRunning,
+                weight: this.weight,
+                session: this.session,
+                database: this.database,
+                user: this.user,
+              }
+            );
+          } else {
+            this.timelinew.window.webContents.send(
+              TIMELINE_SESSION,
+              {
+                rows: [],
+                force: 0,
+                isSessionRunning: this.isSessionRunning,
+                weight: this.weight,
+                session: this.session,
+                database: this.database,
+                user: this.user,
+              }
+            );
+          }
+        }
+        if (this.cpw && this.cpw.window) {
+          if (this.isSessionRunning) {
+            this.cpw.window.webContents.send(COP_SESSION, {
+              rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
+          } else {
+            this.cpw.window.webContents.send(COP_SESSION, {
+              rows: [],
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
+          }
+        }
+    })
 
     // Listen for TCP Packets to forward them to the dashboard
     this.server.on("connection", (socket) => {

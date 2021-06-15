@@ -30,7 +30,7 @@
 const { ipcRenderer } = window.require("electron");
 import VueApexCharts from "vue-apexcharts";
 import AccuracyCard from "./AccuracyCard.vue";
-const { TIMELINE_SESSION, UPDATE_TRIAL } = require("../../../../main/util/types");
+const { TIMELINE_SESSION, UPDATE_TRIAL, UPDATE_TRIAL_ZONES_AND_THRESHOLD } = require("../../../../main/util/types");
 const defaultOptions = require("../../../../assets/options/timeline.json");
 
 export default {
@@ -163,7 +163,7 @@ export default {
       if (responseData.isSessionRunning) {
         _this.updateVariables(responseData);
       } else {
-        //_this.$store.commit('resetLineChartState')
+        _this.$store.commit('resetTimelineState')
       }
     });
   },
@@ -180,7 +180,24 @@ export default {
       this.$store.commit("setUser", responseData.user);
 
       if(this.$store.state.options.trial != ""){
-        ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
+        ipcRenderer.send(UPDATE_TRIAL,{ 
+          database: responseData.database , 
+          trial: this.$store.state.options.trial,
+          data: responseData.rows,
+        })
+        ipcRenderer.send(UPDATE_TRIAL_ZONES_AND_THRESHOLD, {
+          database: responseData.database , 
+          trialId: this.$store.state.options.trialId,
+          fx_zone_min: (this.$store.state.timeline.leftPlateChannel == 'FX1' && this.$store.state.timeline.rightPlateChannel == 'FX2')? this.$store.state.timeline.rangeMin: null,
+          fx_zone_max: (this.$store.state.timeline.leftPlateChannel == 'FX1' && this.$store.state.timeline.rightPlateChannel == 'FX2')? this.$store.state.timeline.rangeMax: null,
+          fx_threshold: (this.$store.state.timeline.leftPlateChannel == 'FX1' && this.$store.state.timeline.rightPlateChannel == 'FX2')? this.$store.state.timeline.trialThreshold: null,
+          fy_zone_min: (this.$store.state.timeline.leftPlateChannel == 'FY1' && this.$store.state.timeline.rightPlateChannel == 'FY2')? this.$store.state.timeline.rangeMin: null,
+          fy_zone_max: (this.$store.state.timeline.leftPlateChannel == 'FY1' && this.$store.state.timeline.rightPlateChannel == 'FY2')? this.$store.state.timeline.rangeMax: null,
+          fy_threshold: (this.$store.state.timeline.leftPlateChannel == 'FY1' && this.$store.state.timeline.rightPlateChannel == 'FY2')? this.$store.state.timeline.trialThreshold: null,
+          fz_zone_min: (this.$store.state.timeline.leftPlateChannel == 'FZ1' && this.$store.state.timeline.rightPlateChannel == 'FZ2')? this.$store.state.timeline.rangeMin: null,
+          fz_zone_max: (this.$store.state.timeline.leftPlateChannel == 'FZ1' && this.$store.state.timeline.rightPlateChannel == 'FZ2')? this.$store.state.timeline.rangeMax: null,
+          fz_threshold: (this.$store.state.timeline.leftPlateChannel == 'FZ1' && this.$store.state.timeline.rightPlateChannel == 'FZ2')? this.$store.state.timeline.trialThreshold: null
+        })
       }
 
       if (this.$store.state.timeline.shouldUpdateLeft) {

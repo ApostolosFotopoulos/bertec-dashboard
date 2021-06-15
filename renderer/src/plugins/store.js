@@ -11,7 +11,8 @@ export default new Vuex.Store({
 			database: '',
 			user: {},
 			session: -1,
-			trial:"",
+			trial: "",
+			trialId:-1,
 			mode: 'Walking',
 			timeout: 60,
 			weight: 700,
@@ -151,6 +152,9 @@ export default new Vuex.Store({
 	mutations: {
 		setTrial(state, trial) {
 			state.options.trial = trial
+		},
+		setTrialId(state, trialId) {
+			state.options.trialId = trialId
 		},
 		setSession(state,session) {
 			state.options.session = session
@@ -948,11 +952,11 @@ export default new Vuex.Store({
 									state.timeline.dataType === 'Normalized'
 										? Math.ceil(state.timeline.leftPlateMax / 10) * 10
 										: Math.ceil(state.timeline.leftPlateMax / 100) * 100;
+								state.timeline.shouldUpdateLeft = true;
 							}
 						}
 					}
 					state.timeline.leftPlateMax = -1;
-					state.timeline.shouldUpdateLeft = true;
 				}
 			} else {
 				if (fz1 > threshold) {
@@ -1059,12 +1063,12 @@ export default new Vuex.Store({
 									state.timeline.dataType === 'Normalized'
 										? Math.ceil(state.timeline.rightPlateMax / 10) * 10
 										: Math.ceil(state.timeline.rightPlateMax / 100) * 100;
+								state.timeline.shouldUpdateRight = true;
 							}
 						}
 					}
 
 					state.timeline.rightPlateMax = -1;
-					state.timeline.shouldUpdateRight = true;
 				}
 			} else {
 				if (fz2 > threshold) {

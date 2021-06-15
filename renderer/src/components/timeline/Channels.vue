@@ -163,19 +163,24 @@ export default {
     ipcRenderer.on(CREATE_TRIAL_RESPONSE, (_, responseData) => {
       this.isTrialRunning = true;
       this.$store.commit("setTrial", responseData.trial);
+      console.log(responseData.trialId)
+      this.$store.commit("setTrialId", responseData.trialId);
       this.timeoutInstance = setTimeout(() => {
         this.isTrialRunning = false;
         this.$store.commit("setTrial", "");
+        this.$store.commit("setTrialId",-1);
       }, this.$store.state.options.timeout * 1000);
     });
   },
   methods: {
-    startStopTrial() {
+    startStopTrial(){
       if (this.isTrialRunning) {
         clearTimeout(this.timeoutInstance);
         this.isTrialRunning = false;
         this.$store.commit("setTrial", "");
+        this.$store.commit("setTrialId",-1);
       } else {
+        console.log(this.$store.state.options.session)
         if (this.$store.state.options.session != -1) {
           ipcRenderer.send(CREATE_TRIAL, {
             session: this.$store.state.options.session,
@@ -184,7 +189,7 @@ export default {
           });
         }
       }
-    },
+    }
   },
 };
 </script>

@@ -10,7 +10,7 @@ const {
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
   CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
-  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE
+  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
@@ -77,7 +77,8 @@ class Events {
                   "create table sessions(id integer primary key autoincrement, name text, user_id integer, created_at date)"
                 );
                 db.run(
-                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date, user_id integer, filename text)"
+                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date, user_id integer, filename text, "+
+                  " fx_zone_min integer, fx_zone_max, fx_trial_threshold, fy_zone_min integer, fy_zone_max, fy_trial_threshold, fz_zone_min integer, fz_zone_max, fz_trial_threshold)"
                 );
               });
               db.close();
@@ -940,7 +941,7 @@ class Events {
           );
           let filename = `session_${session}_trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}.csv`
           let trial = `trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}`
-          await new Promise((resolve, reject) => {
+          let trialId = await new Promise((resolve, reject) => {
             db.run(`insert into trials(filename,name, user_id,session_id,created_at) values('${filename}','${trial}',${userId},${session},'${new Date()}')`, function (error) {
               if (error) {
                 console.log(error)
@@ -955,7 +956,7 @@ class Events {
 
           writeFileSyncRecursive(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
           if (win && !win.isDestroyed()) {
-            e.reply(CREATE_TRIAL_RESPONSE, { trial: filename })
+            e.reply(CREATE_TRIAL_RESPONSE, { trial: filename, trialId })
           }
         }
       } catch (e) {
@@ -1058,6 +1059,51 @@ class Events {
     });
   }
 
+  static updateTrialZonesAndThresholdListener(win) {
+    ipcMain.on(UPDATE_TRIAL_ZONES_AND_THRESHOLD, async (e, d) => {
+      try {
+        let { database, trialId } = d;
+        if (database && trialId) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../.meta/databases/${database}`)
+          );
+
+          let keys = Object.keys(d).filter(k => k != "database" && k != "trialId")
+          if (keys.length > 0) {
+            let updateQuery = "update trials ";
+            console.log(keys)
+            for (var i = 0; i < keys.length; i++){
+              if (!updateQuery.includes("set")) {
+                if (d[keys[i]]) {
+                  updateQuery += ` set ${keys[i]}=${d[keys[i]]}`
+                }
+              } else {
+                if (d[keys[i]]) {
+                  updateQuery += ` , ${keys[i]}=${d[keys[i]]}`
+                }
+              }
+            }
+            updateQuery += ` where id=${trialId}`
+            await new Promise((resolve, reject) => {
+              db.run(
+                updateQuery
+                , function (error) {
+                  if (error) {
+                    reject(false);
+                    return;
+                  }
+                  resolve(true);
+              });
+            })
+            db.close();
+          }
+        }
+      } catch (e) {
+        throw new Error(e);
+      }
+    });
+  }
+
   static exportTrialReportListener(win) {
     ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
       let { database, trialId } = d;
@@ -1116,9 +1162,12 @@ class Events {
           let cop = formCOPChartData(records, user.weight);
 
           // Format the data from the csv to timeline points
-          let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', 10, 10, 200);
-          let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', 10, 10, 200);
-          let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', 10, 10, 200);
+          let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', 10, 16, 25);
+          let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', 10, 16, 25);
+          let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', 10, 16, 25);
+          //let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max);
+          //let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max);
+          //let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
 
           // Generate the html for the pdf
           let html = generateHTML(fx,fy,fz,cop,timelineFX,timelineFΥ,timelineFΖ)

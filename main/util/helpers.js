@@ -497,6 +497,16 @@ const formTimelineChartJS = (row, id, color) => {
             return '${color}';
           },
         ],
+        annotations: {
+          yaxis: [
+            {
+              y: 16,
+              y2: 25,
+              borderColor: "#000",
+              fillColor: "#FEB019",
+            },
+          ],
+        },
       };
 
       var chart = new ApexCharts(document.querySelector("#${id}"), options);
@@ -670,6 +680,14 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
           <h1 class="title is-6 p-0">Fx</h1>
           <div class="columns is-vcentered is-centered p-0">
             <div class="column has-text-centered p-0">
+              ${(timelineFX.isInsideLeftRange/timelineFX.left.length).toFixed(1)*100} %
+            </div>
+            <div class="column has-text-centered p-0">
+              ${(timelineFX.isInsideRightRange/timelineFX.right.length).toFixed(1)*100} %
+            </div>
+          </div>
+          <div class="columns is-vcentered is-centered p-0">
+            <div class="column has-text-centered p-0">
               <div id="left-foot-timeline-fx" style="height:200px; width:400px;"></div>
             </div>
             <div class="column has-text-centered p-0">
@@ -677,6 +695,14 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
             </div>
           </div>
           <h1 class="title is-6 pt-6" style="margin-top:20%;">Fy</h1>
+          <div class="columns is-vcentered is-centered p-0">
+            <div class="column has-text-centered p-0">
+              ${(timelineFΥ.isInsideLeftRange/timelineFΥ.left.length).toFixed(1)*100} %
+            </div>
+            <div class="column has-text-centered p-0">
+              ${(timelineFΥ.isInsideRightRange/timelineFΥ.right.length).toFixed(1)*100} %
+            </div>
+          </div>
           <div class="columns is-vcentered is-centered p-0">
             <div class="column has-text-centered p-0">
               <div id="left-foot-timeline-fy" style="height:200px; width:400px;"></div>
