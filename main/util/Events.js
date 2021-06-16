@@ -14,7 +14,7 @@ const {
 } = require('../util/types')
 const path = require('path')
 const fs = require('fs')
-const { ipcMain, dialog } = require("electron");
+const { ipcMain, dialog, app } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
 const { writeFileSyncRecursive, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
@@ -1133,93 +1133,82 @@ class Events {
           });
         });
         db.close();
-        console.log(trial, user)
-        
-        // Open the dialog to get the filepath where the user wants to save the pdf
-        let file = await dialog.showSaveDialog(win,{
-          title: 'Select to location to save the pdf',
-          buttonLabel: 'Save',
-          properties: []
-        })
 
-        if (!file.canceled) {
-          let records = await new Promise((resolve, reject) => {
-            fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true }, function (error, records) {
-              if (error) {
-                reject(error)
-                return
-              }
-              resolve(records);
-            }));
-          });
+        let records = await new Promise((resolve, reject) => {
+          fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true }, function (error, records) {
+            if (error) {
+              reject(error)
+              return
+            }
+            resolve(records);
+          }));
+        });
 
-          // Format the data from the csv to linecharts
-          let fx = formLineChartData(records, user.weight, 'Fx1', 'Fx2');
-          let fy = formLineChartData(records, user.weight, 'Fy1', 'Fy2');
-          let fz = formLineChartData(records, user.weight, 'Fz1', 'Fz2');
+        console.log(trial)
 
-          // Format the data from the csv to cop points
-          let cop = formCOPChartData(records, user.weight);
+        // Format the data from the csv to linecharts
+        let fx = formLineChartData(records, user.weight, 'Fx1', 'Fx2');
+        let fy = formLineChartData(records, user.weight, 'Fy1', 'Fy2');
+        let fz = formLineChartData(records, user.weight, 'Fz1', 'Fz2');
 
-          // Format the data from the csv to timeline points
-          let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', 10, 16, 25);
-          let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', 10, 16, 25);
-          let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', 10, 16, 25);
-          //let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max);
-          //let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max);
-          //let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
+        // Format the data from the csv to cop points
+        let cop = formCOPChartData(records, user.weight);
 
-          // Generate the html for the pdf
-          let html = generateHTML(fx,fy,fz,cop,timelineFX,timelineFΥ,timelineFΖ)
-          var finalHtml = encodeURIComponent(html);
-          var options = {
-            format: 'A4',
-            headerTemplate: "<p></p>",
-            footerTemplate: "<p></p>",
-            displayHeaderFooter: false,
-            printBackground: true,
-            path: file.filePath,
-            preferCSSPageSize: true,
-          }
+        // Format the data from the csv to timeline points
+        let timelineFX = formTimelineChartData(records, user.weight,'Fx1','Fx2', trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max);
+        let timelineFΥ = formTimelineChartData(records, user.weight, 'Fy1', 'Fy2', trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max);
+        let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
 
-          // Create the pdf using puppeteer
-          const browser = await puppeteer.launch({
-              args: ['--no-sandbox'],
-              headless: true
-          });
-          const page = await browser.newPage();
-          await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
-              waitUntil: 'networkidle0'
-          });
-          await page.emulateMediaType("print");
-          await page.pdf(options);
-          await browser.close();
-
-          // Open pdf with chrome or firefox
-          let isChromeIsAvailable = await new Promise((resolve, reject) => {
-            commandExists('google-chrome').then(function (command) {
-              return resolve(true)
-            }).catch(function () {
-              reject(false)
-            });
-          });
-
-          let isFireFoxAvailable = await new Promise((resolve, reject) => {
-            commandExists('firefox').then(function (command) {
-              return resolve(true)
-            }).catch(function () {
-              reject(false)
-            });
-          });
-
-          if (isChromeIsAvailable) {
-            exec('google-chrome ' + file.filePath);
-          } else if(isFireFoxAvailable){
-            exec('firefox ' + file.filePath);
-          }
-
-          console.log('Done: PDF is created!');
+        // Generate the html for the pdf
+        let html = generateHTML(fx,fy,fz,cop,timelineFX,timelineFΥ,timelineFΖ)
+        var finalHtml = encodeURIComponent(html);
+        var options = {
+          format: 'A4',
+          headerTemplate: "<p></p>",
+          footerTemplate: "<p></p>",
+          displayHeaderFooter: false,
+          printBackground: true,
+          path: app.getPath("downloads")+"/"+trial.name+".pdf",
+          preferCSSPageSize: true,
         }
+
+        // Create the pdf using puppeteer
+        const browser = await puppeteer.launch({
+            args: ['--no-sandbox'],
+            headless: true
+        });
+        const page = await browser.newPage();
+        await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
+            waitUntil: 'networkidle0'
+        });
+        await page.emulateMediaType("print");
+        await page.pdf(options);
+        await browser.close();
+
+        // Open pdf with chrome or firefox
+        let isChromeIsAvailable = await new Promise((resolve, reject) => {
+          commandExists('google-chrome').then(function (command) {
+            return resolve(true)
+          }).catch(function () {
+            reject(false)
+          });
+        });
+
+        let isFireFoxAvailable = await new Promise((resolve, reject) => {
+          commandExists('firefox').then(function (command) {
+            return resolve(true)
+          }).catch(function () {
+            reject(false)
+          });
+        });
+
+        if (isChromeIsAvailable) {
+          exec('google-chrome ' + app.getPath("downloads")+"/"+trial.name+".pdf");
+        } else if(isFireFoxAvailable){
+          exec('firefox ' + app.getPath("downloads")+"/"+trial.name+".pdf");
+        }
+
+        console.log('Done: PDF is created!');
         e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
       }
     });
@@ -1247,10 +1236,10 @@ class Events {
           db.close();
 
           // Open the dialog to get the filepath where the user wants to save the csv
-          let file = await dialog.showSaveDialog(win,{
+          let file = await dialog.showSaveDialog({
             title: 'Select to save the trial data',
             buttonLabel: 'Save',
-            properties: []
+            defaultPath: app.getPath("downloads")+`/${trial.name}.csv`,
           })
 
           // Transfer data to the new file

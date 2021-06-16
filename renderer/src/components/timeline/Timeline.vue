@@ -285,7 +285,7 @@ export default {
               formatter: (val) => {
                 return val.toFixed(0);
               },
-            },
+            }, 
           },
           xaxis: {
             min: 0,

@@ -42,6 +42,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
   var isLeftPlateLocked = false;
   var leftPlateSeries = [{ data: [] }]
   var leftPlateFinalSeries = [{ data: [] }]
+  var maxY = -1;
 
   for (var i = 0; i < records.length; i++) {
     var fz1 = Number(records[i]['Fz1']);
@@ -54,6 +55,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
       if (fz2 > threshold) {
         rightSteps += 1;
         rightPlateSeries[rightPlateRows].data.push(entryRight);
+        if (maxY < entryRight) {
+          maxY = entryRight;
+        }
       }
       
       if (fz2 < threshold) {
@@ -76,6 +80,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
       if (fz2 > threshold) {
         isRightPlateLocked = true;
         rightPlateSeries[rightPlateRows].data.push(entryRight);
+        if (maxY < entryRight) {
+          maxY = entryRight;
+        }
       }
     }
 
@@ -83,6 +90,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
       if (fz1 > threshold) {
         leftSteps += 1;
         leftPlateSeries[leftPlateRows].data.push(entryLeft);
+        if (maxY < entryLeft) {
+          maxY = entryLeft;
+        }
       }
         
       if (fz1 < threshold) {
@@ -105,6 +115,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
       if (fz1 > threshold) {
         isLeftPlateLocked = true;
         leftPlateSeries[leftPlateRows].data.push(entryLeft);
+        if (maxY < entryLeft) {
+          maxY = entryLeft;
+        }
       }
     }
   }
@@ -113,6 +126,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
   return {
     left: leftPlateFinalSeries,
     right: rightPlateFinalSeries,
+    maxY,
   };
 }
 
@@ -205,7 +219,7 @@ const formCOPChartData = (records, weight) => {
   };
 }
 
-const formTimelineChartData = (records, weight,leftColumn, rightColumn, trialThreshold,rangeMin,rangeMax, ) => {
+const formTimelineChartData = (records, weight,leftColumn, rightColumn, trialThreshold, rangeMin, rangeMax ) => {
 
 var rightPlateMax = -1;
   var isRightPlateLocked = false;
@@ -233,8 +247,14 @@ var rightPlateMax = -1;
       
       if (fz2 < threshold) {
         isRightPlateLocked = false;
-        if (rightPlateMax > trialThreshold) {
+        if (trialThreshold) {
+          if (rightPlateMax > trialThreshold) {
+            rightPlateSeries[0].data.push(rightPlateMax);
+          }
+        } else {
           rightPlateSeries[0].data.push(rightPlateMax);
+        }
+        if (rangeMin && rangeMax) {
           if (rangeMin <= rightPlateMax && rangeMax >= rightPlateMax) {
             isInsideRightRange +=1
           }
@@ -259,8 +279,14 @@ var rightPlateMax = -1;
         
       if (fz1 < threshold) {
         isLeftPlateLocked = false;
-        if (leftPlateMax > trialThreshold) {
+        if (trialThreshold) {
+          if (leftPlateMax > trialThreshold) {
+            leftPlateSeries[0].data.push(leftPlateMax);
+          }
+        } else {
           leftPlateSeries[0].data.push(leftPlateMax);
+        }
+        if (rangeMin && rangeMax) {
           if (rangeMin <= leftPlateMax && rangeMax >= leftPlateMax) {
             isInsideLeftRange +=1
           }
@@ -277,15 +303,24 @@ var rightPlateMax = -1;
     }
   }
 
+  var maxY = 0;
+  var maxLeft = Math.max(...leftPlateSeries[0].data)
+  var maxRight = Math.max(...rightPlateSeries[0].data)
+  maxY = Math.max(...[maxLeft,maxRight])
+
   return {
     left: leftPlateSeries[0].data,
     right: rightPlateSeries[0].data,
     isInsideLeftRange,
     isInsideRightRange,
+    trialThreshold,
+    rangeMax,
+    rangeMin,
+    maxY 
   };
 }
 
-const formLineChartJS = (row, id, color) => {
+const formLineChartJS = (row,max, id, color) => {
   return `
       var options = {
         series:${JSON.stringify(row.map((r, idx) => {
@@ -328,7 +363,9 @@ const formLineChartJS = (row, id, color) => {
           type:"category",
         },
         yaxis: {
-          forceNiceScale: true,
+          min:0,
+          ${max != -1?"max: "+(max + 10)+",":``}
+          forceNiceScale: false,
           labels:{
             formatter: (val) => {
               return val.toFixed(0);
@@ -372,6 +409,7 @@ const formCOPChartJS = (row, id, color) => {
       },
       markers: {
         size:2,
+        strokeColors: '${color}',
       },
       grid:{
         padding:{
@@ -438,7 +476,8 @@ const formCOPChartJS = (row, id, color) => {
   `;
 }
 
-const formTimelineChartJS = (row, id, color) => {
+const formTimelineChartJS = (row, max, id, color, rangeMin, rangeMax) => {
+  console.log(max)
   return `
       var options = {
         series:[{
@@ -477,7 +516,9 @@ const formTimelineChartJS = (row, id, color) => {
           type:"category",
         },
         yaxis: {
-          forceNiceScale: true,
+          min:0,
+          ${max != -1?"max: "+(max + 10)+",":``}
+          forceNiceScale: false,
           labels:{
             formatter: (val) => {
               return val.toFixed(0);
@@ -498,14 +539,12 @@ const formTimelineChartJS = (row, id, color) => {
           },
         ],
         annotations: {
-          yaxis: [
-            {
-              y: 16,
-              y2: 25,
-              borderColor: "#000",
-              fillColor: "#FEB019",
-            },
-          ],
+          yaxis: ${(rangeMax && rangeMin) ? JSON.stringify([{
+            y: rangeMin,
+            y2: rangeMax,
+            borderColor: "#000",
+            fillColor: "#FEB019",
+          }]):JSON.stringify([])},
         },
       };
 
@@ -516,9 +555,9 @@ const formTimelineChartJS = (row, id, color) => {
 
 const formMeasurements = () => {
   return `
-    <div class="container p-1 mt-4">
+    <div class="container p-1 pt-3 pl-3 pr-3" style="margin-top:55%;">
       <h1 class="title is-6 has-text-centered">Measurements</h1>
-      <table>
+      <table class="pl-3 pr-3">
         <tr>
           <th>Parameter</th>
           <th>Value</th>
@@ -548,7 +587,7 @@ const formMeasurements = () => {
   `
 }
 
-const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => {
+const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFY, timelineFZ) => {
   return `
     <html lang="en">
       <head>
@@ -589,7 +628,7 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
       </style>
       </head>
       <body>
-        <div class="container p-1">
+        <div class="container">
           <div class="columns is-vcentered is-centered">
             <div class="column">
               <figure class="image is-128x128 has-image-centered">
@@ -618,9 +657,9 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
             </div>
           </div>
         </div>
-        <h1 class="title is-6 has-text-centered">Line Charts</h1>
-        <div class="container">
-          <h1 class="title is-6 p-0">Fx</h1>
+        <div class="container pl-3 pr-3">
+          <h1 class="title is-6 has-text-centered">Line Charts</h1>
+          <h1 class="title is-6 p-0 has-text-centered">Fx</h1>
           <div class="columns is-vcentered is-centered p-0">
             <div class="column has-text-centered p-0">
               <h1 class="title is-6 p-0">Left Foot</h1>
@@ -629,7 +668,7 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
               <h1 class="title is-6 p-0">Right Foot</h1>
             </div>
           </div>
-          <div class="columns is-vcentered is-centered p-0">
+          <div class="columns is-vcentered is-centered pl-3 pr-3">
             <div class="column has-text-centered p-0">
               <div id="left-foot-fx" style="height:200px; width:400px;"></div>
             </div>
@@ -637,8 +676,8 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
               <div id="right-foot-fx" style="height:200px; width:400px;"></div>
             </div>
           </div>
-          <h1 class="title is-6 p-0">Fy</h1>
-          <div class="columns is-vcentered is-centered p-0">
+          <h1 class="title is-6 p-0 has-text-centered">Fy</h1>
+          <div class="columns is-vcentered is-centered pl-3 pr-3">
             <div class="column has-text-centered p-0">
               <div id="left-foot-fy" style="height:200px; width:400px;"></div>
             </div>
@@ -646,8 +685,8 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
               <div id="right-foot-fy" style="height:200px; width:400px;"></div>
             </div>
           </div>
-          <h1 class="title is-6 p-0">Fz</h1>
-          <div class="columns is-vcentered is-centered p-0">
+          <h1 class="title is-6 p-0 has-text-centered">Fz</h1>
+          <div class="columns is-vcentered is-centered pl-3 pr-3">
             <div class="column has-text-centered p-0">
               <div id="left-foot-fz" style="height:200px; width:400px;"></div>
             </div>
@@ -658,35 +697,42 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
         </div>
         <div class="container p-1 pt-5" style="margin-top:20%;">
           <h1 class="title is-6 has-text-centered">COP Charts</h1>
-        </div>
-        <div class="columns is-vcentered is-centered p-0">
-          <div class="column has-text-centered p-0">
-            <h1 class="title is-6 p-0">Left Foot</h1>
+          <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
+            <div class="column has-text-centered p-0">
+              <h1 class="title is-6 p-0">Left Foot</h1>
+            </div>
+            <div class="column has-text-centered p-0">
+              <h1 class="title is-6 p-0">Right Foot</h1>
+            </div>
           </div>
-          <div class="column has-text-centered p-0">
-            <h1 class="title is-6 p-0">Right Foot</h1>
-          </div>
-        </div>
-        <div class="columns is-vcentered is-centered p-0">
-          <div class="column has-text-centered p-0">
-            <div id="left-foot-cop" style="width:400px;"></div>
-          </div>
-          <div class="column has-text-centered p-0">
-            <div id="right-foot-cop" style="width:400px;"></div>
+          <div class="columns is-vcentered is-centered p-0 pl-3 pr-3">
+            <div class="column has-text-centered p-0">
+              <div id="left-foot-cop" style="width:400px;"></div>
+            </div>
+            <div class="column has-text-centered p-0">
+              <div id="right-foot-cop" style="width:400px;"></div>
+            </div>
           </div>
         </div>
         <div class="container">
           <h1 class="title is-6 has-text-centered">Timeline Charts</h1>
-          <h1 class="title is-6 p-0">Fx</h1>
-          <div class="columns is-vcentered is-centered p-0">
-            <div class="column has-text-centered p-0">
-              ${(timelineFX.isInsideLeftRange/timelineFX.left.length).toFixed(1)*100} %
-            </div>
-            <div class="column has-text-centered p-0">
-              ${(timelineFX.isInsideRightRange/timelineFX.right.length).toFixed(1)*100} %
-            </div>
-          </div>
-          <div class="columns is-vcentered is-centered p-0">
+          <h1 class="title is-6 p-0 has-text-centered">Fx</h1>
+          ${
+            timelineFX.rangeMax && timelineFX.rangeMin ?
+            `
+              <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
+                <div class="column has-text-centered p-0">
+            `+ (timelineFX.isInsideLeftRange / timelineFX.left.length).toFixed(1) * 100 + ` %`+
+            `  </div>
+            `+`
+                <div class="column has-text-centered p-0">
+            `+ (timelineFX.isInsideRightRange / timelineFX.right.length).toFixed(1) * 100 + ` %`+
+            `  </div>
+              </div>
+            `
+            :""
+          }
+          <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
             <div class="column has-text-centered p-0">
               <div id="left-foot-timeline-fx" style="height:200px; width:400px;"></div>
             </div>
@@ -694,16 +740,23 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
               <div id="right-timeline-fx" style="height:200px; width:400px;"></div>
             </div>
           </div>
-          <h1 class="title is-6 pt-6" style="margin-top:20%;">Fy</h1>
-          <div class="columns is-vcentered is-centered p-0">
-            <div class="column has-text-centered p-0">
-              ${(timelineFΥ.isInsideLeftRange/timelineFΥ.left.length).toFixed(1)*100} %
-            </div>
-            <div class="column has-text-centered p-0">
-              ${(timelineFΥ.isInsideRightRange/timelineFΥ.right.length).toFixed(1)*100} %
-            </div>
-          </div>
-          <div class="columns is-vcentered is-centered p-0">
+          <h1 class="title is-6 pt-6 has-text-centered" style="margin-top:20%;">Fy</h1>
+          ${
+            timelineFY.rangeMax && timelineFY.rangeMin ?
+            `
+              <div class="columns is-vcentered is-centered p-0">
+                <div class="column has-text-centered p-0">
+            `+ (timelineFY.isInsideLeftRange / timelineFY.left.length).toFixed(1) * 100 + ` %`+
+            `  </div>
+            `+`
+                <div class="column has-text-centered p-0">
+            `+ (timelineFY.isInsideRightRange / timelineFY.right.length).toFixed(1) * 100 + ` %`+
+            `  </div>
+              </div>
+            `
+            :""
+          }
+          <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
             <div class="column has-text-centered p-0">
               <div id="left-foot-timeline-fy" style="height:200px; width:400px;"></div>
             </div>
@@ -711,8 +764,23 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
               <div id="right-timeline-fy" style="height:200px; width:400px;"></div>
             </div>
           </div>
-          <h1 class="title is-6 pt-6">Fz</h1>
-          <div class="columns is-vcentered is-centered p-0">
+          <h1 class="title is-6 pt-6 has-text-centered">Fz</h1>
+          ${
+            timelineFZ.rangeMax && timelineFZ.rangeMin ?
+            `
+              <div class="columns is-vcentered is-centered p-0">
+                <div class="column has-text-centered p-0">
+            `+ (timelineFZ.isInsideLeftRange / timelineFZ.left.length).toFixed(1) * 100 + ` %`+
+            `  </div>
+            `+`
+                <div class="column has-text-centered p-0">
+            `+ (timelineFZ.isInsideRightRange / timelineFZ.right.length).toFixed(1) * 100 + ` %`+
+            `  </div>
+              </div>
+            `
+            :""
+          }
+          <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
             <div class="column has-text-centered p-0">
               <div id="left-foot-timeline-fz" style="height:200px; width:400px;"></div>
             </div>
@@ -723,20 +791,20 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFΥ, timelineFΖ) => 
         </div>
         ${formMeasurements()}
         <script>
-          ${formLineChartJS(fx.left, 'left-foot-fx', '#d32d41')}
-          ${formLineChartJS(fx.right, 'right-foot-fx', '#6ab187')}
-          ${formLineChartJS(fy.left, 'left-foot-fy', '#d32d41')}
-          ${formLineChartJS(fy.right, 'right-foot-fy', '#6ab187')}
-          ${formLineChartJS(fz.left, 'left-foot-fz', '#d32d41')}
-          ${formLineChartJS(fz.right, 'right-foot-fz', '#6ab187')}
+          ${formLineChartJS(fx.left, fx.maxY,'left-foot-fx', '#d32d41')}
+          ${formLineChartJS(fx.right, fx.maxY,'right-foot-fx', '#6ab187')}
+          ${formLineChartJS(fy.left, fy.maxY, 'left-foot-fy', '#d32d41')}
+          ${formLineChartJS(fy.right, fy.maxY, 'right-foot-fy', '#6ab187')}
+          ${formLineChartJS(fz.left, fz.maxY, 'left-foot-fz', '#d32d41')}
+          ${formLineChartJS(fz.right, fz.maxY, 'right-foot-fz', '#6ab187')}
           ${formCOPChartJS(cop.left, 'left-foot-cop', '#d32d41')}
           ${formCOPChartJS(cop.right, 'right-foot-cop', '#6ab187')}
-          ${formTimelineChartJS(timelineFX.left, 'left-foot-timeline-fx', '#d32d41')}
-          ${formTimelineChartJS(timelineFX.right, 'right-timeline-fx', '#6ab187')}
-          ${formTimelineChartJS(timelineFΥ.left, 'left-foot-timeline-fy', '#d32d41')}
-          ${formTimelineChartJS(timelineFΥ.right, 'right-timeline-fy', '#6ab187')}
-          ${formTimelineChartJS(timelineFΖ.left, 'left-foot-timeline-fz', '#d32d41')}
-          ${formTimelineChartJS(timelineFΖ.right, 'right-timeline-fz', '#6ab187')}
+          ${formTimelineChartJS(timelineFX.left,timelineFX.maxY,'left-foot-timeline-fx', '#d32d41',timelineFX.rangeMin,timelineFX.rangeMax)}
+          ${formTimelineChartJS(timelineFX.right,timelineFX.maxY,'right-timeline-fx', '#6ab187',timelineFX.rangeMin,timelineFX.rangeMax)}
+          ${formTimelineChartJS(timelineFY.left,timelineFY.maxY,'left-foot-timeline-fy', '#d32d41',timelineFY.rangeMin,timelineFY.rangeMax)}
+          ${formTimelineChartJS(timelineFY.right,timelineFY.maxY,'right-timeline-fy', '#6ab187',timelineFY.rangeMin,timelineFY.rangeMax)}
+          ${formTimelineChartJS(timelineFZ.left,timelineFZ.maxY,'left-foot-timeline-fz', '#d32d41',timelineFZ.rangeMin,timelineFZ.rangeMax)}
+          ${formTimelineChartJS(timelineFZ.right,timelineFZ.maxY,'right-timeline-fz', '#6ab187',timelineFZ.rangeMin,timelineFZ.rangeMax)}
         </script>
       </body>
     </html>
