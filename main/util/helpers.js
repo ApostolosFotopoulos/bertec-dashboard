@@ -1,5 +1,6 @@
 const fs = require('fs')
-var commandExists = require('command-exists');
+const parameters = require('./parameters')
+
 function writeFileSyncRecursive(filename, content, charset) {
   let filepath = filename.replace(/\\/g,'/');  
 
@@ -477,7 +478,6 @@ const formCOPChartJS = (row, id, color) => {
 }
 
 const formTimelineChartJS = (row, max, id, color, rangeMin, rangeMax) => {
-  console.log(max)
   return `
       var options = {
         series:[{
@@ -553,33 +553,39 @@ const formTimelineChartJS = (row, max, id, color, rangeMin, rangeMax) => {
   `;
 }
 
-const formMeasurements = () => {
+const formMeasurements = (fx,fy,fz) => {
   return `
     <div class="container p-1 pt-3 pl-3 pr-3" style="margin-top:55%;">
       <h1 class="title is-6 has-text-centered">Measurements</h1>
       <table class="pl-3 pr-3">
         <tr>
           <th>Parameter</th>
-          <th>Value</th>
+          <th>Left Foot Value</th>
+          <th>Right Foot Value</th>
         </tr>
         <tr>
-          <td>Vertical Impulse</td>
-          <td>10 N.s</td>
+          <td>Vertical Impulse (FX)</td>
+          <td>${parameters.verticalImpulse(fx.left).toFixed(1)} N.s</td>
+          <td>${parameters.verticalImpulse(fx.right).toFixed(1)} N.s</td>
         </tr>
         <tr>
-          <td>Loading Rate</td>
-          <td>3 N/ms</td>
+          <td>Vertical Impulse (FY)</td>
+          <td>${parameters.verticalImpulse(fy.left).toFixed(1)} N.s</td>
+          <td>${parameters.verticalImpulse(fy.right).toFixed(1)} N.s</td>
         </tr>
         <tr>
-          <td>Time to Loading Peak</td>
-          <td>30 N</td>
+          <td>Vertical Impulse (FZ)</td>
+          <td>${parameters.verticalImpulse(fz.left).toFixed(1)} N.s</td>
+          <td>${parameters.verticalImpulse(fz.right).toFixed(1)} N.s</td>
         </tr>
         <tr>
           <td>Mid-Support Force</td>
           <td>30 N</td>
+          <td>30 N</td>
         </tr>
         <tr>
           <td>Time to Mid-Support</td>
+          <td>300 ms</td>
           <td>300 ms</td>
         </tr>
       </table>
@@ -789,7 +795,7 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFY, timelineFZ) => {
             </div>
           </div>
         </div>
-        ${formMeasurements()}
+        ${formMeasurements(fx,fy,fz)}
         <script>
           ${formLineChartJS(fx.left, fx.maxY,'left-foot-fx', '#d32d41')}
           ${formLineChartJS(fx.right, fx.maxY,'right-foot-fx', '#6ab187')}
