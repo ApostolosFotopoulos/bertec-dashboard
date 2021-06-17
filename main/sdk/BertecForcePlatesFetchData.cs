@@ -127,7 +127,7 @@ namespace BertecForcePlatesFetchData{
           // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
           for (int col = 0; col < channelCountFirst; ++col){
             //Console.Write("{0};", Math.Abs(firstForcePlate.forceData[col]));
-            d = d + Math.Abs(firstForcePlate.forceData[col]).ToString()+";";
+            d = d + firstForcePlate.forceData[col].ToString()+";";
           }
         }
 
@@ -136,7 +136,7 @@ namespace BertecForcePlatesFetchData{
           // Fx2	Fy2	Fz2	Mx2	My2	Mz2	
           for (int col = 0; col < channelCountSec; ++col){
             //Console.Write("{0};", Math.Abs(secForcePlate.forceData[col]));
-            d = d + Math.Abs(secForcePlate.forceData[col]).ToString()+";";
+            d = d + secForcePlate.forceData[col].ToString()+";";
           }
         }
 
