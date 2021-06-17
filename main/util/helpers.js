@@ -363,7 +363,6 @@ const formLineChartJS = (row,max, id, color) => {
           type:"category",
         },
         yaxis: {
-          min:0,
           ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
@@ -516,7 +515,6 @@ const formTimelineChartJS = (row, max, id, color, rangeMin, rangeMax) => {
           type:"category",
         },
         yaxis: {
-          min:0,
           ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
