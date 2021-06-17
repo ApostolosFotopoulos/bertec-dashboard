@@ -44,6 +44,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
   var leftPlateSeries = [{ data: [] }]
   var leftPlateFinalSeries = [{ data: [] }]
   var maxY = -1;
+  var minY = 0;
 
   for (var i = 0; i < records.length; i++) {
     var fz1 = Number(records[i]['Fz1']);
@@ -58,6 +59,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
         rightPlateSeries[rightPlateRows].data.push(entryRight);
         if (maxY < entryRight) {
           maxY = entryRight;
+        }
+        if (entryRight < minY) {
+          minY = entryRight;
         }
       }
       
@@ -84,6 +88,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
         if (maxY < entryRight) {
           maxY = entryRight;
         }
+        if (entryRight < minY) {
+          minY = entryRight;
+        }
       }
     }
 
@@ -93,6 +100,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
         leftPlateSeries[leftPlateRows].data.push(entryLeft);
         if (maxY < entryLeft) {
           maxY = entryLeft;
+        }
+        if (entryLeft < minY) {
+          minY = entryLeft;
         }
       }
         
@@ -119,6 +129,9 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
         if (maxY < entryLeft) {
           maxY = entryLeft;
         }
+        if (entryLeft < minY) {
+          minY = entryLeft;
+        }
       }
     }
   }
@@ -128,6 +141,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
     left: leftPlateFinalSeries,
     right: rightPlateFinalSeries,
     maxY,
+    minY,
   };
 }
 
@@ -305,9 +319,13 @@ var rightPlateMax = -1;
   }
 
   var maxY = 0;
+  var minY = 0;
   var maxLeft = Math.max(...leftPlateSeries[0].data)
   var maxRight = Math.max(...rightPlateSeries[0].data)
-  maxY = Math.max(...[maxLeft,maxRight])
+  maxY = Math.max(...[maxLeft, maxRight])
+  var minLeft = Math.min(...leftPlateSeries[0].data)
+  var minRight = Math.min(...rightPlateSeries[0].data)
+  minY = Math.min(...[minLeft, minRight])
 
   return {
     left: leftPlateSeries[0].data,
@@ -317,11 +335,12 @@ var rightPlateMax = -1;
     trialThreshold,
     rangeMax,
     rangeMin,
-    maxY 
+    maxY,
+    minY
   };
 }
 
-const formLineChartJS = (row,max, id, color) => {
+const formLineChartJS = (row,min,max, id, color) => {
   return `
       var options = {
         series:${JSON.stringify(row.map((r, idx) => {
@@ -364,7 +383,7 @@ const formLineChartJS = (row,max, id, color) => {
           type:"category",
         },
         yaxis: {
-          min:0,
+          min: ${min - 10},
           ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
@@ -477,7 +496,7 @@ const formCOPChartJS = (row, id, color) => {
   `;
 }
 
-const formTimelineChartJS = (row, max, id, color, rangeMin, rangeMax) => {
+const formTimelineChartJS = (row,min,max, id, color, rangeMin, rangeMax) => {
   return `
       var options = {
         series:[{
@@ -516,7 +535,7 @@ const formTimelineChartJS = (row, max, id, color, rangeMin, rangeMax) => {
           type:"category",
         },
         yaxis: {
-          min:0,
+          min: ${min - 10},
           ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
@@ -797,20 +816,20 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFY, timelineFZ) => {
         </div>
         ${formMeasurements(fx,fy,fz)}
         <script>
-          ${formLineChartJS(fx.left, fx.maxY,'left-foot-fx', '#d32d41')}
-          ${formLineChartJS(fx.right, fx.maxY,'right-foot-fx', '#6ab187')}
-          ${formLineChartJS(fy.left, fy.maxY, 'left-foot-fy', '#d32d41')}
-          ${formLineChartJS(fy.right, fy.maxY, 'right-foot-fy', '#6ab187')}
-          ${formLineChartJS(fz.left, fz.maxY, 'left-foot-fz', '#d32d41')}
-          ${formLineChartJS(fz.right, fz.maxY, 'right-foot-fz', '#6ab187')}
+          ${formLineChartJS(fx.left, fx.minY,fx.maxY,'left-foot-fx', '#d32d41')}
+          ${formLineChartJS(fx.right,fx.minY, fx.maxY,'right-foot-fx', '#6ab187')}
+          ${formLineChartJS(fy.left,fy.minY, fy.maxY, 'left-foot-fy', '#d32d41')}
+          ${formLineChartJS(fy.right,fy.minY, fy.maxY, 'right-foot-fy', '#6ab187')}
+          ${formLineChartJS(fz.left,fz.minY, fz.maxY, 'left-foot-fz', '#d32d41')}
+          ${formLineChartJS(fz.right,fz.minY, fz.maxY, 'right-foot-fz', '#6ab187')}
           ${formCOPChartJS(cop.left, 'left-foot-cop', '#d32d41')}
           ${formCOPChartJS(cop.right, 'right-foot-cop', '#6ab187')}
-          ${formTimelineChartJS(timelineFX.left,timelineFX.maxY,'left-foot-timeline-fx', '#d32d41',timelineFX.rangeMin,timelineFX.rangeMax)}
-          ${formTimelineChartJS(timelineFX.right,timelineFX.maxY,'right-timeline-fx', '#6ab187',timelineFX.rangeMin,timelineFX.rangeMax)}
-          ${formTimelineChartJS(timelineFY.left,timelineFY.maxY,'left-foot-timeline-fy', '#d32d41',timelineFY.rangeMin,timelineFY.rangeMax)}
-          ${formTimelineChartJS(timelineFY.right,timelineFY.maxY,'right-timeline-fy', '#6ab187',timelineFY.rangeMin,timelineFY.rangeMax)}
-          ${formTimelineChartJS(timelineFZ.left,timelineFZ.maxY,'left-foot-timeline-fz', '#d32d41',timelineFZ.rangeMin,timelineFZ.rangeMax)}
-          ${formTimelineChartJS(timelineFZ.right,timelineFZ.maxY,'right-timeline-fz', '#6ab187',timelineFZ.rangeMin,timelineFZ.rangeMax)}
+          ${formTimelineChartJS(timelineFX.left,timelineFX.minY,timelineFX.maxY,'left-foot-timeline-fx', '#d32d41',timelineFX.rangeMin,timelineFX.rangeMax)}
+          ${formTimelineChartJS(timelineFX.right,timelineFX.minY,timelineFX.maxY,'right-timeline-fx', '#6ab187',timelineFX.rangeMin,timelineFX.rangeMax)}
+          ${formTimelineChartJS(timelineFY.left,timelineFY.minY,timelineFY.maxY,'left-foot-timeline-fy', '#d32d41',timelineFY.rangeMin,timelineFY.rangeMax)}
+          ${formTimelineChartJS(timelineFY.right,timelineFY.minY,timelineFY.maxY,'right-timeline-fy', '#6ab187',timelineFY.rangeMin,timelineFY.rangeMax)}
+          ${formTimelineChartJS(timelineFZ.left,timelineFZ.minY,timelineFZ.maxY,'left-foot-timeline-fz', '#d32d41',timelineFZ.rangeMin,timelineFZ.rangeMax)}
+          ${formTimelineChartJS(timelineFZ.right,timelineFZ.minY,timelineFZ.maxY,'right-timeline-fz', '#6ab187',timelineFZ.rangeMin,timelineFZ.rangeMax)}
         </script>
       </body>
     </html>

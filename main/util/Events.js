@@ -1186,27 +1186,11 @@ class Events {
         await page.pdf(options);
         await browser.close();
 
-        // Open pdf with chrome or firefox
-        let isChromeIsAvailable = await new Promise((resolve, reject) => {
-          commandExists('google-chrome').then(function (command) {
-            return resolve(true)
-          }).catch(function () {
-            reject(false)
-          });
-        });
-
-        let isFireFoxAvailable = await new Promise((resolve, reject) => {
-          commandExists('firefox').then(function (command) {
-            return resolve(true)
-          }).catch(function () {
-            reject(false)
-          });
-        });
-
-        if (isChromeIsAvailable) {
-          exec('google-chrome ' + app.getPath("downloads")+"/"+trial.name+".pdf");
-        } else if(isFireFoxAvailable){
-          exec('firefox ' + app.getPath("downloads")+"/"+trial.name+".pdf");
+        // Automatically open pdf that is created
+        if (process.platform === "win64" || process.platform == "win32") {
+          require('electron').shell.openExternal(`${app.getPath("downloads")}/${trial.name}.pdf`);
+        } else {
+          require('electron').shell.openPath(`${app.getPath("downloads")}/${trial.name}.pdf`);
         }
 
         console.log('Done: PDF is created!');
