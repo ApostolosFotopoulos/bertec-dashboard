@@ -597,16 +597,6 @@ const formMeasurements = (fx,fy,fz) => {
           <td>${parameters.verticalImpulse(fz.left).toFixed(1)} N.s</td>
           <td>${parameters.verticalImpulse(fz.right).toFixed(1)} N.s</td>
         </tr>
-        <tr>
-          <td>Mid-Support Force</td>
-          <td>30 N</td>
-          <td>30 N</td>
-        </tr>
-        <tr>
-          <td>Time to Mid-Support</td>
-          <td>300 ms</td>
-          <td>300 ms</td>
-        </tr>
       </table>
     </div>
   `

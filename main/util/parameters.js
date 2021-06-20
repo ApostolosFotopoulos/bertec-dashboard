@@ -8,8 +8,7 @@ module.exports = class {
       let x = rows[i].data.map((_, id) => id);
       let y = rows[i].data
       let intg = math.integral(x, y)
-      
-      if (intg > 0) {
+      if (intg != 0) {
         numOfRows += 1
         sumOfIntegral += intg
       }
