@@ -584,18 +584,63 @@ const formMeasurements = (fx,fy,fz) => {
         </tr>
         <tr>
           <td>Vertical Impulse (FX)</td>
-          <td>${parameters.verticalImpulse(fx.left).toFixed(1)} N.s</td>
-          <td>${parameters.verticalImpulse(fx.right).toFixed(1)} N.s</td>
+          <td>${parameters.verticalImpulse(fx.left).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fx.right).toFixed(1)} % BW.s</td>
         </tr>
         <tr>
           <td>Vertical Impulse (FY)</td>
-          <td>${parameters.verticalImpulse(fy.left).toFixed(1)} N.s</td>
-          <td>${parameters.verticalImpulse(fy.right).toFixed(1)} N.s</td>
+          <td>${parameters.verticalImpulse(fy.left).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fy.right).toFixed(1)} % BW.s</td>
         </tr>
         <tr>
           <td>Vertical Impulse (FZ)</td>
-          <td>${parameters.verticalImpulse(fz.left).toFixed(1)} N.s</td>
-          <td>${parameters.verticalImpulse(fz.right).toFixed(1)} N.s</td>
+          <td>${parameters.verticalImpulse(fz.left).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fz.right).toFixed(1)} % BW.s</td>
+        </tr>
+        <tr>
+          <td>Loading Rate (FX)</td>
+          <td>${parameters.loadingRate(fx.left).toFixed(1)} % BW/s</td>
+          <td>${parameters.loadingRate(fx.right).toFixed(1)} % BW/s</td>
+        </tr>
+        <tr>
+          <td>Loading Rate (FY)</td>
+          <td>${parameters.loadingRate(fy.left).toFixed(1)} % BW/s</td>
+          <td>${parameters.loadingRate(fy.right).toFixed(1)} % BW/s</td>
+        </tr>
+        <tr>
+          <td>Loading Rate (FZ)</td>
+          <td>${parameters.loadingRate(fz.left).toFixed(1)} % BW/s</td>
+          <td>${parameters.loadingRate(fz.right).toFixed(1)} % BW/s</td>
+        </tr>
+        <tr>
+          <td>Loading Peak Force (FX)</td>
+          <td>${parameters.loadingPeakForce(fx.left).toFixed(1)} % BW</td>
+          <td>${parameters.loadingPeakForce(fx.right).toFixed(1)} % BW</td>
+        </tr>
+        <tr>
+          <td>Loading Peak Force (FY)</td>
+          <td>${parameters.loadingPeakForce(fy.left).toFixed(1)} % BW</td>
+          <td>${parameters.loadingPeakForce(fy.right).toFixed(1)} % BW</td>
+        </tr>
+        <tr>
+          <td>Loading Peak Force (FZ)</td>
+          <td>${parameters.loadingPeakForce(fz.left).toFixed(1)} % BW</td>
+          <td>${parameters.loadingPeakForce(fz.right).toFixed(1)} % BW</td>
+        </tr>
+        <tr>
+          <td>Time to Loading Peak (FX)</td>
+          <td>${parameters.timeToLoadingPeak(fx.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToLoadingPeak(fx.right).toFixed(1)} ms</td>
+        </tr>
+        <tr>
+          <td>Time to Loading Peak (FY)</td>
+          <td>${parameters.timeToLoadingPeak(fy.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToLoadingPeak(fy.right).toFixed(1)} ms</td>
+        </tr>
+        <tr>
+          <td>Time to Loading Peak (FZ)</td>
+          <td>${parameters.timeToLoadingPeak(fz.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToLoadingPeak(fz.right).toFixed(1)} ms</td>
         </tr>
       </table>
     </div>
