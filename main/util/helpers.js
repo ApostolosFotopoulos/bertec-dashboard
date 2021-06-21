@@ -613,34 +613,34 @@ const formMeasurements = (fx,fy,fz) => {
           <td>${parameters.loadingRate(fz.right).toFixed(1)} % BW/s</td>
         </tr>
         <tr>
-          <td>Loading Peak Force (FX)</td>
-          <td>${parameters.loadingPeakForce(fx.left).toFixed(1)} % BW</td>
-          <td>${parameters.loadingPeakForce(fx.right).toFixed(1)} % BW</td>
+          <td>Impact Peak Force (FX)</td>
+          <td>${parameters.impactPeakForce(fx.left).toFixed(1)} % BW</td>
+          <td>${parameters.impactPeakForce(fx.right).toFixed(1)} % BW</td>
         </tr>
         <tr>
-          <td>Loading Peak Force (FY)</td>
-          <td>${parameters.loadingPeakForce(fy.left).toFixed(1)} % BW</td>
-          <td>${parameters.loadingPeakForce(fy.right).toFixed(1)} % BW</td>
+          <td>Impact Peak Force (FY)</td>
+          <td>${parameters.impactPeakForce(fy.left).toFixed(1)} % BW</td>
+          <td>${parameters.impactPeakForce(fy.right).toFixed(1)} % BW</td>
         </tr>
         <tr>
-          <td>Loading Peak Force (FZ)</td>
-          <td>${parameters.loadingPeakForce(fz.left).toFixed(1)} % BW</td>
-          <td>${parameters.loadingPeakForce(fz.right).toFixed(1)} % BW</td>
+          <td>Impact Peak Force (FZ)</td>
+          <td>${parameters.impactPeakForce(fz.left).toFixed(1)} % BW</td>
+          <td>${parameters.impactPeakForce(fz.right).toFixed(1)} % BW</td>
         </tr>
         <tr>
-          <td>Time to Loading Peak (FX)</td>
-          <td>${parameters.timeToLoadingPeak(fx.left).toFixed(1)} ms</td>
-          <td>${parameters.timeToLoadingPeak(fx.right).toFixed(1)} ms</td>
+          <td>Time to Impact Peak (FX)</td>
+          <td>${parameters.timeToImpactPeak(fx.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fx.right).toFixed(1)} ms</td>
         </tr>
         <tr>
-          <td>Time to Loading Peak (FY)</td>
-          <td>${parameters.timeToLoadingPeak(fy.left).toFixed(1)} ms</td>
-          <td>${parameters.timeToLoadingPeak(fy.right).toFixed(1)} ms</td>
+          <td>Time to Impact Peak (FY)</td>
+          <td>${parameters.timeToImpactPeak(fy.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fy.right).toFixed(1)} ms</td>
         </tr>
         <tr>
-          <td>Time to Loading Peak (FZ)</td>
-          <td>${parameters.timeToLoadingPeak(fz.left).toFixed(1)} ms</td>
-          <td>${parameters.timeToLoadingPeak(fz.right).toFixed(1)} ms</td>
+          <td>Time to Impact Peak (FZ)</td>
+          <td>${parameters.timeToImpactPeak(fz.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fz.right).toFixed(1)} ms</td>
         </tr>
       </table>
     </div>

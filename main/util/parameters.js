@@ -63,4 +63,33 @@ module.exports = class {
     }
     return sumOfTimes / numOfTimes;
   }
+
+  static impactPeakForce(rows) {
+    let numOfMaxs= 0
+    let sumOfMaxs = 0
+    for (var i = 0; i < rows.length; i++){
+      let [m] = math.localMax(rows[i].data)
+      if (m) {
+        numOfMaxs += 1
+        sumOfMaxs += m
+      }
+    }
+    return sumOfMaxs / numOfMaxs;
+  }
+
+  static timeToImpactPeak(rows) {
+    let numOfTimes = 0
+    let sumOfTimes = 0
+    for (var i = 0; i < rows.length; i++){
+      let [m] = math.localMax(rows[i].data)
+      if (m) {
+        let maxIdx = rows[i].data.indexOf(m)
+        if (maxIdx) {
+          numOfTimes += 1
+          sumOfTimes += maxIdx
+        }
+      }
+    }
+    return sumOfTimes / numOfTimes;
+  }
 }
