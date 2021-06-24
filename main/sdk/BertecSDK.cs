@@ -6,7 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace BertecForcePlatesFetchData{
+namespace BertecSDK{
   enum Channel{
     FX,
     FY,
@@ -16,7 +16,7 @@ namespace BertecForcePlatesFetchData{
     MZ
   };
 
-  class CallbackHandler{
+  public class CallbackHandler{
     public BertecDeviceNET.BertecDevice handler = null;
     public int timestampStepping = 0;
     private Int64 timestampValue = 0;
@@ -27,7 +27,12 @@ namespace BertecForcePlatesFetchData{
     public StreamWriter writer;
     public int dataCollected = 0;
     public int counter = 0;
-      
+
+    public int underSamplingFrequency = 0;
+
+    public CallbackHandler(int underSamplingFrequency) {
+      this.underSamplingFrequency = underSamplingFrequency;
+    }
 
     public void createTCPClientForDataStreaming(){
       int port = 12345;
@@ -96,7 +101,7 @@ namespace BertecForcePlatesFetchData{
           d = d + "0;0;0\r\n";
 
           // Write to TCP buffe
-          if(dataCollected == 10){
+          if(dataCollected == this.underSamplingFrequency){
             dataCollected = 0;
 
             writer.Flush();
@@ -162,7 +167,7 @@ namespace BertecForcePlatesFetchData{
         // Copxy2
         d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString()+";";
 
-        if(dataCollected == 10){
+        if(dataCollected == this.underSamplingFrequency){
           dataCollected = 0;
 
           writer.Flush();
@@ -190,13 +195,17 @@ namespace BertecForcePlatesFetchData{
     }
 
   }
-  class BertecForcePlatesFetchData{
+  class BertecSDK{
     static void Main(string[] args){
       int timestampStepping = 0;
-      //bool isTesting = true;
+      int underSamplingFrequency = 10;
+
+      if (args.Length > 0){
+        underSamplingFrequency = Int32.Parse(args[0]);
+      }
 
       // Create the callback handler that triggers when data arrives
-      CallbackHandler callback = new CallbackHandler();
+      CallbackHandler callback = new CallbackHandler(underSamplingFrequency);
       
       // Create the handler for the connection
       BertecDeviceNET.BertecDevice handler;
@@ -250,7 +259,6 @@ namespace BertecForcePlatesFetchData{
       handler.OnStatus += callback.statusEvent;
       handler.OnDeviceTimestamp += callback.deviceTimestamp;
       callback.timestampStepping = timestampStepping;
-  
 
       // Wait until the session is stopped
       while(true);
