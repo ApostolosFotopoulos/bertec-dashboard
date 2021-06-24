@@ -268,76 +268,102 @@ module.exports = class {
       this.socket = socket;
       socket.on("data", (packet) => {
         // Retrieve the packet and break to each section
-        if (!packet.includes("RAW")) {
-          let packetArray = packet
-            .toString()
-            .replaceAll(/(\r\n|\n|\r)/gm, "")
-            .replaceAll(",", ".")
-            .split(";")
-            .filter((i, idx) => idx >= 4)
-            .map((i) => Number(i));
-          //packetArray = packet.slice(0,18);
-          packetArray = packetArray.slice(0, 18);
-          //console.log(packetArray);
+        let packetArray = packet
+          .toString()
+          .replaceAll(/(\r\n|\n|\r)/gm, "")
+          .replaceAll(",", ".")
+          .split(";")
+          .filter((i, idx) => idx >= 4)
+          .map((i) => Number(i));
+        //packetArray = packet.slice(0,18);
+        packetArray = packetArray.slice(0, 18);
+        //console.log(packetArray);
 
-          // Retrieve the serial numbers of the devices
-          let details = packet
-            .toString()
-            .replaceAll(/(\r\n|\n|\r)/gm, "")
-            .replaceAll(",", ".")
-            .split(";")
-            .filter((i, idx) => idx < 4);
+        // Retrieve the serial numbers of the devices
+        let details = packet
+          .toString()
+          .replaceAll(/(\r\n|\n|\r)/gm, "")
+          .replaceAll(",", ".")
+          .split(";")
+          .filter((i, idx) => idx < 4);
 
-          // Send the data to the linechart window
-          if (this.linechartw && this.linechartw.window) {
-            if (this.isSessionRunning) {
-              this.linechartw.window.webContents.send(LINECHART_SESSION, {
-                rows: packetArray,
-                isSessionRunning: this.isSessionRunning,
-                weight: this.weight,
-                session: this.session,
-                database: this.database,
-                user: this.user,
-              });
-            } else {
-              this.linechartw.window.webContents.send(LINECHART_SESSION, {
-                rows: packetArray,
-                isSessionRunning: this.isSessionRunning,
-                weight: this.weight,
-                session: this.session,
-                database: this.database,
-                user: this.user,
-              });
-            }
+        // Send the data to the linechart window
+        if (this.linechartw && this.linechartw.window) {
+          if (this.isSessionRunning) {
+            this.linechartw.window.webContents.send(LINECHART_SESSION, {
+              rows: packetArray,
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
+          } else {
+            this.linechartw.window.webContents.send(LINECHART_SESSION, {
+              rows: packetArray,
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
           }
+        }
 
-          // Send the data to the COP window
-          if (this.cpw && this.cpw.window) {
-            if (this.isSessionRunning) {
-              this.cpw.window.webContents.send(COP_SESSION, {
-                rows: packetArray,
-                isSessionRunning: this.isSessionRunning,
-                weight: this.weight,
-                session: this.session,
-                database: this.database,
-                user: this.user,
-              });
-            } else {
-              this.cpw.window.webContents.send(COP_SESSION, {
-                rows: [],
-                isSessionRunning: this.isSessionRunning,
-                weight: this.weight,
-                session: this.session,
-                database: this.database,
-                user: this.user,
-              });
-            }
+        // Send the data to the COP window
+        if (this.cpw && this.cpw.window) {
+          if (this.isSessionRunning) {
+            this.cpw.window.webContents.send(COP_SESSION, {
+              rows: packetArray,
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
+          } else {
+            this.cpw.window.webContents.send(COP_SESSION, {
+              rows: [],
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
           }
+        }
 
-          // Send the data to the speedmeter window
-          if (this.cw && this.cw.window) {
-            if (this.isSessionRunning) {
-              this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+        // Send the data to the speedmeter window
+        if (this.cw && this.cw.window) {
+          if (this.isSessionRunning) {
+            this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+              rows: packetArray,
+              force: Math.random().toFixed(2),
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
+          } else {
+            this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+              rows: [],
+              force: 0,
+              isSessionRunning: this.isSessionRunning,
+              weight: this.weight,
+              session: this.session,
+              database: this.database,
+              user: this.user,
+            });
+          }
+        }
+
+        // Send the data to the timeline window
+        if (this.timelinew && this.timelinew.window) {
+          if (this.isSessionRunning) {
+            this.timelinew.window.webContents.send(
+              TIMELINE_SESSION,
+              {
                 rows: packetArray,
                 force: Math.random().toFixed(2),
                 isSessionRunning: this.isSessionRunning,
@@ -345,9 +371,12 @@ module.exports = class {
                 session: this.session,
                 database: this.database,
                 user: this.user,
-              });
-            } else {
-              this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+              }
+            );
+          } else {
+            this.timelinew.window.webContents.send(
+              TIMELINE_SESSION,
+              {
                 rows: [],
                 force: 0,
                 isSessionRunning: this.isSessionRunning,
@@ -355,67 +384,34 @@ module.exports = class {
                 session: this.session,
                 database: this.database,
                 user: this.user,
-              });
-            }
+              }
+            );
           }
+        }
 
-          // Send the data to the timeline window
-          if (this.timelinew && this.timelinew.window) {
-            if (this.isSessionRunning) {
-              this.timelinew.window.webContents.send(
-                TIMELINE_SESSION,
-                {
-                  rows: packetArray,
-                  force: Math.random().toFixed(2),
-                  isSessionRunning: this.isSessionRunning,
-                  weight: this.weight,
-                  session: this.session,
-                  database: this.database,
-                  user: this.user,
-                }
-              );
-            } else {
-              this.timelinew.window.webContents.send(
-                TIMELINE_SESSION,
-                {
-                  rows: [],
-                  force: 0,
-                  isSessionRunning: this.isSessionRunning,
-                  weight: this.weight,
-                  session: this.session,
-                  database: this.database,
-                  user: this.user,
-                }
-              );
-            }
-          }
+        // Send the details the main window with the options
+        if (this.window) {
+          this.window.webContents.send(SESSION_OPTIONS, {
+            rows: packetArray,
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            filePath: this.filePath,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
 
-          // Send the details the main window with the options
-          if (this.window) {
-            this.window.webContents.send(SESSION_OPTIONS, {
-              rows: packetArray,
-              isSessionRunning: this.isSessionRunning,
-              weight: this.weight,
-              filePath: this.filePath,
-              session: this.session,
-              database: this.database,
-              user: this.user,
-            });
+          // Send the device serial to the dashboard
+          this.window.webContents.send(DEVICE_DETAILS, {
+            deviceLeft: Number(details[1]),
+            deviceRight: Number(details[3]),
+          });
+        }
 
-            // Send the device serial to the dashboard
-            this.window.webContents.send(DEVICE_DETAILS, {
-              deviceLeft: Number(details[1]),
-              deviceRight: Number(details[3]),
-            });
-          }
-
-          if (this.createuserw && this.createuserw.window) {
-            this.createuserw.window.webContents.send(SESSION_OPTIONS, {
-              rows: packetArray,
-            });
-          }
-        } else {
-          
+        if (this.createuserw && this.createuserw.window) {
+          this.createuserw.window.webContents.send(SESSION_OPTIONS, {
+            rows: packetArray,
+          });
         }
       });
     });

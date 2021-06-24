@@ -102,13 +102,13 @@ namespace BertecSDK{
           // Copx2 Copy2 Copxy2
           d = d + "0;0;0\r\n";
 
-          // Write to TCP buffe
+          // Write to TCP buffer
           if(dataCollected == this.underSamplingFrequency){
             dataCollected = 0;
 
             writer.Flush();
             String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;-1;";
-            Console.WriteLine(forcePlates + d);
+            //Console.WriteLine(forcePlates + d);
             writer.WriteLine(forcePlates+d);
             writer.Flush();
 
@@ -175,7 +175,7 @@ namespace BertecSDK{
 
           writer.Flush();
           String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;"+handler.DeviceSerialNumber(1).ToString()+";";
-          Console.WriteLine(forcePlates + d);
+          //Console.WriteLine(forcePlates + d);
           writer.WriteLine(forcePlates+d);
           writer.Flush();
 
