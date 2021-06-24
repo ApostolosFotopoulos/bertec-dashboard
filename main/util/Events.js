@@ -20,10 +20,6 @@ const moment = require("moment");
 const { writeFileSyncRecursive, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
-const { exec } = require('child_process');
-var commandExists = require('command-exists');
-const parameters = require('./parameters')
-
 
 function groupBy(list, keyGetter) {
   const map = new Map();

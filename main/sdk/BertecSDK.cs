@@ -23,11 +23,13 @@ namespace BertecSDK{
 
     // Data streaming
     public TcpClient client;
+    public TcpClient clientRaw;
     public NetworkStream stream;
+    public NetworkStream streamRaw;
     public StreamWriter writer;
+    public StreamWriter writerRaw;
     public int dataCollected = 0;
     public int counter = 0;
-
     public int underSamplingFrequency = 0;
 
     public CallbackHandler(int underSamplingFrequency) {
@@ -106,12 +108,13 @@ namespace BertecSDK{
 
             writer.Flush();
             String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;-1;";
-            writer.WriteLine(forcePlates);
+            Console.WriteLine(forcePlates + d);
+            writer.WriteLine(forcePlates+d);
             writer.Flush();
 
-            writer.Flush();
-            writer.WriteLine(d);
-            writer.Flush();
+            // writer.Flush();
+            // writer.WriteLine(d);
+            // writer.Flush();
             //Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
             //Console.WriteLine(counter);
             //Console.WriteLine(copx1.ToString());
@@ -171,13 +174,14 @@ namespace BertecSDK{
           dataCollected = 0;
 
           writer.Flush();
-          String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;"+handler.DeviceSerialNumber(1).ToString()+";";;
-          writer.WriteLine(forcePlates);
+          String forcePlates = "LEFT_PLATE;"+handler.DeviceSerialNumber(0).ToString()+";RIGHT_PLATE;"+handler.DeviceSerialNumber(1).ToString()+";";
+          Console.WriteLine(forcePlates + d);
+          writer.WriteLine(forcePlates+d);
           writer.Flush();
 
-          writer.Flush();
-          writer.WriteLine(d);
-          writer.Flush();
+          // writer.Flush();
+          // writer.WriteLine(d);
+          // writer.Flush();
           //Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
           //Console.WriteLine(counter);
           //Console.WriteLine(copx1.ToString());
@@ -249,10 +253,8 @@ namespace BertecSDK{
       // Create the TCP Client
       callback.createTCPClientForDataStreaming();
 
-
       // Clear the buffered data
       handler.ClearBufferedData();
-
 
       // Setup the callback for the data streaming
       handler.OnData += callback.onDataCallback;
