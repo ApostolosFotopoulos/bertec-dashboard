@@ -31,6 +31,9 @@ namespace BertecSDK{
     public int dataCollected = 0;
     public int counter = 0;
     public int underSamplingFrequency = 0;
+  
+    public bool isWriting = false;
+    public String filePath = "";
 
     public CallbackHandler(int underSamplingFrequency) {
       this.underSamplingFrequency = underSamplingFrequency;
@@ -62,6 +65,19 @@ namespace BertecSDK{
                   System.Threading.Thread.Sleep(100);
                 }
                 Console.WriteLine("\nDone");
+              }
+
+              if(serverMessage.Contains("START_TRIAL_WRITING")){
+                Console.WriteLine("Starting the trial....");
+                this.filePath = serverMessage.Substring(serverMessage.LastIndexOf(';') + 1);
+                Console.WriteLine(this.filePath);
+                File.WriteAllText(this.filePath, "\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n");
+                this.isWriting = true;
+              }
+
+              if(serverMessage == "STOP_TRIAL_WRITING"){
+                this.isWriting = false;
+                Console.WriteLine("Stopping the trial....");
               }
             } 				
           } 	 
@@ -102,6 +118,11 @@ namespace BertecSDK{
           // Copx2 Copy2 Copxy2
           d = d + "0;0;0\r\n";
 
+          // Write the raw data
+          if(this.isWriting){
+            File.AppendAllLines(this.filePath, new []{ d });
+          }
+
           // Write to TCP buffer
           if(dataCollected == this.underSamplingFrequency){
             dataCollected = 0;
@@ -111,14 +132,6 @@ namespace BertecSDK{
             //Console.WriteLine(forcePlates + d);
             writer.WriteLine(forcePlates+d);
             writer.Flush();
-
-            // writer.Flush();
-            // writer.WriteLine(d);
-            // writer.Flush();
-            //Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
-            //Console.WriteLine(counter);
-            //Console.WriteLine(copx1.ToString());
-            //counter+=1;
           }
           dataCollected += 1;
         }
@@ -170,6 +183,11 @@ namespace BertecSDK{
         // Copxy2
         d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString()+";";
 
+        // Write the raw data
+        if(this.isWriting){
+          File.AppendAllLines(this.filePath, new []{ d });
+        }
+
         if(dataCollected == this.underSamplingFrequency){
           dataCollected = 0;
 
@@ -178,14 +196,6 @@ namespace BertecSDK{
           //Console.WriteLine(forcePlates + d);
           writer.WriteLine(forcePlates+d);
           writer.Flush();
-
-          // writer.Flush();
-          // writer.WriteLine(d);
-          // writer.Flush();
-          //Console.WriteLine(Math.Abs(firstForcePlate.forceData[2]).ToString());
-          //Console.WriteLine(counter);
-          //Console.WriteLine(copx1.ToString());
-          //counter+=1;
         }
         dataCollected += 1;
       }

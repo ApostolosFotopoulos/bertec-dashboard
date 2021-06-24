@@ -951,9 +951,9 @@ class Events {
           db.close();
           
 
-          writeFileSyncRecursive(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
+          //writeFileSyncRecursive(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
           if (win && !win.isDestroyed()) {
-            e.reply(CREATE_TRIAL_RESPONSE, { trial: filename, trialId })
+            e.reply(CREATE_TRIAL_RESPONSE, { trial: path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), trialId })
           }
         }
       } catch (e) {

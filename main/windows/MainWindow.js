@@ -1,4 +1,4 @@
-const { BrowserWindow, ipcMain, dialog } = require("electron");
+const { BrowserWindow, ipcMain } = require("electron");
 const SecondaryWindow = require("./SecondaryWindow");
 const ForcePlatesProcess = require("../util/ForcePlatesProcess");
 const path = require("path");
@@ -17,7 +17,9 @@ const {
 	DEVICE_DETAILS,
 	RESET_FORCE_PLATES,
 	WINDOWS_STATUS,
-	WINDOWS_STATUS_RESPONSE
+  WINDOWS_STATUS_RESPONSE,
+  START_TRIAL_WRITING,
+  STOP_TRIAL_WRITING
 } = require("../util/types");
 
 module.exports = class {
@@ -50,12 +52,11 @@ module.exports = class {
     this.server = new net.Server();
     this.server.listen(this.port, () => {
       console.log("[STATUS] TCP server is active");
+      // Start the forceplate process only at windows
+      if (process.platform === "win64" || process.platform == "win32") {
+        new ForcePlatesProcess().createForcePlateProcess();
+      }
     });
-
-    // Start the forceplate process only at windows
-    if (process.platform === "win64" || process.platform == "win32") {
-      new ForcePlatesProcess().createForcePlateProcess();
-    }
   }
 
   async createWindow() {
@@ -414,6 +415,127 @@ module.exports = class {
           });
         }
       });
+    });
+
+    //// TESTING PURPOSE PLEASE REMOVE //////
+    // setInterval(() => {
+    //   if (this.linechartw && this.linechartw.window) {
+    //     if (this.isSessionRunning) {
+    //       this.linechartw.window.webContents.send(LINECHART_SESSION, {
+    //         rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+    //         isSessionRunning: this.isSessionRunning,
+    //         weight: this.weight,
+    //         session: this.session,
+    //         database: this.database,
+    //         user: this.user,
+    //       });
+    //     } else {
+    //       this.linechartw.window.webContents.send(LINECHART_SESSION, {
+    //         rows: [],
+    //         isSessionRunning: this.isSessionRunning,
+    //         weight: this.weight,
+    //         session: this.session,
+    //         database: this.database,
+    //         user: this.user,
+    //       });
+    //     }
+    //   }
+      
+    //   if (this.cw && this.cw.window) {
+    //     if (this.isSessionRunning) {
+    //       this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+    //         rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+    //         force: Math.random().toFixed(2),
+    //         isSessionRunning: this.isSessionRunning,
+    //         weight: this.weight,
+    //         session: this.session,
+    //         database: this.database,
+    //         user: this.user,
+    //       });
+    //     } else {
+    //       this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+    //         rows: [],
+    //         force: 0,
+    //         isSessionRunning: this.isSessionRunning,
+    //         weight: this.weight,
+    //         session: this.session,
+    //         database: this.database,
+    //         user: this.user,
+    //       });
+    //     }
+    //   }
+
+    //   // Send the data to the timeline window
+    //     if (this.timelinew && this.timelinew.window) {
+    //       if (this.isSessionRunning) {
+    //         this.timelinew.window.webContents.send(
+    //           TIMELINE_SESSION,
+    //           {
+    //             rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+    //             force: Math.random().toFixed(2),
+    //             isSessionRunning: this.isSessionRunning,
+    //             weight: this.weight,
+    //             session: this.session,
+    //             database: this.database,
+    //             user: this.user,
+    //           }
+    //         );
+    //       } else {
+    //         this.timelinew.window.webContents.send(
+    //           TIMELINE_SESSION,
+    //           {
+    //             rows: [],
+    //             force: 0,
+    //             isSessionRunning: this.isSessionRunning,
+    //             weight: this.weight,
+    //             session: this.session,
+    //             database: this.database,
+    //             user: this.user,
+    //           }
+    //         );
+    //       }
+    //     }
+    //     if (this.cpw && this.cpw.window) {
+    //       if (this.isSessionRunning) {
+    //         this.cpw.window.webContents.send(COP_SESSION, {
+    //           rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       } else {
+    //         this.cpw.window.webContents.send(COP_SESSION, {
+    //           rows: [],
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       }
+    //     }
+    // })
+
+
+    ipcMain.on(START_TRIAL_WRITING, (e, d) => {
+      const { trial } = d
+      if (this.socket) {
+        console.log("[STATUS] Trying to start the trial writing");
+        this.socket.write(START_TRIAL_WRITING+";"+trial);
+      } else {
+        console.log("[ERROR] The force plates are not connected")
+      }
+    });
+
+    ipcMain.on(STOP_TRIAL_WRITING, (e, d) => {
+      if (this.socket) {
+        console.log("[STATUS] Trying to stop the trial writing");
+        this.socket.write(STOP_TRIAL_WRITING);
+      } else {
+        console.log("[ERROR] The force plates are not connected")
+      }
     });
 
     ipcMain.on(RESET_FORCE_PLATES, (e, d) => {

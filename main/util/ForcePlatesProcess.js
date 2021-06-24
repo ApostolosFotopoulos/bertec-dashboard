@@ -7,7 +7,7 @@ module.exports = class {
 		const child = spawn(path.resolve(__dirname, '../sdk/BertecSDK.exe'), ["10"]);
 
 		child.stdout.on('data', (data) => {
-			//console.log(`stdout:${data}`);
+			console.log(`stdout:${data}`);
 		});
 
 		child.stderr.on('data', (data) => {
