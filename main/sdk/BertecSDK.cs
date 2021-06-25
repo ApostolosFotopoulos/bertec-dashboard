@@ -97,7 +97,7 @@ namespace BertecSDK{
         if(channelCount > 0){
 
           // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
-          for (int col = 0; col < channelCount; ++col){
+          for (int col = 0; col < channelCount; col++){
             d = d + firstForcePlate.forceData[col].ToString()+";";
           }
 
@@ -116,7 +116,7 @@ namespace BertecSDK{
           d = d + (Math.Sqrt( Math.Pow(copx1,2)+ Math.Pow(copy1,2))).ToString()+";";
           
           // Copx2 Copy2 Copxy2
-          d = d + "0;0;0\r\n";
+          d = d + "0;0;0";
 
           // Write the raw data
           if(this.isWriting){
@@ -146,7 +146,7 @@ namespace BertecSDK{
         int channelCountFirst = firstForcePlate.forceData.Length;
         if(channelCountFirst > 0){
           // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
-          for (int col = 0; col < channelCountFirst; ++col){
+          for (int col = 0; col < channelCountFirst; col++){
             //Console.Write("{0};", Math.Abs(firstForcePlate.forceData[col]));
             d = d + firstForcePlate.forceData[col].ToString()+";";
           }
@@ -155,7 +155,7 @@ namespace BertecSDK{
         int channelCountSec = secForcePlate.forceData.Length;
         if(channelCountSec > 0){
           // Fx2	Fy2	Fz2	Mx2	My2	Mz2	
-          for (int col = 0; col < channelCountSec; ++col){
+          for (int col = 0; col < channelCountSec; col++){
             //Console.Write("{0};", Math.Abs(secForcePlate.forceData[col]));
             d = d + secForcePlate.forceData[col].ToString()+";";
           }
@@ -181,7 +181,7 @@ namespace BertecSDK{
         d = d + copy2.ToString()+";";
         
         // Copxy2
-        d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString()+";";
+        d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString();
 
         // Write the raw data
         if(this.isWriting){
