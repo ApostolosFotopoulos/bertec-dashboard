@@ -29,9 +29,8 @@ function writeFileSyncRecursive(filename, content, charset) {
   fs.writeFileSync(root + filepath, content, charset);
 }
 
-const formLineChartData = (records, weight, leftColumn, rightColumn) => {
-  var frequency = 100;
-
+const formRawLineChartData = (records, weight, leftColumn, rightColumn) => {
+  var frequency = 10;
   var rightPlateRows = 0
   var rightSteps = 0
   var isRightPlateLocked = false;
@@ -46,7 +45,123 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
   var maxY = -1;
   var minY = 0;
 
-  for (var i = 0; i < records.length; i++) {
+  for (var i = 0; i < records.length; i ++) {
+    var fz1 = Number(records[i]['Fz1']);
+    var fz2 = Number(records[i]['Fz2']);
+    var entryLeft = (Number(records[i][leftColumn]) / Number(weight)) * 100;
+    var entryRight = (Number(records[i][rightColumn]) / Number(weight)) * 100;
+    var threshold = Number(0.05 * weight);
+    
+    if (isRightPlateLocked) {
+      if (fz2 > threshold) {
+        rightSteps += 1;
+        rightPlateSeries[rightPlateRows].data.push(entryRight);
+        if (maxY < entryRight) {
+          maxY = entryRight;
+        }
+        if (entryRight < minY) {
+          minY = entryRight;
+        }
+      }
+      
+      if (fz2 < threshold) {
+        isRightPlateLocked = false;
+        if (rightSteps > 0.2 * frequency) {
+
+          let s = rightPlateFinalSeries;
+          rightPlateFinalSeries = s;
+          s.push({
+            data: []
+          });
+          rightPlateSeries = s;
+          rightPlateRows += 1;
+        } else {
+          rightPlateSeries[rightPlateRows].data = [];
+        }
+        rightSteps = 0;
+      }
+    } else {
+      if (fz2 > threshold) {
+        isRightPlateLocked = true;
+        rightPlateSeries[rightPlateRows].data.push(entryRight);
+        if (maxY < entryRight) {
+          maxY = entryRight;
+        }
+        if (entryRight < minY) {
+          minY = entryRight;
+        }
+      }
+    }
+
+    if (isLeftPlateLocked) {
+      if (fz1 > threshold) {
+        leftSteps += 1;
+        leftPlateSeries[leftPlateRows].data.push(entryLeft);
+        if (maxY < entryLeft) {
+          maxY = entryLeft;
+        }
+        if (entryLeft < minY) {
+          minY = entryLeft;
+        }
+      }
+        
+      if (fz1 < threshold) {
+        isLeftPlateLocked = false;
+        if (leftSteps > 0.2 * frequency) {
+
+          let s = leftPlateFinalSeries;
+          leftPlateFinalSeries = s;
+          s.push({
+            data: []
+          });
+          leftPlateSeries = s;
+          leftPlateRows += 1;
+        } else {
+          leftPlateSeries[leftPlateRows].data = [];
+        }
+        leftSteps = 0;
+      }
+    } else {
+      if (fz1 > threshold) {
+        isLeftPlateLocked = true;
+        leftPlateSeries[leftPlateRows].data.push(entryLeft);
+        if (maxY < entryLeft) {
+          maxY = entryLeft;
+        }
+        if (entryLeft < minY) {
+          minY = entryLeft;
+        }
+      }
+    }
+  }
+
+  return {
+    left: leftPlateFinalSeries,
+    right: rightPlateFinalSeries,
+    maxY,
+    minY,
+  };
+}
+
+
+const formLineChartData = (records, weight, leftColumn, rightColumn) => {
+  var frequency = 10;
+  var step = 10;
+  var rightPlateRows = 0
+  var rightSteps = 0
+  var isRightPlateLocked = false;
+  var rightPlateSeries = [{ data: [] }]
+  var rightPlateFinalSeries = [{ data: [] }]
+  
+  var leftPlateRows = 0
+  var leftSteps = 0
+  var isLeftPlateLocked = false;
+  var leftPlateSeries = [{ data: [] }]
+  var leftPlateFinalSeries = [{ data: [] }]
+  var maxY = -1;
+  var minY = 0;
+
+  for (var i = 0; i < records.length; i+=step) {
     var fz1 = Number(records[i]['Fz1']);
     var fz2 = Number(records[i]['Fz2']);
     var entryLeft = (Number(records[i][leftColumn]) / Number(weight))*100;
@@ -146,7 +261,8 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
 }
 
 const formCOPChartData = (records, weight) => {
-  var frequency = 100;
+  var frequency = 10;
+  var step = 10;
 
   var rightPlateRows = 0
   var rightSteps = 0
@@ -160,7 +276,7 @@ const formCOPChartData = (records, weight) => {
   var leftPlateSeries = [{ data: [] }]
   var leftPlateFinalSeries = [{ data: [] }]
 
-  for (var i = 0; i < records.length; i++) {
+  for (var i = 0; i < records.length; i+=step) {
     var fz1 = Number(records[i]['Fz1']);
     var fz2 = Number(records[i]['Fz2']);
     let copx1 = records[i]['Copx1'];
@@ -235,8 +351,8 @@ const formCOPChartData = (records, weight) => {
 }
 
 const formTimelineChartData = (records, weight,leftColumn, rightColumn, trialThreshold, rangeMin, rangeMax ) => {
-
-var rightPlateMax = -1;
+  var step = 10;
+  var rightPlateMax = -1;
   var isRightPlateLocked = false;
   var rightPlateSeries = [{ data: [] }]
   var isInsideRightRange = 0
@@ -246,7 +362,7 @@ var rightPlateMax = -1;
   var leftPlateSeries = [{ data: [] }]
   var isInsideLeftRange = 0
 
-  for (var i = 0; i < records.length; i++) {
+  for (var i = 0; i < records.length; i+=step) {
     var fz1 = Number(records[i]['Fz1']);
     var fz2 = Number(records[i]['Fz2']);
     var entryLeft = (Number(records[i][leftColumn]) / Number(weight))*100;
@@ -375,7 +491,7 @@ const formLineChartJS = (row,min,max, id, color) => {
           labels:{
             formatter: (val) => {
               if (val.toFixed(0) % 10 == 0) {
-                return val.toFixed(0);
+                return (val.toFixed(0)/100);
               }
             },
             show:true,
@@ -572,7 +688,7 @@ const formTimelineChartJS = (row,min,max, id, color, rangeMin, rangeMax) => {
   `;
 }
 
-const formMeasurements = (fx,fy,fz) => {
+const formMeasurements = (fxRaw,fyRaw,fzRaw) => {
   return `
     <div class="container p-1 pt-3 pl-3 pr-3" style="margin-top:55%;">
       <h1 class="title is-6 has-text-centered">Measurements</h1>
@@ -584,70 +700,25 @@ const formMeasurements = (fx,fy,fz) => {
         </tr>
         <tr>
           <td>Vertical Impulse (FX)</td>
-          <td>${parameters.verticalImpulse(fx.left).toFixed(1)} % BW.s</td>
-          <td>${parameters.verticalImpulse(fx.right).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fxRaw.left).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fxRaw.right).toFixed(1)} % BW.s</td>
         </tr>
         <tr>
           <td>Vertical Impulse (FY)</td>
-          <td>${parameters.verticalImpulse(fy.left).toFixed(1)} % BW.s</td>
-          <td>${parameters.verticalImpulse(fy.right).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fyRaw.left).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fyRaw.right).toFixed(1)} % BW.s</td>
         </tr>
         <tr>
           <td>Vertical Impulse (FZ)</td>
-          <td>${parameters.verticalImpulse(fz.left).toFixed(1)} % BW.s</td>
-          <td>${parameters.verticalImpulse(fz.right).toFixed(1)} % BW.s</td>
-        </tr>
-        <tr>
-          <td>Loading Rate (FX)</td>
-          <td>${parameters.loadingRate(fx.left).toFixed(1)} % BW/s</td>
-          <td>${parameters.loadingRate(fx.right).toFixed(1)} % BW/s</td>
-        </tr>
-        <tr>
-          <td>Loading Rate (FY)</td>
-          <td>${parameters.loadingRate(fy.left).toFixed(1)} % BW/s</td>
-          <td>${parameters.loadingRate(fy.right).toFixed(1)} % BW/s</td>
-        </tr>
-        <tr>
-          <td>Loading Rate (FZ)</td>
-          <td>${parameters.loadingRate(fz.left).toFixed(1)} % BW/s</td>
-          <td>${parameters.loadingRate(fz.right).toFixed(1)} % BW/s</td>
-        </tr>
-        <tr>
-          <td>Impact Peak Force (FX)</td>
-          <td>${parameters.impactPeakForce(fx.left).toFixed(1)} % BW</td>
-          <td>${parameters.impactPeakForce(fx.right).toFixed(1)} % BW</td>
-        </tr>
-        <tr>
-          <td>Impact Peak Force (FY)</td>
-          <td>${parameters.impactPeakForce(fy.left).toFixed(1)} % BW</td>
-          <td>${parameters.impactPeakForce(fy.right).toFixed(1)} % BW</td>
-        </tr>
-        <tr>
-          <td>Impact Peak Force (FZ)</td>
-          <td>${parameters.impactPeakForce(fz.left).toFixed(1)} % BW</td>
-          <td>${parameters.impactPeakForce(fz.right).toFixed(1)} % BW</td>
-        </tr>
-        <tr>
-          <td>Time to Impact Peak (FX)</td>
-          <td>${parameters.timeToImpactPeak(fx.left).toFixed(1)} ms</td>
-          <td>${parameters.timeToImpactPeak(fx.right).toFixed(1)} ms</td>
-        </tr>
-        <tr>
-          <td>Time to Impact Peak (FY)</td>
-          <td>${parameters.timeToImpactPeak(fy.left).toFixed(1)} ms</td>
-          <td>${parameters.timeToImpactPeak(fy.right).toFixed(1)} ms</td>
-        </tr>
-        <tr>
-          <td>Time to Impact Peak (FZ)</td>
-          <td>${parameters.timeToImpactPeak(fz.left).toFixed(1)} ms</td>
-          <td>${parameters.timeToImpactPeak(fz.right).toFixed(1)} ms</td>
+          <td>${parameters.verticalImpulse(fzRaw.left).toFixed(1)} % BW.s</td>
+          <td>${parameters.verticalImpulse(fzRaw.right).toFixed(1)} % BW.s</td>
         </tr>
       </table>
     </div>
   `
 }
 
-const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFY, timelineFZ) => {
+const generateHTML = (fx,fxRaw, fy,fyRaw, fz,fzRaw, cop, timelineFX, timelineFY, timelineFZ,rows) => {
   return `
     <html lang="en">
       <head>
@@ -849,7 +920,7 @@ const generateHTML = (fx, fy, fz, cop, timelineFX, timelineFY, timelineFZ) => {
             </div>
           </div>
         </div>
-        ${formMeasurements(fx,fy,fz)}
+        ${formMeasurements(fxRaw,fyRaw,fzRaw)}
         <script>
           ${formLineChartJS(fx.left, fx.minY,fx.maxY,'left-foot-fx', '#d32d41')}
           ${formLineChartJS(fx.right,fx.minY, fx.maxY,'right-foot-fx', '#6ab187')}
@@ -880,4 +951,5 @@ module.exports = {
   formLineChartJS,
   formCOPChartJS,
   generateHTML,
+  formRawLineChartData,
 }

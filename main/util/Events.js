@@ -17,7 +17,7 @@ const fs = require('fs')
 const { ipcMain, dialog, app } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const { writeFileSyncRecursive, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
+const { formRawLineChartData, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
 const puppeteer = require('puppeteer');
 var parse = require('csv-parse');
 
@@ -1148,6 +1148,10 @@ class Events {
         let fy = formLineChartData(records, user.weight, 'Fy1', 'Fy2');
         let fz = formLineChartData(records, user.weight, 'Fz1', 'Fz2');
 
+        let fxRaw = formRawLineChartData(records, user.weight, 'Fx1', 'Fx2');
+        let fyRaw = formRawLineChartData(records, user.weight, 'Fy1', 'Fy2');
+        let fzRaw = formRawLineChartData(records, user.weight, 'Fz1', 'Fz2');
+
         // Format the data from the csv to cop points
         let cop = formCOPChartData(records, user.weight);
 
@@ -1157,7 +1161,7 @@ class Events {
         let timelineFΖ = formTimelineChartData(records, user.weight,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
 
         // Generate the html for the pdf
-        let html = generateHTML(fx,fy,fz,cop,timelineFX,timelineFΥ,timelineFΖ)
+        let html = generateHTML(fx,fxRaw,fy,fyRaw,fz,fzRaw,cop,timelineFX,timelineFΥ,timelineFΖ)
         var finalHtml = encodeURIComponent(html);
         var options = {
           format: 'A4',
@@ -1169,6 +1173,7 @@ class Events {
           preferCSSPageSize: true,
         }
 
+        console.log(html)
         // Create the pdf using puppeteer
         const browser = await puppeteer.launch({
             args: ['--no-sandbox'],
@@ -1176,7 +1181,8 @@ class Events {
         });
         const page = await browser.newPage();
         await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
-            waitUntil: 'networkidle0'
+          waitUntil: 'networkidle0',
+          timeout: 0
         });
         await page.emulateMediaType("print");
         await page.pdf(options);
