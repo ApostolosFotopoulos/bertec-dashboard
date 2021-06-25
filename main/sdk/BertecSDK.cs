@@ -71,7 +71,7 @@ namespace BertecSDK{
                 Console.WriteLine("Starting the trial....");
                 this.filePath = serverMessage.Substring(serverMessage.LastIndexOf(';') + 1);
                 Console.WriteLine(this.filePath);
-                File.WriteAllText(this.filePath, "\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n");
+                File.WriteAllText(this.filePath, "\ufeffFx1;Fy1;Fz1;Mx1;My1;Mz1;Fx2;Fy2;Fz2;Mx2;My2;Mz2;Copx1;Copy1;Copxy1;Copx2;Copy2;Copxy2\n");
                 this.isWriting = true;
               }
 

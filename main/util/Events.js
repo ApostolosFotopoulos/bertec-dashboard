@@ -1132,7 +1132,7 @@ class Events {
         db.close();
 
         let records = await new Promise((resolve, reject) => {
-          fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true }, function (error, records) {
+          fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true, delimiter:[";"] }, function (error, records) {
             if (error) {
               reject(error)
               return
