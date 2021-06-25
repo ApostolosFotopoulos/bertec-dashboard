@@ -118,6 +118,8 @@ namespace BertecSDK{
           // Copx2 Copy2 Copxy2
           d = d + "0;0;0";
 
+          d = d.Replace(",",".");
+
           // Write the raw data
           if(this.isWriting){
             File.AppendAllLines(this.filePath, new []{ d });
@@ -182,6 +184,8 @@ namespace BertecSDK{
         
         // Copxy2
         d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString();
+
+        d = d.Replace(",",".");
 
         // Write the raw data
         if(this.isWriting){
