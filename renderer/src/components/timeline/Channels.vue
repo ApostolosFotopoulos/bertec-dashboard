@@ -128,6 +128,7 @@ const { ipcRenderer } = window.require("electron");
 const {
   CREATE_TRIAL,
   CREATE_TRIAL_RESPONSE,
+  START_TRIAL_WRITING, STOP_TRIAL_WRITING
 } = require("../../../../main/util/types");
 export default {
   data() {
@@ -163,11 +164,13 @@ export default {
     ipcRenderer.on(CREATE_TRIAL_RESPONSE, (_, responseData) => {
       this.isTrialRunning = true;
       this.$store.commit("setTrial", responseData.trial);
-      console.log(responseData.trialId)
-      this.$store.commit("setTrialId", responseData.trialId);
+      console.log(responseData.trial)
+      this.$store.commit("setTrial",responseData.trial)
+      ipcRenderer.send(START_TRIAL_WRITING,{ trial: responseData.trial })
       this.timeoutInstance = setTimeout(() => {
         this.isTrialRunning = false;
         this.$store.commit("setTrial", "");
+        ipcRenderer.send(STOP_TRIAL_WRITING,{})
         this.$store.commit("setTrialId",-1);
       }, this.$store.state.options.timeout * 1000);
     });
@@ -179,6 +182,7 @@ export default {
         this.isTrialRunning = false;
         this.$store.commit("setTrial", "");
         this.$store.commit("setTrialId",-1);
+        ipcRenderer.send(STOP_TRIAL_WRITING,{})
       } else {
         console.log(this.$store.state.options.session)
         if (this.$store.state.options.session != -1) {

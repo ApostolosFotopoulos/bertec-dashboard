@@ -17,19 +17,6 @@ module.exports = class {
     return sumOfIntegral / numOfRows;
   }
 
-  static loadingPeakForce(rows) {
-    let numOfMaxs= 0
-    let sumOfMaxs = 0
-    for (var i = 0; i < rows.length; i++){
-      let [m] = math.localMax(rows[i].data)
-      if (m) {
-        numOfMaxs += 1
-        sumOfMaxs += m
-      }
-    }
-    return sumOfMaxs / numOfMaxs;
-  }
-
   static loadingRate(rows) {
     let numOfRates = 0
     let sumOfRates = 0
@@ -49,6 +36,33 @@ module.exports = class {
     return sumOfRates / numOfRates;
   }
 
+  static loadingPeakForce(rows) {
+    let numOfMaxs= 0
+    let sumOfMaxs = 0
+    for (var i = 0; i < rows.length; i++){
+      let [m] = math.localMax(rows[i].data)
+      if (m) {
+        numOfMaxs += 1
+        sumOfMaxs += m
+      }
+    }
+    return sumOfMaxs / numOfMaxs;
+  }
+
+  static impactPeakForce(rows) {
+    let numOfMaxs= 0
+    let sumOfMaxs = 0
+    for (var i = 0; i < rows.length; i++){
+      let [m] = math.localMax(rows[i].data)
+      if (m) {
+        numOfMaxs += 1
+        sumOfMaxs += m
+      }
+    }
+    return sumOfMaxs / numOfMaxs;
+  }
+  
+
   static timeToLoadingPeak(rows) {
     let numOfTimes = 0
     let sumOfTimes = 0
@@ -63,19 +77,6 @@ module.exports = class {
       }
     }
     return sumOfTimes / numOfTimes;
-  }
-
-  static impactPeakForce(rows) {
-    let numOfMaxs= 0
-    let sumOfMaxs = 0
-    for (var i = 0; i < rows.length; i++){
-      let [m] = math.localMax(rows[i].data)
-      if (m) {
-        numOfMaxs += 1
-        sumOfMaxs += m
-      }
-    }
-    return sumOfMaxs / numOfMaxs;
   }
 
   static timeToImpactPeak(rows) {

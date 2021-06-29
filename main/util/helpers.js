@@ -167,6 +167,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
     var entryLeft = (Number(records[i][leftColumn]) / Number(weight))*100;
     var entryRight = (Number(records[i][rightColumn]) / Number(weight))*100;
     var threshold = Number(0.05 * weight);
+    console.log(fz1,threshold)
     
     if (isRightPlateLocked) {
       if (fz2 > threshold) {
@@ -712,6 +713,51 @@ const formMeasurements = (fxRaw,fyRaw,fzRaw) => {
           <td>Vertical Impulse (FZ)</td>
           <td>${parameters.verticalImpulse(fzRaw.left).toFixed(1)} % BW.s</td>
           <td>${parameters.verticalImpulse(fzRaw.right).toFixed(1)} % BW.s</td>
+        </tr>
+        <tr>
+          <td>Loading Rate (FX)</td>
+          <td>${parameters.loadingRate(fxRaw.left).toFixed(1)} % BW/s</td>
+          <td>${parameters.loadingRate(fxRaw.right).toFixed(1)} % BW/s</td>
+        </tr>
+        <tr>
+          <td>Loading Rate (FY)</td>
+          <td>${parameters.loadingRate(fyRaw.left).toFixed(1)} % BW/s</td>
+          <td>${parameters.loadingRate(fyRaw.right).toFixed(1)} % BW/s</td>
+        </tr>
+        <tr>
+          <td>Loading Rate (FZ)</td>
+          <td>${parameters.loadingRate(fzRaw.left).toFixed(1)} % BW/s</td>
+          <td>${parameters.loadingRate(fzRaw.right).toFixed(1)} % BW/s</td>
+        </tr>
+        <tr>
+          <td>Impact Peak Force (FX)</td>
+          <td>${parameters.impactPeakForce(fxRaw.left).toFixed(1)} % BW</td>
+          <td>${parameters.impactPeakForce(fxRaw.right).toFixed(1)} % BW</td>
+        </tr>
+        <tr>
+          <td>Impact Peak Force (FY)</td>
+          <td>${parameters.impactPeakForce(fyRaw.left).toFixed(1)} % BW</td>
+          <td>${parameters.impactPeakForce(fyRaw.right).toFixed(1)} % BW</td>
+        </tr>
+        <tr>
+          <td>Impact Peak Force (FZ)</td>
+          <td>${parameters.impactPeakForce(fzRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.impactPeakForce(fzRaw.right).toFixed(1)} ms</td>
+        </tr>
+        <tr>
+          <td>Time to Impact Peak Force (FX)</td>
+          <td>${parameters.impactPeakForce(fxRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.impactPeakForce(fxRaw.right).toFixed(1)} ms</td>
+        </tr>
+        <tr>
+          <td>Time to Impact Peak Force (FY)</td>
+          <td>${parameters.impactPeakForce(fyRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.impactPeakForce(fyRaw.right).toFixed(1)} ms</td>
+        </tr>
+        <tr>
+          <td>Time to Impact Peak Force (FZ)</td>
+          <td>${parameters.impactPeakForce(fzRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.impactPeakForce(fzRaw.right).toFixed(1)} ms</td>
         </tr>
       </table>
     </div>
