@@ -146,7 +146,7 @@ const formRawLineChartData = (records, weight, leftColumn, rightColumn) => {
 
 const formLineChartData = (records, weight, leftColumn, rightColumn) => {
   var frequency = 10;
-  var step = 10;
+  var step = 1;
   var rightPlateRows = 0
   var rightSteps = 0
   var isRightPlateLocked = false;
@@ -167,7 +167,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
     var entryLeft = (Number(records[i][leftColumn]) / Number(weight))*100;
     var entryRight = (Number(records[i][rightColumn]) / Number(weight))*100;
     var threshold = Number(0.05 * weight);
-    console.log(fz1,threshold)
+    //console.log(fz1,threshold)
     
     if (isRightPlateLocked) {
       if (fz2 > threshold) {
@@ -263,7 +263,7 @@ const formLineChartData = (records, weight, leftColumn, rightColumn) => {
 
 const formCOPChartData = (records, weight) => {
   var frequency = 10;
-  var step = 10;
+  var step = 1;
 
   var rightPlateRows = 0
   var rightSteps = 0
@@ -352,7 +352,7 @@ const formCOPChartData = (records, weight) => {
 }
 
 const formTimelineChartData = (records, weight,leftColumn, rightColumn, trialThreshold, rangeMin, rangeMax ) => {
-  var step = 10;
+  var step = 1;
   var rightPlateMax = -1;
   var isRightPlateLocked = false;
   var rightPlateSeries = [{ data: [] }]
@@ -498,7 +498,7 @@ const formLineChartJS = (row,min,max, id, color) => {
           tickAmount: 10,
         },
         yaxis: {
-          min: ${min - 10},
+          min: ${min > 10? min - 10:min},
           ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
@@ -650,7 +650,7 @@ const formTimelineChartJS = (row,min,max, id, color, rangeMin, rangeMax) => {
           type:"category",
         },
         yaxis: {
-          min: ${min - 10},
+          min: ${min > 10? min - 10:min},
           ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
@@ -744,18 +744,18 @@ const formMeasurements = (fxRaw,fyRaw,fzRaw) => {
         </tr>
         <tr>
           <td>Time to Impact Peak Force (FX)</td>
-          <td>${parameters.impactPeakForce(fxRaw.left).toFixed(1)} ms</td>
-          <td>${parameters.impactPeakForce(fxRaw.right).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fxRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fxRaw.right).toFixed(1)} ms</td>
         </tr>
         <tr>
           <td>Time to Impact Peak Force (FY)</td>
-          <td>${parameters.impactPeakForce(fyRaw.left).toFixed(1)} ms</td>
-          <td>${parameters.impactPeakForce(fyRaw.right).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fyRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fyRaw.right).toFixed(1)} ms</td>
         </tr>
         <tr>
           <td>Time to Impact Peak Force (FZ)</td>
-          <td>${parameters.impactPeakForce(fzRaw.left).toFixed(1)} ms</td>
-          <td>${parameters.impactPeakForce(fzRaw.right).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fzRaw.left).toFixed(1)} ms</td>
+          <td>${parameters.timeToImpactPeak(fzRaw.right).toFixed(1)} ms</td>
         </tr>
       </table>
     </div>

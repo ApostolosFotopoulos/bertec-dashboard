@@ -54,6 +54,7 @@ module.exports = class {
     let sumOfMaxs = 0
     for (var i = 0; i < rows.length; i++){
       let [m] = math.localMax(rows[i].data)
+      console.log(m)
       if (m) {
         numOfMaxs += 1
         sumOfMaxs += m

@@ -1145,21 +1145,21 @@ class Events {
         console.log(trial)
 
         // Format the data from the csv to linecharts
-        let fx = formLineChartData(records, 300, 'Fx1', 'Fx2');
-        let fy = formLineChartData(records, 300, 'Fy1', 'Fy2');
-        let fz = formLineChartData(records,300, 'Fz1', 'Fz2');
+        let fx = formLineChartData(records, 750, 'Fx1', 'Fx2');
+        let fy = formLineChartData(records, 750, 'Fy1', 'Fy2');
+        let fz = formLineChartData(records, 750, 'Fz1', 'Fz2');
 
-        let fxRaw = formRawLineChartData(records,300, 'Fx1', 'Fx2');
-        let fyRaw = formRawLineChartData(records,300, 'Fy1', 'Fy2');
-        let fzRaw = formRawLineChartData(records,300, 'Fz1', 'Fz2');
+        let fxRaw = formRawLineChartData(records,750, 'Fx1', 'Fx2');
+        let fyRaw = formRawLineChartData(records,750, 'Fy1', 'Fy2');
+        let fzRaw = formRawLineChartData(records,750, 'Fz1', 'Fz2');
 
         // Format the data from the csv to cop points
-        let cop = formCOPChartData(records, 300);
+        let cop = formCOPChartData(records, 750);
 
         // Format the data from the csv to timeline points
-        let timelineFX = formTimelineChartData(records, 300,'Fx1','Fx2', trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max);
-        let timelineFΥ = formTimelineChartData(records, 300, 'Fy1', 'Fy2', trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max);
-        let timelineFΖ = formTimelineChartData(records, 300,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
+        let timelineFX = formTimelineChartData(records, 750,'Fx1','Fx2', trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max);
+        let timelineFΥ = formTimelineChartData(records, 750, 'Fy1', 'Fy2', trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max);
+        let timelineFΖ = formTimelineChartData(records, 750,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
 
         // Generate the html for the pdf
         let html = generateHTML(fx,fxRaw,fy,fyRaw,fz,fzRaw,cop,timelineFX,timelineFΥ,timelineFΖ)
