@@ -491,13 +491,11 @@ const formLineChartJS = (row,min,max, id, color) => {
           forceNiceScale: true,
           labels:{
             formatter: (val) => {
-              if (val.toFixed(0) % 10 == 0) {
-                return (val.toFixed(0)/100);
-              }
+              return (val.toFixed(0)/100);
             },
             show:true,
           },
-          type:"category",
+          tickAmount: 10,
         },
         yaxis: {
           min: ${min - 10},
