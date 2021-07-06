@@ -1,9 +1,9 @@
 const { BrowserWindow, ipcMain } = require("electron");
 const SecondaryWindow = require("./SecondaryWindow");
-const ForcePlatesProcess = require("../util/ForcePlatesProcess");
+const ForcePlatesProcess = require("../util/modules/ForcePlatesProcess");
 const path = require("path");
 var net = require("net");
-const Events = require('../util/Events');
+const Events = require('../util/modules/Events');
 const sqlite3 = require("sqlite3").verbose();
 
 const {
@@ -223,12 +223,11 @@ module.exports = class {
     
     // Trials
     Events.createTrialListener(this.window);
-    Events.updateTrialDataListener(this.window);
     Events.updateTrialDetailsListener(this.usersw);
     Events.updateTrialZonesAndThresholdListener(this.timelinew)
     Events.deleteTrialListener(this.usersw);
     Events.downloadTrialListener(this.usersw);
-    Events.exportTrialReportListener(this.userw);
+    Events.exportTrialReportListener(this.usersw);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {

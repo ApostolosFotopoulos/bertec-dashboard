@@ -11,14 +11,14 @@ const {
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
   CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
   UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD
-} = require('../util/types')
+} = require('../types')
 const path = require('path')
 const fs = require('fs')
 const { ipcMain, dialog, app } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const { formRawLineChartData, formLineChartData, generateHTML, formCOPChartData, formTimelineChartData } = require('./helpers');
-const puppeteer = require('puppeteer');
+const Report = require('./Report');
+const Renderer = require('./Renderer');
 var parse = require('csv-parse');
 
 function groupBy(list, keyGetter) {
@@ -43,7 +43,7 @@ class Events {
 
         if (database) {
           let files = await new Promise((resolve, reject) => {
-            glob(path.resolve(__dirname,"../../.meta/databases/*.db"), (error, files) => {
+            glob(path.resolve(__dirname,"../../../.meta/databases/*.db"), (error, files) => {
               if (error) {
                 reject(error);
                 return;
@@ -59,7 +59,7 @@ class Events {
           } else {
             if (win && !win.isDestroyed()) {
               const db = new sqlite3.Database(
-                path.resolve(__dirname, `../../.meta/databases/${database}.db`)
+                path.resolve(__dirname, `../../../.meta/databases/${database}.db`)
               );
               db.serialize(function () {
                 db.run(
@@ -96,7 +96,7 @@ class Events {
         let { database } = d
         if (database) {
           let isDone = await new Promise((resolve, reject) => {
-            fs.rename(path.resolve(__dirname, `../../.meta/databases/${database}`), path.resolve(__dirname, `../../.meta/databases/${database}.deleted`), function (error) {
+            fs.rename(path.resolve(__dirname, `../../../.meta/databases/${database}`), path.resolve(__dirname, `../../../.meta/databases/${database}.deleted`), function (error) {
               if (error) {
                 reject(false);
                 return;
@@ -122,7 +122,7 @@ class Events {
     ipcMain.on(FETCH_DATABASES_TO_DELETE, async (e, d) => {
       try {
         let files = await new Promise((resolve, reject) => {
-          glob(path.resolve(__dirname, "../../.meta/databases/*.db"), (error, files) => {
+          glob(path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -143,7 +143,7 @@ class Events {
     ipcMain.on(FETCH_DATABASES_TO_CONTINUE, async (e, d) => {
       try {
         let files = await new Promise((resolve, reject) => {
-          glob(path.resolve(__dirname, "../../.meta/databases/*.db"), (error, files) => {
+          glob(path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -164,7 +164,7 @@ class Events {
     ipcMain.on(FETCH_DATABASES_TO_TAGS, async (e, d) => {
       try {
         let files = await new Promise((resolve, reject) => {
-          glob(path.resolve(__dirname, "../../.meta/databases/*.db"), (error, files) => {
+          glob(path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -185,7 +185,7 @@ class Events {
     ipcMain.on(FETCH_DATABASES_TO_USERS, async (e, d) => {
       try {
         let files = await new Promise((resolve, reject) => {
-          glob(path.resolve(__dirname, "../../.meta/databases/*.db"), (error, files) => {
+          glob(path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -206,7 +206,7 @@ class Events {
     ipcMain.on(FETCH_DATABASES_TO_VIEW_ALL, async (e, d) => {
       try {
         let files = await new Promise((resolve, reject) => {
-          glob(path.resolve(__dirname, "../../.meta/databases/*.db"), (error, files) => {
+          glob(path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -229,7 +229,7 @@ class Events {
         let { database } = d;
         if (database && win && !win.isDestroyed()) {
           const db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let users = await new Promise((resolve, reject) => {
             db.all("select * from users", (error, rows) => {
@@ -255,7 +255,7 @@ class Events {
         let { database } = d;
         if (database && win && win.window && !win.window.isDestroyed()) {
           const db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let users = await new Promise((resolve, reject) => {
             db.all("select * from users", (error, rows) => {
@@ -281,7 +281,7 @@ class Events {
         let { database } = d;
         if (database && win && win.window && !win.window.isDestroyed()) {
           const db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let users = await new Promise((resolve, reject) => {
             db.all("select * from users", (error, rows) => {
@@ -323,7 +323,7 @@ class Events {
 
         if (database) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let isDone = await new Promise((resolve, reject) => {
             db.serialize(function () {
@@ -388,7 +388,7 @@ class Events {
 
         if (database) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let isUpdatedUser = await new Promise((resolve, reject) => {
             db.run(
@@ -437,7 +437,7 @@ class Events {
         let { database, userId } = d
         if (database && userId) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let isUserDeleted = await new Promise((resolve, reject) => {
@@ -477,7 +477,7 @@ class Events {
         let { database, filters } = d
         if (database && filters) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           if (Object.keys(filters).length > 0) {
             let sqlQuery = "select * from users";
@@ -673,7 +673,7 @@ class Events {
         let { database, tag } = d;
         if (database && tag) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
     
           let isDone = await new Promise((resolve, reject) => {
@@ -704,7 +704,7 @@ class Events {
         let { database, tagId } = d;
         if (database && tagId) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let isDone = await new Promise((resolve, reject) => {
@@ -735,7 +735,7 @@ class Events {
         let { database } = d;
         if (database) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let tags = await new Promise((resolve, reject) => {
@@ -764,7 +764,7 @@ class Events {
         let { database } = d;
         if (database) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let tags = await new Promise((resolve, reject) => {
@@ -793,7 +793,7 @@ class Events {
         let { database } = d;
         if (database) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let tags = await new Promise((resolve, reject) => {
@@ -822,7 +822,7 @@ class Events {
         let { database, userId } = d;
         if (database && userId) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let tags = await new Promise((resolve, reject) => {
             db.all(`select * from tags where user_id=${userId}`, function (error, rows) {
@@ -850,7 +850,7 @@ class Events {
         let { database, userId, session } = d;
         if (database, userId && session) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let sessionId = await new Promise((resolve, reject) => {
             db.run(`insert into sessions(name, user_id, created_at) values('${session}',${userId},'${new Date()}')`, function (error, rows) {
@@ -879,7 +879,7 @@ class Events {
         let { database, sessionId } = d;
         if (database, sessionId) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           // Get all the trials from the session
@@ -915,7 +915,7 @@ class Events {
                 resolve(rows)
               });
             })
-            fs.unlink(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trials[i].filename}`), () => { })
+            fs.unlink(path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trials[i].filename}`), () => { })
           }
 
           if (win && win.window && !win.window.isDestroyed()) {
@@ -931,10 +931,9 @@ class Events {
     ipcMain.on(CREATE_TRIAL, async (e, d) => {
       try {
         let { database, userId, session } = d;
-        console.log(d)
         if (database && userId && session) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let filename = `session_${session}_trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}.csv`
           let trial = `trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}`
@@ -950,10 +949,8 @@ class Events {
           });
           db.close();
           
-
-          //writeFileSyncRecursive(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), '\ufeffFx1,Fy1,Fz1,Mx1,My1,Mz1,Fx2,Fy2,Fz2,Mx2,My2,Mz2,Copx1,Copy1,Copxy1,Copx2,Copy2,Copxy2\n', 'utf8')
           if (win && !win.isDestroyed()) {
-            e.reply(CREATE_TRIAL_RESPONSE, { trial: path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), trialId })
+            e.reply(CREATE_TRIAL_RESPONSE, { trial: path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${filename}`), trialId })
           }
         }
       } catch (e) {
@@ -971,7 +968,7 @@ class Events {
 
           // Find the trial and the details
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let [trial] = await new Promise((resolve, reject) => {
             db.all(`select * from trials where id=${trialId}`, function (error, rows) {
@@ -997,7 +994,7 @@ class Events {
           db.close();
 
           // Delete the file
-          fs.unlink(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${filename}`), () => { })
+          fs.unlink(path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${filename}`), () => { })
           
           if (win && win.window && !win.window.isDestroyed()) {
             e.reply(DELETE_TRIAL_RESPONSE, { error: false });
@@ -1017,7 +1014,7 @@ class Events {
         console.log(d)
         if (database && trialId && trialName) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           await new Promise((resolve, reject) => {
             db.run(
@@ -1041,20 +1038,6 @@ class Events {
       }
     });
   }
-  static updateTrialDataListener(win) {
-    ipcMain.on(UPDATE_TRIAL, async (e, d) => {
-      try {
-        let { database, trial, data } = d;
-        //console.log(data)
-        if (database && trial && data && data.length == 18) {
-          //console.log(data)
-          fs.appendFile(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial}`),data.join(",")+"\n",()=>{})
-        }
-      } catch (e) {
-        throw new Error(e);
-      }
-    });
-  }
 
   static updateTrialZonesAndThresholdListener(win) {
     ipcMain.on(UPDATE_TRIAL_ZONES_AND_THRESHOLD, async (e, d) => {
@@ -1062,7 +1045,7 @@ class Events {
         let { database, trialId } = d;
         if (database && trialId) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let keys = Object.keys(d).filter(k => k != "database" && k != "trialId")
@@ -1106,10 +1089,18 @@ class Events {
       let { database, trialId } = d;
       if (database && trialId){
 
-        // Fetch the trial from the database
+        /**
+         * Connect to the database to retrieve all the related 
+         * data that is saved.
+         */
         var db = new sqlite3.Database(
-          path.resolve(__dirname, `../../.meta/databases/${database}`)
+          path.resolve(__dirname, `../../../.meta/databases/${database}`)
         );
+
+        /**
+         * Get from the database the trial of the user
+         * with all the details.
+         */
         let [trial] = await new Promise((resolve, reject) => {
           db.all(`select * from trials where id=${trialId}`, function (error, rows) {
             if (error) {
@@ -1120,6 +1111,23 @@ class Events {
           });
         });
 
+        /**
+         * Get from the database the trial of the user
+         * with all the details.
+         */
+        let [session] = await new Promise((resolve, reject) => {
+          db.all(`select * from sessions where id=${trial.session_id}`, function (error, rows) {
+            if (error) {
+              reject([]);
+              return
+            }
+            resolve(rows)
+          });
+        });
+
+        /**
+         * Get the user that is related with the above trial.
+         */
         let [user] = await new Promise((resolve, reject) => {
           db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
             if (error) {
@@ -1131,8 +1139,12 @@ class Events {
         });
         db.close();
 
+        /**
+         * Read the raw data from the csv that is saved for the current 
+         * trial.
+         */
         let records = await new Promise((resolve, reject) => {
-          fs.createReadStream(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true, delimiter:[";"] }, function (error, records) {
+          fs.createReadStream(path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true, delimiter:[";"] }, function (error, records) {
             if (error) {
               reject(error)
               return
@@ -1141,62 +1153,37 @@ class Events {
           }));
         });
 
-        console.log(records)
-        console.log(trial)
+        console.log(trial, user, session)
+        
+        /**
+         * Calculate every parameter for every section of the report.
+         */
+        const linechartAxes = Report.lineChartAxes(records, user.weight);
+        const copAxes = Report.copChartAxes(records, user.weight);
+        const timelineAxes = Report.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
 
-        // Format the data from the csv to linecharts
-        let fx = formLineChartData(records, 750, 'Fx1', 'Fx2');
-        let fy = formLineChartData(records, 750, 'Fy1', 'Fy2');
-        let fz = formLineChartData(records, 750, 'Fz1', 'Fz2');
+        /**
+         * After gathering all the data then use the renderer
+         * to create the pdf
+         */
+        await Renderer.start(user, trial, session, linechartAxes, copAxes, timelineAxes);
 
-        let fxRaw = formRawLineChartData(records,750, 'Fx1', 'Fx2');
-        let fyRaw = formRawLineChartData(records,750, 'Fy1', 'Fy2');
-        let fzRaw = formRawLineChartData(records,750, 'Fz1', 'Fz2');
-
-        // Format the data from the csv to cop points
-        let cop = formCOPChartData(records, 750);
-
-        // Format the data from the csv to timeline points
-        let timelineFX = formTimelineChartData(records, 750,'Fx1','Fx2', trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max);
-        let timelineFΥ = formTimelineChartData(records, 750, 'Fy1', 'Fy2', trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max);
-        let timelineFΖ = formTimelineChartData(records, 750,'Fz1','Fz2', trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
-
-        // Generate the html for the pdf
-        let html = generateHTML(fx,fxRaw,fy,fyRaw,fz,fzRaw,cop,timelineFX,timelineFΥ,timelineFΖ)
-        var finalHtml = encodeURIComponent(html);
-        var options = {
-          format: 'A4',
-          headerTemplate: "<p></p>",
-          footerTemplate: "<p></p>",
-          displayHeaderFooter: false,
-          printBackground: true,
-          path: app.getPath("downloads")+"/"+trial.name+".pdf",
-          preferCSSPageSize: true,
-        }
-
-        // Create the pdf using puppeteer
-        const browser = await puppeteer.launch({
-            args: ['--no-sandbox'],
-            headless: true
-        });
-        const page = await browser.newPage();
-        await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
-          waitUntil: 'networkidle0',
-          timeout: 0
-        });
-        await page.emulateMediaType("print");
-        await page.pdf(options);
-        await browser.close();
-
-        // Automatically open pdf that is created
+        /**
+         * Automatically open pdf that is created 
+         */
         if (process.platform === "win64" || process.platform == "win32") {
           require('electron').shell.openExternal(`${app.getPath("downloads")}/${trial.name}.pdf`);
         } else {
           require('electron').shell.openPath(`${app.getPath("downloads")}/${trial.name}.pdf`);
         }
 
-        console.log('Done: PDF is created!');
-        e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
+        /**
+         * Reply to the window to stop the loading for the
+         * pdf preparation
+         */
+        if (win && win.window && !win.window.isDestroyed()) {
+          e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
+        }
       }
     });
   }
@@ -1207,7 +1194,7 @@ class Events {
         let { database, trialId } = d;
         if (database && trialId) {
           var db = new sqlite3.Database(
-            path.resolve(__dirname, `../../.meta/databases/${database}`)
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           // Find the trial and the details
@@ -1241,7 +1228,7 @@ class Events {
               })
             });
             await new Promise((resolve, reject) => {
-              fs.copyFile(path.resolve(__dirname, `../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`), file.filePath, (error) => {
+              fs.copyFile(path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`), file.filePath, (error) => {
                 if (error) {
                   reject(false);
                   return
