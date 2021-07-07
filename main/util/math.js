@@ -14,16 +14,12 @@ module.exports = class {
       return mx;
     }
 
-    for (var i = 1; i < rows.length - 1; i++){
+    for (var i = 1; i < rows.length - 1; ++i) {
       if (rows[i - 1] < rows[i] && rows[i] > rows[i + 1]) {
-        mx.push(rows[i]);
+        mx.push(rows[i]) 
       }
     }
-
-    if (rows[rows.length] > rows[rows.length - 1]) {
-      mx.push(rows[rows.length])
-    }
-
+    
     return mx;
   }
   static localMin(rows) {

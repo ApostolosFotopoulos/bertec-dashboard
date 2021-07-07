@@ -34,6 +34,7 @@ class Metrics {
 
       // Calculate the loading rate
       let [m] = math.localMax(rows[i].data)
+      console.log(m)
       if (m) {
         let maxIdx = rows[i].data.indexOf(m)
         let from = (20 * maxIdx) / m

@@ -514,14 +514,14 @@ class Renderer{
             </div>
           </div>
         </div>
-        ${this.genereateMeasumentsTable(lineChartAxes.fxRaw, lineChartAxes.fyRaw, lineChartAxes.fzRaw)}
+        ${this.genereateMeasumentsTable(lineChartAxes.fx, lineChartAxes.fy, lineChartAxes.fz)}
         <script>
-          ${this.generateLineChart(lineChartAxes.fx.left, lineChartAxes.fx.minY, lineChartAxes.fx.maxY, 'left-foot-fx', '#d32d41')}
-          ${this.generateLineChart(lineChartAxes.fx.right,lineChartAxes.fx.minY, lineChartAxes.fx.maxY, 'right-foot-fx', '#6ab187')}
-          ${this.generateLineChart(lineChartAxes.fy.left, lineChartAxes.fy.minY, lineChartAxes.fy.maxY, 'left-foot-fy', '#d32d41')}
-          ${this.generateLineChart(lineChartAxes.fy.right, lineChartAxes.fy.minY, lineChartAxes.fy.maxY, 'right-foot-fy', '#6ab187')}
-          ${this.generateLineChart(lineChartAxes.fz.left, lineChartAxes.fz.minY, lineChartAxes.fz.maxY, 'left-foot-fz', '#d32d41')}
-          ${this.generateLineChart(lineChartAxes.fz.right, lineChartAxes.fz.minY, lineChartAxes.fz.maxY, 'right-foot-fz', '#6ab187')}
+          ${this.generateLineChart(lineChartAxes.fxRaw.left, lineChartAxes.fxRaw.minY, lineChartAxes.fxRaw.maxY, 'left-foot-fx', '#d32d41')}
+          ${this.generateLineChart(lineChartAxes.fxRaw.right,lineChartAxes.fxRaw.minY, lineChartAxes.fxRaw.maxY, 'right-foot-fx', '#6ab187')}
+          ${this.generateLineChart(lineChartAxes.fyRaw.left, lineChartAxes.fyRaw.minY, lineChartAxes.fyRaw.maxY, 'left-foot-fy', '#d32d41')}
+          ${this.generateLineChart(lineChartAxes.fyRaw.right, lineChartAxes.fyRaw.minY, lineChartAxes.fyRaw.maxY, 'right-foot-fy', '#6ab187')}
+          ${this.generateLineChart(lineChartAxes.fzRaw.left, lineChartAxes.fzRaw.minY, lineChartAxes.fzRaw.maxY, 'left-foot-fz', '#d32d41')}
+          ${this.generateLineChart(lineChartAxes.fzRaw.right, lineChartAxes.fzRaw.minY, lineChartAxes.fzRaw.maxY, 'right-foot-fz', '#6ab187')}
           ${this.generateCOPChart(copAxes.left, 'left-foot-cop', '#d32d41')}
           ${this.generateCOPChart(copAxes.right, 'right-foot-cop', '#6ab187')}
           ${this.generateTimelineChart(timelineAxes.fx.left,timelineAxes.fx.minY,timelineAxes.fx.maxY,'left-foot-timeline-fx', '#d32d41',timelineAxes.fx.rangeMin,timelineAxes.fx.rangeMax)}

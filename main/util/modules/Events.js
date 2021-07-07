@@ -1320,12 +1320,12 @@ class Events {
              *  for each axis and each foot
              */
             const linechartAxes = Processor.lineChartAxes(records, user.weight);
-            const averageMetricLeftFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fxRaw.left)
-            const averageMetricRightFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fxRaw.right)
-            const averageMetricLeftFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fyRaw.left)
-            const averageMetricRightFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fyRaw.right)  
-            const averageMetricLeftFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fzRaw.left)
-            const averageMetricRightFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fzRaw.right)
+            const averageMetricLeftFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fx.left)
+            const averageMetricRightFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fx.right)
+            const averageMetricLeftFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fy.left)
+            const averageMetricRightFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fy.right)  
+            const averageMetricLeftFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fz.left)
+            const averageMetricRightFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fz.right)
             const maxLength = Math.max(...[
               averageMetricLeftFX.averageImpulses.length,
               averageMetricLeftFX.averageLRates.length,
