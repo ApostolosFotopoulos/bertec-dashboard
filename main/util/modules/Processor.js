@@ -1,6 +1,6 @@
 const { WEIGHT_THRESHOLD_PERCENT, FREQUENCY_THRESHOLD_PERCENT, FREQUENCY, STEP, RAW_STEP } = require('../constants');
 
-class Report {
+class Processor {
   static formLineChartData(records, weight, frequency, step, leftColumnName, rightColumnName) {
     // Right plate variables
     var rightPlateRows = 0
@@ -352,4 +352,4 @@ class Report {
   }
 }
 
-module.exports = Report;
+module.exports = Processor;

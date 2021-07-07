@@ -8,18 +8,20 @@ const {
   UPDATE_USER, UPDATE_USER_RESPONSE, CREATE_TAG, CREATE_TAG_RESPONSE, DELETE_TAG, DELETE_TAG_RESPONSE, FETCH_TAGS_TO_TAGS, FETCH_TAGS_TO_TAGS_RESPONSE,
   FETCH_TAGS_TO_USERS, FETCH_TAGS_TO_USERS_RESPONSE, FETCH_TAGS_FOR_SPECIFIC_USER, FETCH_TAGS_FOR_SPECIFIC_USER_RESPONSE,
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
-  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, FETCH_TRIALS_TO_VIEW_ALL, FETCH_TRIALS_TO_VIEW_ALL_RESPONSE,
-  CREATE_SESSION, CREATE_SESSION_RESPONSE, CREATE_TRIAL_RESPONSE, UPDATE_TRIAL, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE,
-  UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE, DOWNLOAD_TRIAL,EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD
+  FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, CREATE_SESSION, CREATE_SESSION_RESPONSE,
+  CREATE_TRIAL_RESPONSE, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE, UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE,
+  DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, DOWNLOAD_AVERAGE_METRICS_RESPONSE, DOWNLOAD_AVERAGE_METRICS
 } = require('../types')
 const path = require('path')
 const fs = require('fs')
 const { ipcMain, dialog, app } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const Report = require('./Report');
+const Processor = require('./Processor');
 const Renderer = require('./Renderer');
 var parse = require('csv-parse');
+const Metrics = require('./Metrics');
+var jsonexport = require('jsonexport');
 
 function groupBy(list, keyGetter) {
   const map = new Map();
@@ -33,6 +35,12 @@ function groupBy(list, keyGetter) {
     }
   });
   return map;
+}
+
+function arrayToCSV (data) {
+  csv = data.map(row => Object.values(row));
+  csv.unshift(Object.keys(data[0]));
+  return csv.join('\n');
 }
 
 class Events {
@@ -1152,15 +1160,13 @@ class Events {
             resolve(records);
           }));
         });
-
-        console.log(trial, user, session)
         
         /**
          * Calculate every parameter for every section of the report.
          */
-        const linechartAxes = Report.lineChartAxes(records, user.weight);
-        const copAxes = Report.copChartAxes(records, user.weight);
-        const timelineAxes = Report.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
+        const linechartAxes = Processor.lineChartAxes(records, user.weight);
+        const copAxes = Processor.copChartAxes(records, user.weight);
+        const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
 
         /**
          * After gathering all the data then use the renderer
@@ -1240,6 +1246,142 @@ class Events {
         }
       } catch (e) {
         co
+        throw new Error(e);
+      }
+    });
+  }
+
+  static downloadAverageMetrics(win) {
+    ipcMain.on(DOWNLOAD_AVERAGE_METRICS, async (e, d) => {
+      try {
+        let { database, trialId } = d;
+        if (database && trialId) {
+          var db = new sqlite3.Database(
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
+          );
+
+          /**
+           * Find the trial that has the provided id
+           */
+          let [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+
+          /**
+           * Get the user that is related with the above trial.
+           */
+          let [user] = await new Promise((resolve, reject) => {
+            db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+          db.close();
+
+          /**
+           * Open the dialog to get the filepath where the user wants to save the csv
+           */
+          let file = await dialog.showSaveDialog({
+            title: 'Select to save the average metrics from the data',
+            buttonLabel: 'Save',
+            defaultPath: app.getPath("downloads")+`/average_metrics_${trial.name}.csv`,
+          })
+
+          /**
+           * Calculate all the average metrics of all the curves
+           */
+          if (!file.canceled) {
+            /**
+             * Read the raw data from the csv that is saved for the current 
+             * trial.
+             */
+            let records = await new Promise((resolve, reject) => {
+              fs.createReadStream(path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)).pipe(parse({ columns: true, bom: true, delimiter:[";"] }, function (error, records) {
+                if (error) {
+                  reject(error)
+                  return
+                }
+                resolve(records);
+              }));
+            });
+            
+            
+            /**
+             *  Calculate the linechart data and the average metrics
+             *  for each axis and each foot
+             */
+            const linechartAxes = Processor.lineChartAxes(records, user.weight);
+            const averageMetricLeftFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fxRaw.left)
+            const averageMetricRightFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fxRaw.right)
+            const averageMetricLeftFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fyRaw.left)
+            const averageMetricRightFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fyRaw.right)  
+            const averageMetricLeftFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fzRaw.left)
+            const averageMetricRightFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fzRaw.right)
+            const maxLength = Math.max(...[
+              averageMetricLeftFX.averageImpulses.length,
+              averageMetricLeftFX.averageLRates.length,
+              averageMetricLeftFX.averageImpactPeakForce.length,
+              averageMetricLeftFX.averageTimeImpactPeakForce.length,
+              averageMetricRightFX.averageImpulses.length,
+              averageMetricRightFX.averageLRates.length,
+              averageMetricRightFX.averageImpactPeakForce.length,
+              averageMetricRightFX.averageTimeImpactPeakForce.length,
+              averageMetricLeftFY.averageImpulses.length,
+              averageMetricLeftFY.averageLRates.length,
+              averageMetricLeftFY.averageImpactPeakForce.length,
+              averageMetricLeftFY.averageTimeImpactPeakForce.length,
+              averageMetricRightFY.averageImpulses.length,
+              averageMetricRightFY.averageLRates.length,
+              averageMetricRightFY.averageImpactPeakForce.length,
+              averageMetricRightFY.averageTimeImpactPeakForce.length,
+              averageMetricLeftFZ.averageImpulses.length,
+              averageMetricLeftFZ.averageLRates.length,
+              averageMetricLeftFZ.averageImpactPeakForce.length,
+              averageMetricLeftFZ.averageTimeImpactPeakForce.length,
+              averageMetricRightFZ.averageImpulses.length,
+              averageMetricRightFZ.averageLRates.length,
+              averageMetricRightFZ.averageImpactPeakForce.length,
+              averageMetricRightFZ.averageTimeImpactPeakForce.length,
+            ])
+            let csv = 'ImpulseLeft(FX),LoadingRateLeft(FX),ImpactPeakForceLeft(FX),TimeImpactPeakForceLeft(FX),ImpulseRight(FX),LoadingRateRight(FX),ImpactPeakForceRight(FX),TimeImpactPeakForceRight(FX),' +
+              'ImpulseLeft(FY),LoadingRtaeLeft(FY),ImpactPeakForceLeft(FY),TimeImpactPeakForceLeft(FY),ImpulseRight(FY),LoadingRateRight(FY),ImpactPeakForceRight(FY),TimeImpactPeakForceRight(FY),' +
+              'ImpulseLeft(FZ),LoadingRateLeft(FZ),ImpactPeakForceLeft(FZ),TimeImpactPeakForceLeft(FZ),ImpulseRight(FZ),LoadingRateRight(FZ),ImpactPeakForceRight(FZ),TimeImpactPeakForceRight(FZ)\n'
+            for (var i = 0; i < maxLength; i++){
+              csv = csv +`${averageMetricLeftFX.averageImpulses[i] || ''},${averageMetricLeftFX.averageLRates[i] || ''},${averageMetricLeftFX.averageImpactPeakForce[i] || ''},${averageMetricLeftFX.averageTimeImpactPeakForce[i] || ''},${averageMetricRightFX.averageTimeImpactPeakForce[i] || ''},${averageMetricRightFX.averageLRates[i] || ''},${averageMetricRightFX.averageImpactPeakForce[i] || ''},${averageMetricRightFX.averageTimeImpactPeakForce[i] || ''},` +
+                `${averageMetricLeftFY.averageImpulses[i] || ''},${averageMetricLeftFY.averageLRates[i] || ''},${averageMetricLeftFY.averageImpactPeakForce[i] || ''},${averageMetricLeftFY.averageTimeImpactPeakForce[i] || ''},${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''},${averageMetricRightFY.averageLRates[i] || ''},${averageMetricRightFY.averageImpactPeakForce[i] || ''},${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''},` +
+                `${averageMetricLeftFZ.averageImpulses[i]|| ''},${averageMetricLeftFZ.averageLRates[i]|| ''},${averageMetricLeftFZ.averageImpactPeakForce[i]|| ''},${averageMetricLeftFZ.averageTimeImpactPeakForce[i]|| ''},${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''},${averageMetricRightFZ.averageLRates[i]|| ''},${averageMetricRightFX.averageImpactPeakForce[i]|| ''},${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''}\n`
+            }
+
+            await new Promise((resolve, reject) => {
+              fs.writeFile(file.filePath,csv, (error) => {
+                if (error) {
+                  reject(false);
+                  return
+                }
+                resolve(true);
+              })
+            });
+          }
+          
+          /**
+           * Reply to the window to stop the loading for the
+           * csv preparation
+           */
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply(DOWNLOAD_AVERAGE_METRICS_RESPONSE, {});
+          }
+        }
+      } catch (e) {
+        console.log(e)
         throw new Error(e);
       }
     });

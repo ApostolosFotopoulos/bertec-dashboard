@@ -102,6 +102,8 @@
                   <template v-slot:[`item.actions`]="{ item }">
                     <v-icon medium class="mr-2" @click="() => openEditTrialDialog(item)">mdi-pencil-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => downloadTrial(item)">mdi-download-outline</v-icon>
+                    <v-progress-circular v-if="loadingAverageMetrics && loadingAverageMetrics == item.id" indeterminate color="blue"></v-progress-circular>
+                    <v-icon medium class="mr-2" v-else @click="() => downloadAverageMetrics(item)">mdi-file-document</v-icon>
                     <v-progress-circular v-if="loadingTrialIdx && loadingTrialIdx == item.id" indeterminate color="blue"></v-progress-circular>
                     <v-icon medium class="mr-2" v-else @click="() => exportTrialReport(item)">mdi-file-pdf-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => openDeleteTrialDialog(item)">mdi-delete-outline</v-icon>
@@ -139,6 +141,8 @@ export default {
     openEditTrialDialog: Function,
     downloadTrial: Function,
     exportTrialReport: Function,
+    downloadAverageMetrics:Function,
+    loadingAverageMetrics: Number,
     loadingTrialIdx: Number,
   },
   mounted(){

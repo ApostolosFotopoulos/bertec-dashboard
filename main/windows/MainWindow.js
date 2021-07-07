@@ -228,6 +228,7 @@ module.exports = class {
     Events.deleteTrialListener(this.usersw);
     Events.downloadTrialListener(this.usersw);
     Events.exportTrialReportListener(this.usersw);
+    Events.downloadAverageMetrics(this.usersw);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {

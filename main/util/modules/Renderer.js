@@ -528,8 +528,8 @@ class Renderer{
           ${this.generateTimelineChart(timelineAxes.fx.right,timelineAxes.fx.minY,timelineAxes.fx.maxY,'right-timeline-fx', '#6ab187',timelineAxes.fx.rangeMin,timelineAxes.fx.rangeMax)}
           ${this.generateTimelineChart(timelineAxes.fy.left,timelineAxes.fy.minY,timelineAxes.fy.maxY,'left-foot-timeline-fy', '#d32d41',timelineAxes.fy.rangeMin,timelineAxes.fy.rangeMax)}
           ${this.generateTimelineChart(timelineAxes.fy.right,timelineAxes.fy.minY,timelineAxes.fy.maxY,'right-timeline-fy', '#6ab187',timelineAxes.fy.rangeMin,timelineAxes.fy.rangeMax)}
-          ${this.generateTimelineChart(timelineAxes.fz.left,timelineAxes.fz.minY,timelineAxes.fz.maxY,'left-foot-timeline-fz', '#d32d41',timelineAxes.fz.rangeMin,timelineAxes.fz.rangeMax)}
-          ${this.generateTimelineChart(timelineAxes.fz.right,timelineAxes.fz.minY,timelineAxes.fz.maxY,'right-timeline-fz', '#6ab187',timelineAxes.fz.rangeMin,timelineAxes.fz.rangeMax)}
+          ${this.generateTimelineChart(timelineAxes.fz.left,0,timelineAxes.fz.maxY,'left-foot-timeline-fz', '#d32d41',timelineAxes.fz.rangeMin,timelineAxes.fz.rangeMax)}
+          ${this.generateTimelineChart(timelineAxes.fz.right,0,timelineAxes.fz.maxY,'right-timeline-fz', '#6ab187',timelineAxes.fz.rangeMin,timelineAxes.fz.rangeMax)}
         </script>
       </body>
     </html>
