@@ -81,7 +81,7 @@ module.exports = class {
         this.window.loadURL(winURL);
       } else {
         this.window.loadURL(
-          "file://" + path.join(`${__dirname}`, "../dist/index.html")
+          "file://" + path.join(`${__dirname}`, "../../dist/index.html")
         );
       }
 

@@ -21,8 +21,8 @@ const Processor = require('./Processor');
 const Renderer = require('./Renderer');
 var parse = require('csv-parse');
 const Metrics = require('./Metrics');
-var jsonexport = require('jsonexport');
 
+// app.getPath("downloads")+'/.meta/databases/*.db' gia production
 function groupBy(list, keyGetter) {
   const map = new Map();
   list.forEach((item) => {

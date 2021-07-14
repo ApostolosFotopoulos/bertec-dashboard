@@ -1,16 +1,18 @@
 {
   "name": "bertec_dashboard",
   "version": "1.0.0",
-  "description": "",
+  "description": "Analysis Dashboard",
   "author": "",
   "scripts": {
-    "dev:renderer": "webpack serve --config renderer/webpack.config.js --mode development",
-    "dev:main": "electron ./main",
+    "dev-renderer": "webpack serve --config renderer/webpack.dev.js --mode development",
+    "dev-main": "electron ./main",
     "dev:win": "NODE_ENV=development npm-run-all -p dev:renderer dev:main",
     "dev:unix": "NODE_ENV=development concurrently --kill-others \"npm run dev:renderer\" \"npm run dev:main\" ",
-    "build:renderer": "webpack build --config renderer/webpack.config.js --mode production",
-    "build:mac": "electron-builder build --mac",
-    "build:windows": "electron-builder build --windows"
+    "prod":"NODE_ENV=production electron ./main",
+    "build:renderer": "webpack build --config renderer/webpack.prod.js --mode production",
+    "build:mac": "NODE_ENV=production electron-builder build --mac",
+    "build:linux": "NODE_ENV=production electron-builder build --linux",
+    "build:windows": "NODE_ENV=production electron-builder build --windows"
   },
   "main": "./main/index.js",
   "dependencies": {
@@ -62,28 +64,28 @@
     "appId": "bertec-dashboard",
     "productName": "bertec-dashboard",
     "files": [
-      "assets/**/*",
-      "data-fetching/**/*",
-      "electron-app/**/*",
-      "dist/**/*",
-      "node_modules/**/*",
-      "electron-helpers/**/*",
-      "main.js"
+      "./.meta/databases/*",
+      "./.meta/trials/*",
+      "./assets/**/*",
+      "./main/**/*",
+      "./dist/**/*",
+      "./node_modules/**/*",
+      "./main/index.js"
     ],
     "directories": {
       "output": "build"
     },
     "extraMetadata": {
-      "main": "main.js"
+      "main": "./main/index.js"
     },
     "mac": {
-      "icon": "icons/icon.png"
+      "icon": "./assets/icon.png"
     },
     "win": {
-      "icon": "icons/icon.png"
+      "icon": "./assets/icon.png"
     },
     "linux": {
-      "icon": "icons/icon.png"
+      "icon": "./assets/icon.png"
     }
   }
 }
