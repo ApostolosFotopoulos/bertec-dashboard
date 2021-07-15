@@ -1462,6 +1462,12 @@ class Events {
                 `${averageMetricLeftFY.averageImpulses[i] || ''},${averageMetricLeftFY.averageLRates[i] || ''},${averageMetricLeftFY.averageImpactPeakForce[i] || ''},${averageMetricLeftFY.averageTimeImpactPeakForce[i] || ''},${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''},${averageMetricRightFY.averageLRates[i] || ''},${averageMetricRightFY.averageImpactPeakForce[i] || ''},${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''},` +
                 `${averageMetricLeftFZ.averageImpulses[i]|| ''},${averageMetricLeftFZ.averageLRates[i]|| ''},${averageMetricLeftFZ.averageImpactPeakForce[i]|| ''},${averageMetricLeftFZ.averageTimeImpactPeakForce[i]|| ''},${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''},${averageMetricRightFZ.averageLRates[i]|| ''},${averageMetricRightFX.averageImpactPeakForce[i]|| ''},${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''}\n`
             }
+            
+            // Calculate the averages of the column
+            csv = csv + `=AVERAGE(A2:A${maxLength + 1}),=AVERAGE(B2:B${maxLength + 1}),=AVERAGE(C2:C${maxLength + 1}),=AVERAGE(D2:D${maxLength + 1}),=AVERAGE(E2:E${maxLength + 1}),=AVERAGE(F2:F${maxLength + 1}),=AVERAGE(G2:G${maxLength + 1}),` +
+              `=AVERAGE(H2: H${maxLength + 1}),=AVERAGE(I2: I${maxLength + 1}),=AVERAGE(J2:J${maxLength + 1}),=AVERAGE(K2:K${maxLength + 1}),=AVERAGE(L2:L${maxLength + 1}),=AVERAGE(M2:M${maxLength + 1}),=AVERAGE(N2:N${maxLength + 1}),` +
+              `=AVERAGE(O2:O${maxLength + 1}),=AVERAGE(P2:P${maxLength + 1}),=AVERAGE(Q2:Q${maxLength + 1}),=AVERAGE(R2:R${maxLength + 1}),=AVERAGE(S2:S${maxLength + 1}),=AVERAGE(T2:T${maxLength + 1}),=AVERAGE(U2:U${maxLength + 1}),=AVERAGE(V2:V${maxLength + 1}),` +
+              `=AVERAGE(W2:W${maxLength + 1}),=AVERAGE(X2:X${maxLength + 1})\n`
 
             await new Promise((resolve, reject) => {
               fs.writeFile(file.filePath,csv, (error) => {
