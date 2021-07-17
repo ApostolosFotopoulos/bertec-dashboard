@@ -250,7 +250,7 @@ class Processor {
       var fz2 = Number(records[i]['Fz2']);
       var entryLeft = (Number(records[i][leftColumnName]) / Number(weight))*100;
       var entryRight = (Number(records[i][rightColumnName]) / Number(weight))*100;
-      var threshold = Number(0.05 * weight);
+      var threshold = 500;
 
       if (isRightPlateLocked) {
         if (fz2 > threshold) {

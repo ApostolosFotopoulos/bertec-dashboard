@@ -740,7 +740,7 @@ export default new Vuex.Store({
 					// threshold
 					state.copChart.leftSteps += 1;
 					let d = state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data;
-					d.push([copx1, copy1]);
+					d.push([ -copx1, -copy1]);
 					state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = d;
 				}
 				if (fz1 < threshold) {
@@ -786,7 +786,7 @@ export default new Vuex.Store({
 					// threshold and activate the step process
 					state.copChart.isLeftPlateLocked = true;
 					let d = state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data;
-					d.push([ copx1, copy1 ]);
+					d.push([ -copx1, -copy1 ]);
 					state.copChart.leftPlateSeries[state.copChart.leftPlateRows].data = d;
 				}
 			}
@@ -803,7 +803,7 @@ export default new Vuex.Store({
 					// threshold
 					state.copChart.rightSteps += 1;
 					let d = state.copChart.righPlateSeries[state.copChart.rightPlateRows].data;
-					d.push([copx2, copy2]);
+					d.push([-copx2, -copy2]);
 					state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = d;
 				}
 				if (fz2 < threshold) {
@@ -849,7 +849,7 @@ export default new Vuex.Store({
 					// threshold and activate the step process
 					state.copChart.isRightPlateLocked = true;
 					let d = state.copChart.righPlateSeries[state.copChart.rightPlateRows].data;
-					d.push([copx2, copy2]);
+					d.push([-copx2, -copy2]);
 					state.copChart.righPlateSeries[state.copChart.rightPlateRows].data = d;
 				}
 			}
@@ -952,11 +952,11 @@ export default new Vuex.Store({
 									state.timeline.dataType === 'Normalized'
 										? Math.ceil(state.timeline.leftPlateMax / 10) * 10
 										: Math.ceil(state.timeline.leftPlateMax / 100) * 100;
-								state.timeline.shouldUpdateLeft = true;
 							}
 						}
 					}
 					state.timeline.leftPlateMax = -1;
+					state.timeline.shouldUpdateLeft = true;
 				}
 			} else {
 				if (fz1 > threshold) {
@@ -1063,12 +1063,12 @@ export default new Vuex.Store({
 									state.timeline.dataType === 'Normalized'
 										? Math.ceil(state.timeline.rightPlateMax / 10) * 10
 										: Math.ceil(state.timeline.rightPlateMax / 100) * 100;
-								state.timeline.shouldUpdateRight = true;
 							}
 						}
 					}
 
 					state.timeline.rightPlateMax = -1;
+					state.timeline.shouldUpdateRight = true;
 				}
 			} else {
 				if (fz2 > threshold) {

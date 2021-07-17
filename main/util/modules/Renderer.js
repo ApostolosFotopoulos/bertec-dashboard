@@ -15,6 +15,10 @@ class Renderer{
           enabled:false,
           show:false
         },
+        markers: {
+          size:2,
+          strokeColors: '${color}',
+        },
         grid:{
           padding:{
             top:0,
