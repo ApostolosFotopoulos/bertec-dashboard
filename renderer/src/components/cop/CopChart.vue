@@ -64,7 +64,7 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 const defaultOptions = require("../../../../assets/options/copChart.json");
-const { COP_SESSION, CREATE_TRIAL, UPDATE_TRIAL, CREATE_TRIAL_RESPONSE,START_TRIAL_WRITING, STOP_TRIAL_WRITING } = require("../../../../main/util/types");
+const { COP_SESSION, CREATE_TRIAL, UPDATE_TRIAL, CREATE_TRIAL_RESPONSE,START_TRIAL_WRITING, STOP_TRIAL_WRITING,DOWNLOAD_AVERAGE_METRICS_RESPONSE,DOWNLOAD_AVERAGE_METRICS} = require("../../../../main/util/types");
 
 import VueApexCharts from "vue-apexcharts";
 export default {
@@ -268,14 +268,25 @@ export default {
     ipcRenderer.on(CREATE_TRIAL_RESPONSE, (_, responseData) => {
       this.isTrialRunning = true;
       this.$store.commit("setTrial", responseData.trial);
-      console.log(responseData.trial)
-      this.$store.commit("setTrial",responseData.trial)
+      this.$store.commit("setTrialId",responseData.trialId)
       ipcRenderer.send(START_TRIAL_WRITING,{ trial: responseData.trial })
       this.timeoutInstance = setTimeout(() => {
-        this.isTrialRunning = false;
-        this.$store.commit("setTrial", "");
-        ipcRenderer.send(STOP_TRIAL_WRITING,{})
+        ipcRenderer.send(STOP_TRIAL_WRITING,{
+          database: this.$store.state.options.database , 
+          session: this.$store.state.options.session ,
+          trialId: this.$store.state.options.trialId 
+        })
+        ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS,{
+          database: this.$store.state.options.database , 
+          trialId: this.$store.state.options.trialId 
+        })
       }, this.$store.state.options.timeout * 1000);
+    });
+
+    ipcRenderer.on(DOWNLOAD_AVERAGE_METRICS_RESPONSE, (_, responseData) => {
+      this.isTrialRunning = false;
+      this.$store.commit("setTrial", "");
+      this.$store.commit("setTrialId",-1);
     });
   },
   methods: {
@@ -290,19 +301,20 @@ export default {
       this.$store.commit("setSession", responseData.session);
       this.$store.commit("setDatabase", responseData.database);
       this.$store.commit("setUser", responseData.user);
-
-      if(this.$store.state.options.trial != ""){
-        ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
-      }
     },
     startStopTrial(){
       if(this.isTrialRunning){
         clearTimeout(this.timeoutInstance);
-        this.isTrialRunning = false;
-        this.$store.commit("setTrial","")
-        ipcRenderer.send(STOP_TRIAL_WRITING,{})
+        ipcRenderer.send(STOP_TRIAL_WRITING,{
+          database: this.$store.state.options.database , 
+          session: this.$store.state.options.session ,
+          trialId: this.$store.state.options.trialId 
+        })
+        ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS,{
+          database: this.$store.state.options.database , 
+          trialId: this.$store.state.options.trialId 
+        })
       } else {
-        console.log(this.$store.state.options.session)
         if(this.$store.state.options.session != -1){
           ipcRenderer.send(CREATE_TRIAL,{ 
             session: this.$store.state.options.session,

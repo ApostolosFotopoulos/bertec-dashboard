@@ -175,10 +175,6 @@ export default {
       this.$store.commit("setDatabase", responseData.database);
       this.$store.commit("setUser", responseData.user);
 
-      if(this.$store.state.options.trial != ""){
-        ipcRenderer.send(UPDATE_TRIAL,{ database: responseData.database , trial: this.$store.state.options.trial, data: responseData.rows })
-      }
-
       if (this.$store.state.lineChart.shouldUpdateLeft) {
         this.updateLeftChart();
         this.$store.commit("setShouldUpdateLeftAtLineChart", false);

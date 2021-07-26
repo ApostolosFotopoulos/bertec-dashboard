@@ -31,8 +31,7 @@
       :openEditTrialDialog="openEditTrialDialog"
       :downloadTrial="downloadTrial"
       :exportTrialReport="exportTrialReport"
-      :downloadAverageMetrics="downloadAverageMetrics"
-      :loadingAverageMetrics="loadingAverageMetrics"
+      :editAverageMetrics="editAverageMetrics"
       :loadingTrialIdx="loadingTrialIdx"
     />
     <UserDetails
@@ -66,8 +65,7 @@ const {
   DOWNLOAD_TRIAL,
   EXPORT_TRIAL_REPORT,
   EXPORT_TRIAL_REPORT_RESPONSE,
-  DOWNLOAD_AVERAGE_METRICS,
-  DOWNLOAD_AVERAGE_METRICS_RESPONSE
+  EDIT_AVERAGE_METRICS
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
@@ -126,11 +124,6 @@ export default {
       console.log('RESPONSEE.....')
       this.loadingTrialIdx = -1
     });
-
-    ipcRenderer.on(DOWNLOAD_AVERAGE_METRICS_RESPONSE, (_, responseData) => {
-      console.log('RESPONSEE AVERAGE.....')
-      this.loadingAverageMetrics = -1
-    });
   },
   data() {
     return {
@@ -152,7 +145,6 @@ export default {
       editTrialDialog:false,
       trialToEdit:{},
       loadingTrialIdx:-1,
-      loadingAverageMetrics: -1,
       search: {
         firstName: "",
         lastName: "",
@@ -354,10 +346,8 @@ export default {
         trialId: t.id,
       });
     },
-    downloadAverageMetrics(t){
-      console.log('Download metrics....')
-      this.loadingAverageMetrics = t.id
-      ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS, {
+    editAverageMetrics(t){
+      ipcRenderer.send(EDIT_AVERAGE_METRICS, {
         database: this.selectedDatabase,
         trialId: t.id,
       });

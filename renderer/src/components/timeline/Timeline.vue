@@ -180,11 +180,11 @@ export default {
       this.$store.commit("setUser", responseData.user);
 
       if(this.$store.state.options.trial != ""){
-        ipcRenderer.send(UPDATE_TRIAL,{ 
-          database: responseData.database , 
-          trial: this.$store.state.options.trial,
-          data: responseData.rows,
-        })
+        // ipcRenderer.send(UPDATE_TRIAL,{ 
+        //   database: responseData.database , 
+        //   trial: this.$store.state.options.trial,
+        //   data: responseData.rows,
+        // })
         ipcRenderer.send(UPDATE_TRIAL_ZONES_AND_THRESHOLD, {
           database: responseData.database , 
           trialId: this.$store.state.options.trialId,

@@ -10,7 +10,8 @@ const {
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, CREATE_SESSION, CREATE_SESSION_RESPONSE,
   CREATE_TRIAL_RESPONSE, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE, UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE,
-  DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, DOWNLOAD_AVERAGE_METRICS_RESPONSE, DOWNLOAD_AVERAGE_METRICS
+  DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, DOWNLOAD_AVERAGE_METRICS_RESPONSE, DOWNLOAD_AVERAGE_METRICS,
+  EDIT_AVERAGE_METRICS
 } = require('../types')
 const path = require('path')
 const fs = require('fs')
@@ -88,6 +89,21 @@ class Events {
                   " fx_zone_min integer, fx_zone_max, fx_trial_threshold, fy_zone_min integer, fy_zone_max, fy_trial_threshold, fz_zone_min integer, fz_zone_max, fz_trial_threshold)"
                 );
               });
+
+              await new Promise((resolve, reject) => {
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`))) {
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`));
+                  resolve(true);
+                }
+              });
+
+               await new Promise((resolve, reject) => {
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials/${database}`))) {
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/trials/${database}`));
+                  resolve(true);
+                }
+               });
+              
               db.close();
               console.log("[SUCCESS]: Database successfully created")
               e.reply(CREATE_DATABASE_RESPONSE, { error: false })
@@ -1385,19 +1401,6 @@ class Events {
           });
           db.close();
 
-          /**
-           * Open the dialog to get the filepath where the user wants to save the csv
-           */
-          let file = await dialog.showSaveDialog({
-            title: 'Select to save the average metrics from the data',
-            buttonLabel: 'Save',
-            defaultPath: app.getPath("downloads")+`/average_metrics_${trial.name}.csv`,
-          })
-
-          /**
-           * Calculate all the average metrics of all the curves
-           */
-          if (!file.canceled) {
             /**
              * Read the raw data from the csv that is saved for the current 
              * trial.
@@ -1473,7 +1476,7 @@ class Events {
               `=AVERAGE(W2:W${maxLength + 1});=AVERAGE(X2:X${maxLength + 1});=AVERAGE(Y2:Y${maxLength + 1});\n`
 
             await new Promise((resolve, reject) => {
-              fs.writeFile(file.filePath,csv, (error) => {
+              fs.writeFile(path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`),csv, (error) => {
                 if (error) {
                   reject(false);
                   return
@@ -1481,23 +1484,69 @@ class Events {
                 resolve(true);
               })
             });
-          }
 
           /**
            * Automatically open pdf that is created 
            */
           if (process.platform === "win64" || process.platform == "win32") {
-            require('electron').shell.openExternal(file.filePath);
+            require('electron').shell.openExternal(
+               path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+            );
           } else {
-            require('electron').shell.openPath(file.filePath);
+            require('electron').shell.openPath(
+              path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+            );
           }
           
           /**
            * Reply to the window to stop the loading for the
            * csv preparation
            */
-          if (win && win.window && !win.window.isDestroyed()) {
-            e.reply(DOWNLOAD_AVERAGE_METRICS_RESPONSE, {});
+           e.reply(DOWNLOAD_AVERAGE_METRICS_RESPONSE, {});
+        }
+      } catch (e) {
+        console.log(e)
+        throw new Error(e);
+      }
+    });
+  }
+  static editAverageMetrics(win) {
+    ipcMain.on(EDIT_AVERAGE_METRICS, async (e, d) => {
+      try {
+        
+        let { database, trialId } = d;
+        if (database && trialId) {
+          var db = new sqlite3.Database(
+            process.env.NODE_ENV
+              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
+              : app.getPath("downloads") + `/.meta/databases/${database}`
+          );
+
+          /**
+           * Find the trial that has the provided id
+           */
+          let [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+
+          /**
+           * Automatically open pdf that is created 
+           */
+  
+          if (process.platform === "win64" || process.platform == "win32") {
+            require('electron').shell.openExternal(
+               path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+            );
+          } else {
+            require('electron').shell.openPath(
+              path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+            );
           }
         }
       } catch (e) {
