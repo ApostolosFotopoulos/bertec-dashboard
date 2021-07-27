@@ -114,8 +114,8 @@ class Processor {
     rightPlateFinalSeries.shift();
 
     return {
-      left: leftPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
-      right: rightPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
+      left: validSteps? leftPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)): leftPlateFinalSeries,
+      right: validSteps?rightPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)):rightPlateFinalSeries,
       maxY,
       minY,
     };
@@ -230,8 +230,8 @@ class Processor {
     rightPlateFinalSeries.shift();
 
     return {
-      left: leftPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
-      right: rightPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
+      left: validSteps?leftPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)):leftPlateFinalSeries,
+      right: validSteps?rightPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)):rightPlateFinalSeries,
     };
   }
 
@@ -336,8 +336,8 @@ class Processor {
     minY = Math.min(...[minLeft, minRight])
 
     return {
-      left: leftPlateSeries[0].data.filter((_,idx) => validSteps.includes(`${idx+1}`)),
-      right: rightPlateSeries[0].data.filter((_,idx) => validSteps.includes(`${idx+1}`)),
+      left: validSteps?leftPlateSeries[0].data.filter((_,idx) => validSteps.includes(`${idx+1}`)):leftPlateSeries[0].data,
+      right: validSteps?rightPlateSeries[0].data.filter((_,idx) => validSteps.includes(`${idx+1}`)):rightPlateSeries[0].data,
       isInsideLeftRange,
       isInsideRightRange,
       trialThreshold,

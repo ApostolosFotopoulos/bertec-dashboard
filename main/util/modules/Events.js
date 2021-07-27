@@ -1278,7 +1278,7 @@ class Events {
         
         /** Get only the valid steps that the user has selected */
         let validSteps = metrics.map(m => m["Step"]).filter(s => Number(s) != NaN && Number(s) != 0)
-        
+        console.log(validSteps)
         /**
          * Calculate every parameter for every section of the report.
          */
