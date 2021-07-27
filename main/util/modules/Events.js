@@ -1258,13 +1258,33 @@ class Events {
             resolve(records);
           }));
         });
+
+        /**
+         * Read the metrics data from the csv to see what steps to include
+         */
+        let metrics = await new Promise((resolve, reject) => {
+          fs.createReadStream(
+            process.env.NODE_ENV
+            ? path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+            : app.getPath("downloads") + `/.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`
+            ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+            if (error) {
+              reject(error)
+              return
+            }
+            resolve(records);
+          }));
+        });
+        
+        /** Get only the valid steps that the user has selected */
+        let validSteps = metrics.map(m => m["Step"]).filter(s => Number(s) != NaN && Number(s) != 0)
         
         /**
          * Calculate every parameter for every section of the report.
          */
-        const linechartAxes = Processor.lineChartAxes(records, user.weight);
-        const copAxes = Processor.copChartAxes(records, user.weight);
-        const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max);
+        const linechartAxes = Processor.lineChartAxes(records, user.weight, validSteps);
+        const copAxes = Processor.copChartAxes(records, user.weight,validSteps);
+        const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max,validSteps);
 
         /**
          * After gathering all the data then use the renderer
@@ -1457,7 +1477,7 @@ class Events {
               averageMetricRightFZ.averageImpactPeakForce.length,
               averageMetricRightFZ.averageTimeImpactPeakForce.length,
             ])
-            let csv = 'Trial;ImpulseLeft(FX);LoadingRateLeft(FX);ImpactPeakForceLeft(FX);TimeImpactPeakForceLeft(FX);ImpulseRight(FX);LoadingRateRight(FX);ImpactPeakForceRight(FX);TimeImpactPeakForceRight(FX);' +
+            let csv = 'Step;ImpulseLeft(FX);LoadingRateLeft(FX);ImpactPeakForceLeft(FX);TimeImpactPeakForceLeft(FX);ImpulseRight(FX);LoadingRateRight(FX);ImpactPeakForceRight(FX);TimeImpactPeakForceRight(FX);' +
               'ImpulseLeft(FY);LoadingRtaeLeft(FY);ImpactPeakForceLeft(FY);TimeImpactPeakForceLeft(FY);ImpulseRight(FY);LoadingRateRight(FY);ImpactPeakForceRight(FY);TimeImpactPeakForceRight(FY);' +
               'ImpulseLeft(FZ);LoadingRateLeft(FZ);ImpactPeakForceLeft(FZ);TimeImpactPeakForceLeft(FZ);ImpulseRight(FZ);LoadingRateRight(FZ);ImpactPeakForceRight(FZ);TimeImpactPeakForceRight(FZ)\n'
             for (var i = 0; i < maxLength; i++){
@@ -1473,7 +1493,7 @@ class Events {
             csv = csv + `;=AVERAGE(B2:B${maxLength + 1});=AVERAGE(C2:C${maxLength + 1});=AVERAGE(D2:D${maxLength + 1});=AVERAGE(E2:E${maxLength + 1});=AVERAGE(F2:F${maxLength + 1});=AVERAGE(G2:G${maxLength + 1});` +
               `=AVERAGE(H2: H${maxLength + 1});=AVERAGE(I2: I${maxLength + 1});=AVERAGE(J2:J${maxLength + 1});=AVERAGE(K2:K${maxLength + 1});=AVERAGE(L2:L${maxLength + 1});=AVERAGE(M2:M${maxLength + 1});=AVERAGE(N2:N${maxLength + 1});` +
               `=AVERAGE(O2:O${maxLength + 1});=AVERAGE(P2:P${maxLength + 1});=AVERAGE(Q2:Q${maxLength + 1});=AVERAGE(R2:R${maxLength + 1});=AVERAGE(S2:S${maxLength + 1});=AVERAGE(T2:T${maxLength + 1});=AVERAGE(U2:U${maxLength + 1});=AVERAGE(V2:V${maxLength + 1});` +
-              `=AVERAGE(W2:W${maxLength + 1});=AVERAGE(X2:X${maxLength + 1});=AVERAGE(Y2:Y${maxLength + 1});\n`
+              `=AVERAGE(W2:W${maxLength + 1});=AVERAGE(X2:X${maxLength + 1});=AVERAGE(Y2:Y${maxLength + 1})\n`
 
             await new Promise((resolve, reject) => {
               fs.writeFile(path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`),csv, (error) => {

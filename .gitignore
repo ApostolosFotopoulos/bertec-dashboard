@@ -4,3 +4,4 @@ renderer/dist
 node_modules
 package-lock.json
 *.pdf
+.DS_Store

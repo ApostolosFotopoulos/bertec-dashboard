@@ -1,7 +1,7 @@
 const { WEIGHT_THRESHOLD_PERCENT, FREQUENCY_THRESHOLD_PERCENT, FREQUENCY, STEP, RAW_STEP } = require('../constants');
 
 class Processor {
-  static formLineChartData(records, weight, frequency, step, leftColumnName, rightColumnName) {
+  static formLineChartData(records, weight, frequency, step, leftColumnName, rightColumnName, validSteps) {
     // Right plate variables
     var rightPlateRows = 0
     var rightSteps = 0
@@ -109,23 +109,27 @@ class Processor {
       }
     }
 
+    // Remove the first element of the array
+    leftPlateFinalSeries.shift();
+    rightPlateFinalSeries.shift();
+
     return {
-      left: leftPlateFinalSeries,
-      right: rightPlateFinalSeries,
+      left: leftPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
+      right: rightPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
       maxY,
       minY,
     };
   }
 
-  static lineChartAxes(records, weight) {
+  static lineChartAxes(records, weight, validSteps) {
 
-    let fx = this.formLineChartData(records, weight, FREQUENCY, STEP, 'Fx1', 'Fx2');
-    let fy = this.formLineChartData(records, weight, FREQUENCY, STEP, 'Fy1', 'Fy2');
-    let fz = this.formLineChartData(records, weight, FREQUENCY, STEP, 'Fz1', 'Fz2');  
+    let fx = this.formLineChartData(records, weight, FREQUENCY, STEP, 'Fx1', 'Fx2',validSteps);
+    let fy = this.formLineChartData(records, weight, FREQUENCY, STEP, 'Fy1', 'Fy2',validSteps);
+    let fz = this.formLineChartData(records, weight, FREQUENCY, STEP, 'Fz1', 'Fz2',validSteps);  
 
-    let fxRaw = this.formLineChartData(records, weight, FREQUENCY, RAW_STEP, 'Fx1', 'Fx2');
-    let fyRaw = this.formLineChartData(records, weight, FREQUENCY, RAW_STEP, 'Fy1', 'Fy2');
-    let fzRaw = this.formLineChartData(records, weight, FREQUENCY, RAW_STEP, 'Fz1', 'Fz2');
+    let fxRaw = this.formLineChartData(records, weight, FREQUENCY, RAW_STEP, 'Fx1', 'Fx2',validSteps);
+    let fyRaw = this.formLineChartData(records, weight, FREQUENCY, RAW_STEP, 'Fy1', 'Fy2',validSteps);
+    let fzRaw = this.formLineChartData(records, weight, FREQUENCY, RAW_STEP, 'Fz1', 'Fz2',validSteps);
 
     return {
       fx,
@@ -137,7 +141,7 @@ class Processor {
     }
   }
 
-  static formCOPChartData(records, weight, frequency, step) {
+  static formCOPChartData(records, weight, frequency, step,validSteps) {
 
     // Right plate variables
     var rightPlateRows = 0
@@ -221,17 +225,21 @@ class Processor {
       }
     }
 
+    // Remove the first element of the array
+    leftPlateFinalSeries.shift();
+    rightPlateFinalSeries.shift();
+
     return {
-      left: leftPlateFinalSeries,
-      right: rightPlateFinalSeries,
+      left: leftPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
+      right: rightPlateFinalSeries.filter((_,idx) => validSteps.includes(`${idx+1}`)),
     };
   }
 
-  static copChartAxes(records, weight) {
-    return this.formCOPChartData(records, weight, FREQUENCY, STEP)
+  static copChartAxes(records, weight,validSteps) {
+    return this.formCOPChartData(records, weight, FREQUENCY, STEP, validSteps)
   }
 
-  static formTimelineChartData = (records, weight, step, leftColumnName, rightColumnName, trialThreshold, rangeMin, rangeMax) => {
+  static formTimelineChartData = (records, weight, step, leftColumnName, rightColumnName, trialThreshold, rangeMin, rangeMax,validSteps) => {
     
     // Right plate variables
     var rightPlateMax = -1;
@@ -328,8 +336,8 @@ class Processor {
     minY = Math.min(...[minLeft, minRight])
 
     return {
-      left: leftPlateSeries[0].data,
-      right: rightPlateSeries[0].data,
+      left: leftPlateSeries[0].data.filter((_,idx) => validSteps.includes(`${idx+1}`)),
+      right: rightPlateSeries[0].data.filter((_,idx) => validSteps.includes(`${idx+1}`)),
       isInsideLeftRange,
       isInsideRightRange,
       trialThreshold,
@@ -340,10 +348,10 @@ class Processor {
     };
   }
 
-  static timelineAxes(records, weight, fx_threshold, fx_zone_min, fx_zone_max, fy_threshold, fy_zone_min, fy_zone_max, fz_threshold, fz_zone_min, fz_zone_max) {
-    let fx = this.formTimelineChartData(records, weight, STEP, 'Fx1', 'Fx2', fx_threshold, fx_zone_min, fx_zone_max);
-    let fy = this.formTimelineChartData(records, weight, STEP, 'Fy1', 'Fy2', fy_threshold, fy_zone_min, fy_zone_max);
-    let fz = this.formTimelineChartData(records, weight, STEP, 'Fz1', 'Fz2', fz_threshold, fz_zone_min, fz_zone_max);
+  static timelineAxes(records, weight, fx_threshold, fx_zone_min, fx_zone_max, fy_threshold, fy_zone_min, fy_zone_max, fz_threshold, fz_zone_min, fz_zone_max,validSteps) {
+    let fx = this.formTimelineChartData(records, weight, STEP, 'Fx1', 'Fx2', fx_threshold, fx_zone_min, fx_zone_max,validSteps);
+    let fy = this.formTimelineChartData(records, weight, STEP, 'Fy1', 'Fy2', fy_threshold, fy_zone_min, fy_zone_max,validSteps);
+    let fz = this.formTimelineChartData(records, weight, STEP, 'Fz1', 'Fz2', fz_threshold, fz_zone_min, fz_zone_max,validSteps);
     return {
       fx,
       fy,
