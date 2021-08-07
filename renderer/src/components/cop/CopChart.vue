@@ -64,7 +64,7 @@
 <script>
 const { ipcRenderer } = window.require("electron");
 const defaultOptions = require("../../../../assets/options/copChart.json");
-const { COP_SESSION, CREATE_TRIAL, UPDATE_TRIAL, CREATE_TRIAL_RESPONSE,START_TRIAL_WRITING, STOP_TRIAL_WRITING,DOWNLOAD_AVERAGE_METRICS_RESPONSE,DOWNLOAD_AVERAGE_METRICS} = require("../../../../main/util/types");
+const { COP_SESSION, CREATE_TRIAL, UPDATE_TRIAL, CREATE_TRIAL_RESPONSE,START_TRIAL_WRITING, STOP_TRIAL_WRITING,AFTER_TRIAL_PROCESS_RESPONSE,AFTER_TRIAL_PROCESS} = require("../../../../main/util/types");
 
 import VueApexCharts from "vue-apexcharts";
 export default {
@@ -276,14 +276,14 @@ export default {
           session: this.$store.state.options.session ,
           trialId: this.$store.state.options.trialId 
         })
-        ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS,{
+        ipcRenderer.send(AFTER_TRIAL_PROCESS,{
           database: this.$store.state.options.database , 
           trialId: this.$store.state.options.trialId 
         })
       }, this.$store.state.options.timeout * 1000);
     });
 
-    ipcRenderer.on(DOWNLOAD_AVERAGE_METRICS_RESPONSE, (_, responseData) => {
+    ipcRenderer.on(AFTER_TRIAL_PROCESS_RESPONSE, (_, responseData) => {
       this.isTrialRunning = false;
       this.$store.commit("setTrial", "");
       this.$store.commit("setTrialId",-1);
@@ -310,7 +310,7 @@ export default {
           session: this.$store.state.options.session ,
           trialId: this.$store.state.options.trialId 
         })
-        ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS,{
+        ipcRenderer.send(AFTER_TRIAL_PROCESS,{
           database: this.$store.state.options.database , 
           trialId: this.$store.state.options.trialId 
         })

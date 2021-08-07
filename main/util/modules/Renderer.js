@@ -1,10 +1,10 @@
 const moment = require('moment');
 const { app } = require("electron");
-const puppeteer = require('puppeteer');
 const Metrics = require('./Metrics');
+var html_to_pdf = require('html-pdf-node');
 
 class Renderer{
-  static generateTimelineChart(row,min,max, id, color, rangeMin, rangeMax) {
+  static generateTimelineChart(row, min, max, id, color, rangeMin, rangeMax) {
     return `
       var options = {
         series:[{
@@ -546,29 +546,14 @@ class Renderer{
       return new Promise(async (resolve, reject) => {
         try {
           const html = this.generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes);
-          var options = {
-            format: 'A4',
-            headerTemplate: "<p></p>",
-            footerTemplate: "<p></p>",
-            displayHeaderFooter: false,
-            printBackground: true,
-            path: app.getPath("downloads")+"/"+trial.name+".pdf",
-            preferCSSPageSize: true,
-          }
-
-          // Create the pdf using puppeteer
-          const browser = await puppeteer.launch({
-            args: ['--no-sandbox'],
-            headless: true
+          let file = { content: `${decodeURIComponent(html)}` }
+          let options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf"};
+          await new Promise((resolve, reject) => {
+            html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
+              console.log("PDF Buffer:-", pdfBuffer);
+              resolve();
+            });
           });
-          const page = await browser.newPage();
-          await page.goto(`data:text/html;charset=UTF-8,${html}`, {
-            waitUntil: 'networkidle0',
-            timeout: 0
-          });
-          await page.emulateMediaType("print");
-          await page.pdf(options);
-          await browser.close();
           resolve();
         } catch (e) {
           return reject(e);

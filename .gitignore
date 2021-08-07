@@ -3,5 +3,6 @@ dist
 renderer/dist
 node_modules
 package-lock.json
+yarn.lock
 *.pdf
 .DS_Store

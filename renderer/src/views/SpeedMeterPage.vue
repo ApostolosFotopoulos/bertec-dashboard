@@ -70,7 +70,7 @@ const { ipcRenderer } = window.require("electron");
 import SpeedMetersCharts from "../components/speedmeter/SpeedMetersCharts.vue";
 import Statistics from "../components/speedmeter/Statistics.vue";
 import History from "../components/speedmeter/History.vue";
-const { CREATE_TRIAL, CREATE_TRIAL_RESPONSE, START_TRIAL_WRITING, STOP_TRIAL_WRITING, DOWNLOAD_AVERAGE_METRICS, DOWNLOAD_AVERAGE_METRICS_RESPONSE } = require("../../../main/util/types");
+const { CREATE_TRIAL, CREATE_TRIAL_RESPONSE, START_TRIAL_WRITING, STOP_TRIAL_WRITING, AFTER_TRIAL_PROCESS, AFTER_TRIAL_PROCESS_RESPONSE } = require("../../../main/util/types");
 
 export default {
   components: {
@@ -96,14 +96,14 @@ export default {
           session: this.$store.state.options.session ,
           trialId: this.$store.state.options.trialId 
         })
-        ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS,{
-          database: this.$store.state.options.database , 
+        ipcRenderer.send(AFTER_TRIAL_PROCESS,{
+            database: this.$store.state.options.database , 
           trialId: this.$store.state.options.trialId 
         })
       }, this.$store.state.options.timeout * 1000);
     });
 
-    ipcRenderer.on(DOWNLOAD_AVERAGE_METRICS_RESPONSE, (_, responseData) => {
+    ipcRenderer.on(AFTER_TRIAL_PROCESS_RESPONSE, (_, responseData) => {
       this.isTrialRunning = false;
       this.$store.commit("setTrial", "");
       this.$store.commit("setTrialId",-1);
@@ -118,7 +118,7 @@ export default {
           session: this.$store.state.options.session ,
           trialId: this.$store.state.options.trialId 
         })
-        ipcRenderer.send(DOWNLOAD_AVERAGE_METRICS,{
+        ipcRenderer.send(AFTER_TRIAL_PROCESS,{
           database: this.$store.state.options.database , 
           trialId: this.$store.state.options.trialId 
         })

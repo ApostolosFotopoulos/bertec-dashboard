@@ -10,7 +10,7 @@ const {
   FETCH_DATABASES_TO_VIEW_ALL, FETCH_DATABASES_TO_VIEW_ALL_RESPONSE, FETCH_TAGS_TO_VIEW_ALL, FETCH_TAGS_TO_VIEW_ALL_RESPONSE,
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, CREATE_SESSION, CREATE_SESSION_RESPONSE,
   CREATE_TRIAL_RESPONSE, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE, UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE,
-  DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, DOWNLOAD_AVERAGE_METRICS_RESPONSE, DOWNLOAD_AVERAGE_METRICS,
+  DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, AFTER_TRIAL_PROCESS_RESPONSE, AFTER_TRIAL_PROCESS,
   EDIT_AVERAGE_METRICS
 } = require('../types')
 const path = require('path')
@@ -90,19 +90,63 @@ class Events {
                 );
               });
 
+              // Create the metrics folder
               await new Promise((resolve, reject) => {
-                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`))) {
-                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`));
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/metrics`))) {
+                  console.log('metrics here')
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/metrics`));
+                  resolve(true);
+                } else {
                   resolve(true);
                 }
               });
 
-               await new Promise((resolve, reject) => {
+              await new Promise((resolve, reject) => {
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`))) {
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`));
+                  resolve(true);
+                } else {
+                  resolve(true);
+                }
+              });
+
+              await new Promise((resolve, reject) => {
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials`))) {
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/trials`));
+                  resolve(true);
+                } else {
+                  resolve(true);
+                }
+              });
+
+              // Create the trials folder
+              await new Promise((resolve, reject) => {
                 if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials/${database}`))) {
                   fs.mkdirSync(path.resolve(__dirname, `../../../.meta/trials/${database}`));
                   resolve(true);
+                } else {
+                  resolve(true);
                 }
-               });
+              });
+
+              await new Promise((resolve, reject) => {
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/calculations`))) {
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/calculations`));
+                  resolve(true);
+                } else {
+                  resolve(true);
+                }
+              });
+              
+              // Create the calculations folder
+              await new Promise((resolve, reject) => {
+                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/calculations/${database}`))) {
+                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/calculations/${database}`));
+                  resolve(true);
+                } else {
+                  resolve(true);
+                }
+              });
               
               db.close();
               console.log("[SUCCESS]: Database successfully created")
@@ -1383,8 +1427,8 @@ class Events {
     });
   }
 
-  static downloadAverageMetrics(win) {
-    ipcMain.on(DOWNLOAD_AVERAGE_METRICS, async (e, d) => {
+  static afterTrialProcess(win) {
+    ipcMain.on(AFTER_TRIAL_PROCESS, async (e, d) => {
       try {
         let { database, trialId } = d;
         if (database && trialId) {
@@ -1522,7 +1566,7 @@ class Events {
            * Reply to the window to stop the loading for the
            * csv preparation
            */
-           e.reply(DOWNLOAD_AVERAGE_METRICS_RESPONSE, {});
+           e.reply(AFTER_TRIAL_PROCESS_RESPONSE, {});
         }
       } catch (e) {
         console.log(e)
