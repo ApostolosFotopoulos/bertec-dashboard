@@ -12,6 +12,16 @@ using System.Threading;
 *   mcs -r:.\BertecDeviceNET.dll .\ForcePlatesConnector.cs
 * Execute:
 *   .\ForcePlatesConnector.exe <frequency>
+*
+* Communication Server:
+*   [TCP Server] <----> [TCP Client] 
+*   Description: The frontend communicates with the server to handle different commands related
+*   to the force plates (resets, writing trial data to file)
+* DataStream Client:
+*   [TCP Client] <----> [TCP Server]
+*   Description: The force plate connector sends the data that are provided from the force plates
+*   to the frontend to visualize them
+*
 */
 
 
@@ -19,9 +29,6 @@ using System.Threading;
 class Configuration {
 
   public int samplingFrequency = 10;
-  public string hostname = "localhost";
-  public int port = 54221;
-  public int DATA_BYTE_LENGTH = 10000;
 
   public void setup(string[] args){
     switch (args.Length) {
@@ -37,12 +44,17 @@ class Configuration {
 
 class CommunicationServer {
 
-  public void setup(Configuration configs, BertecDeviceNET.BertecDevice handler){
+  string hostname = "localhost";
+  int port = 54221;
+  int DATA_BYTE_LENGTH = 10000;
+  
+
+  public void setup(BertecDeviceNET.BertecDevice handler){
 
     // Establish the local endpoint for the socket
-    IPHostEntry ipHostInfo = Dns.GetHostEntry(configs.hostname);
+    IPHostEntry ipHostInfo = Dns.GetHostEntry(this.hostname);
     IPAddress ipAddress = ipHostInfo.AddressList[0];
-    IPEndPoint localEndPoint = new IPEndPoint(ipAddress, configs.port);
+    IPEndPoint localEndPoint = new IPEndPoint(ipAddress, this.port);
 
     // Create a TCP/IP socket
     Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -58,7 +70,7 @@ class CommunicationServer {
         
         while (true) {
           Socket socketHandler = listener.Accept();
-          byte[] bytes = new Byte[configs.DATA_BYTE_LENGTH];
+          byte[] bytes = new Byte[this.DATA_BYTE_LENGTH];
           string command = null;
 
           // An incoming connection needs to be processed.  
@@ -93,22 +105,24 @@ class CommunicationServer {
 }
 
 class DataStreamingClient {
-  // public TcpClient client;
+  string hostname = "localhost";
+  int port = 54221;
 
-  public void setup(Configuration configs, BertecDeviceNET.BertecDevice handler){
+  public void setup(BertecDeviceNET.BertecDevice handler){
     Console.WriteLine("[LOG] Data stream client is ready.");
   }
 }
 
 class ForcePlatesCallback {
 
-  //DataStreamingClient dataStreamingClient = null;
+  DataStreamingClient client = null;
   public BertecDeviceNET.BertecDevice handler = null;
   public int samplingFrequency = 0;
   public int timestampStepping = 0;
 
   public ForcePlatesCallback(int samplingFrequency, DataStreamingClient client){
     this.samplingFrequency = samplingFrequency;
+    this.client = client;
   }
 
   public void onDataCallback(BertecDeviceNET.DataFrame[] dataFrames) { 
@@ -163,14 +177,14 @@ class ForcePlatesConnector {
       }
 
       /** Create the data stream client for the data transfer */
-      DataStreamingClient dataClient = new DataStreamingClient();
-      dataClient.setup(configs, handler);
+      DataStreamingClient client = new DataStreamingClient();
+      client.setup(handler);
 
       /** Clear the buffered data */
       handler.ClearBufferedData();
 
       /** Initialize the callback for the bertec force plates handler */
-      ForcePlatesCallback callback = new ForcePlatesCallback(configs.samplingFrequency, dataClient);
+      ForcePlatesCallback callback = new ForcePlatesCallback(configs.samplingFrequency, client);
 
       /** After the connection link the connection handler wtih callback handler */
       callback.handler = handler;
@@ -183,7 +197,7 @@ class ForcePlatesConnector {
 
     /** Setup the communication server that sends data and waits for requests from the client */
     CommunicationServer server = new CommunicationServer();
-    server.setup(configs, handler);
+    server.setup(handler);
 
     return;
   }
