@@ -46,34 +46,34 @@ class CommunicationServer {
 
   string hostname = "localhost";
   int port = 54221;
-  int DATA_BYTE_LENGTH = 10000;
+  int DATA_BYTES_LENGTH = 10000;
   
 
   public void setup(BertecDeviceNET.BertecDevice handler){
 
-    // Establish the local endpoint for the socket
+    /** Establish the local endpoint for the socket */
     IPHostEntry ipHostInfo = Dns.GetHostEntry(this.hostname);
     IPAddress ipAddress = ipHostInfo.AddressList[0];
     IPEndPoint localEndPoint = new IPEndPoint(ipAddress, this.port);
 
-    // Create a TCP/IP socket
+    /** Create a TCP/IP socket */
     Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-    // Start a thread to communicate with the clients
+    /** Start a thread to communicate with the clients */
     new Thread(() => { 
       try{
 
-        // Bind the socket to the local endpoin
+        /** Bind the socket to the local endpoint */
         listener.Bind(localEndPoint);
         Console.WriteLine("[LOG] Communication server is ready.");
         listener.Listen(10);
         
         while (true) {
           Socket socketHandler = listener.Accept();
-          byte[] bytes = new Byte[this.DATA_BYTE_LENGTH];
+          byte[] bytes = new Byte[this.DATA_BYTES_LENGTH];
           string command = null;
 
-          // An incoming connection needs to be processed.  
+          /** An incoming connection needs to be processed.  */
           int bytesRec = socketHandler.Receive(bytes);
           command = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
