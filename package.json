@@ -5,7 +5,7 @@
   "author": "",
   "scripts": {
     "dev:renderer": "webpack serve --config renderer/webpack.dev.js --mode development",
-    "dev:main": "nodemon --watch . --exec  'electron ./main'",
+    "dev:main": "nodemon --watch . --exec  electron ./main",
     "dev:win": "NODE_ENV=development npm-run-all -p dev:renderer dev:main",
     "dev:unix": "NODE_ENV=development concurrently --kill-others \"npm run dev:renderer\" \"npm run dev:main\" ",
     "prod": "NODE_ENV=production electron ./main",
@@ -17,13 +17,10 @@
   "main": "./main/index.js",
   "dependencies": {
     "apexcharts": "^3.24.0",
-    "command-exists": "^1.2.9",
     "core-js": "^3.8.3",
     "csv-parse": "^4.15.4",
     "glob": "^7.1.7",
-    "handlebars": "^4.7.7",
     "html-pdf-node": "^1.0.7",
-    "jsonexport": "^3.2.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "sqlite3": "^5.0.2",
