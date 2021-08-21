@@ -1,15 +1,14 @@
-const net = require('net');
-net.bufferSize = 300000;
-net.bytesRead = 300000;
-const client = net.connect({port: 8124, address: 'localhost' }, () => {
-  console.log('connected to server!');
-  client.write('world!\r\n');
+var net = require('net');
+var client = new net.Socket();
+
+client.connect(5422, "127.0.0.1",);
+
+client.on('connect', function () {
+  console.log('Client: connection established with server');
+  console.log('---------client details -----------------');
+  client.write('HELLO WORLD')
 });
-client.on('data', (data) => {
-  // console.log(data.toString());
-  console.log(net.bufferSize,data.length);
-  client.end();
-});
-client.on('end', () => {
-  console.log('disconnected from server');
+
+client.on('data', function(data) {
+  console.log('Received: ' + data);
 });
