@@ -47,7 +47,8 @@ class CommunicationServer {
   string hostname = "localhost";
   int port = 54221;
   int DATA_BYTES_LENGTH = 10000;
-  
+  Socket socketHandler = null;
+
 
   public void setup(BertecDeviceNET.BertecDevice handler){
 
@@ -69,12 +70,12 @@ class CommunicationServer {
         listener.Listen(10);
         
         while (true) {
-          Socket socketHandler = listener.Accept();
+          this.socketHandler = listener.Accept();
           byte[] bytes = new Byte[this.DATA_BYTES_LENGTH];
           string command = null;
 
           /** An incoming connection needs to be processed.  */
-          int bytesRec = socketHandler.Receive(bytes);
+          int bytesRec = this.socketHandler.Receive(bytes);
           command = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
           Console.WriteLine("[LOG] Command : {0}.", command);
@@ -107,9 +108,11 @@ class CommunicationServer {
 class DataStreamingClient {
   string hostname = "localhost";
   int port = 54221;
-
+  public TcpClient client;
+  
   public void setup(BertecDeviceNET.BertecDevice handler){
     Console.WriteLine("[LOG] Data stream client is ready.");
+    this.client = new TcpClient("localhost", port);
   }
 }
 
