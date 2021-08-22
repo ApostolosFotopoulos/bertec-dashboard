@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 /**
 * Compile: 
-*   mcs -r:.\BertecDeviceNET.dll .\ForcePlatesConnector.cs
+*   mcs -r:.\BertecDeviceNET.dll -r:.\Newtonsoft.Json.dll .\ForcePlatesConnector.cs
 * Execute:
 *   .\ForcePlatesConnector.exe <frequency>
 *
@@ -44,7 +44,6 @@ class CommunicationServer {
   public string filePath = "";
 
 
-
   public void setup(BertecDeviceNET.BertecDevice handler){
 
     /** Establish the local endpoint for the socket */
@@ -54,57 +53,62 @@ class CommunicationServer {
     Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
     /** Start a thread to communicate with the clients */
-    new Thread(() => { 
-      try{
+    new Thread(() => {
+      /** Bind the socket to the local endpoint */
+      listener.Bind(localEndPoint);
+      Console.WriteLine("[LOG] Communication server is ready.");
+      listener.Listen(100);
 
-        /** Bind the socket to the local endpoint */
-        listener.Bind(localEndPoint);
-        Console.WriteLine("[LOG] Communication server is ready.");
-        listener.Listen(10);
-        
-        while (true) {
+      while(true) {
+        try{
+
+          /** Accept the client */
           this.client = listener.Accept();
-          byte[] bytes = new Byte[this.DATA_BYTES_LENGTH];
-          string command = null;
 
-          /** An incoming connection needs to be processed.  */
-          int bytesRec = this.client.Receive(bytes);
-          command = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+          while (true) {
+            byte[] bytes = new Byte[this.DATA_BYTES_LENGTH];
+            string command = null;
 
-          Console.WriteLine("[LOG] Command : {0}.", command);
+            /** An incoming connection needs to be processed.  */
+            Console.WriteLine("PREV RECEIVE");
+            int bytesRec = this.client.Receive(bytes);
+            Console.WriteLine("AFTER RECEIVE");
+            command = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
-          /** Force Plates Reset Flow */
-          var commandJSON = JObject.Parse(command);
-          
-          if( (string)commandJSON["name"] == "RESET_FORCE_PLATES"){
-             if(handler != null){
-              Console.WriteLine("[LOG] Zeroing load.");
-              handler.ZeroNow();
-              while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
-                System.Threading.Thread.Sleep(100);
+            Console.WriteLine("[LOG] Command : {0}.", command);
+
+            /** Force Plates Reset Flow */
+            var commandJSON = JObject.Parse(command);
+            
+            if( (string)commandJSON["name"] == "RESET_FORCE_PLATES"){
+              if(handler != null){
+                Console.WriteLine("[LOG] Zeroing load.");
+                handler.ZeroNow();
+                while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
+                  System.Threading.Thread.Sleep(100);
+                }
               }
             }
+
+            /** Start Writing To File Flow */
+            if( (string)commandJSON["name"]== "START_WRITING_TRIAL_TO_FILE"){
+              Console.WriteLine("[LOG] Start writing the trial to file.");
+              this.filePath = (string)commandJSON["value"];
+              File.WriteAllText(this.filePath, "\ufeffTimestamp;Fx1;Fy1;Fz1;Mx1;My1;Mz1;Fx2;Fy2;Fz2;Mx2;My2;Mz2;Copx1;Copy1;Copxy1;Copx2;Copy2;Copxy2\n");
+              this.isWritingTrialToFile = true;
+            }
+
+            /** Stop Writing To File Flow */
+            if( (string)commandJSON["name"] == "STOP_WRITING_TRIAL_TO_FILE") {
+              Console.WriteLine("[LOG] Stop writing the trial to file.");
+              this.isWritingTrialToFile = false;
+            }
+
           }
 
-          /** Start Writing To File Flow */
-          if( (string)commandJSON["name"]== "START_WRITING_TRIAL_TO_FILE"){
-            Console.WriteLine("[LOG] Start writing the trial to file.");
-            this.filePath = (string)commandJSON["value"];
-            File.WriteAllText(this.filePath, "\ufeffTimestamp;Fx1;Fy1;Fz1;Mx1;My1;Mz1;Fx2;Fy2;Fz2;Mx2;My2;Mz2;Copx1;Copy1;Copxy1;Copx2;Copy2;Copxy2\n");
-            this.isWritingTrialToFile = true;
-          }
-
-          /** Stop Writing To File Flow */
-          if( (string)commandJSON["name"] == "STOP_WRITING_TRIAL_TO_FILE") {
-            Console.WriteLine("[LOG] Stop writing the trial to file.");
-            this.isWritingTrialToFile = false;
-          }
-
+        } catch(Exception e){
+          Console.WriteLine(e.ToString());
         }
-
-      } catch(Exception e){
-        Console.WriteLine(e.ToString());
-        return;
       }
     }).Start();
   }
@@ -116,12 +120,10 @@ class ForcePlatesCallback {
   Configuration configs = null;
   CommunicationServer server = null;
   public BertecDeviceNET.BertecDevice handler = null;
-  public int samplingFrequency = 0;
   public int timestampStepping = 0;
   int collectedRows = 0;
 
-  public ForcePlatesCallback(int samplingFrequency, CommunicationServer server, Configuration configs){
-    this.samplingFrequency = samplingFrequency;
+  public ForcePlatesCallback(CommunicationServer server, Configuration configs){
     this.server = server;
     this.configs = configs;
   }
@@ -312,7 +314,7 @@ class ForcePlatesConnector {
       handler.ClearBufferedData();
 
       /** Initialize the callback for the bertec force plates handler */
-      ForcePlatesCallback callback = new ForcePlatesCallback(configs.samplingFrequency, server,configs);
+      ForcePlatesCallback callback = new ForcePlatesCallback(server,configs);
 
       /** After the connection link the connection handler wtih callback handler */
       callback.handler = handler;
