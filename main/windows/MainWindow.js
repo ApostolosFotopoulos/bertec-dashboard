@@ -46,6 +46,11 @@ module.exports = class {
     this.createtagsw = null;
     this.window = null;
 
+    // Create TCP Client to send commands to the force plates and 
+    // also receive the data
+    this.client = new net.Socket();
+    this.client.connect(54221, "127.0.0.1");
+
     // TCP / Event Listeners
     this.port = 12345;
     this.ip = "0.0.0.0";
