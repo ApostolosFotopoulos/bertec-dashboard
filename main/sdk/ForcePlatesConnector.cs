@@ -120,7 +120,6 @@ class ForcePlatesCallback {
   Configuration configs = null;
   CommunicationServer server = null;
   public BertecDeviceNET.BertecDevice handler = null;
-  public int timestampStepping = 0;
   int collectedRows = 0;
 
   public ForcePlatesCallback(CommunicationServer server, Configuration configs){
@@ -162,7 +161,7 @@ class ForcePlatesCallback {
 
         // Write the raw data
         if(this.server.isWritingTrialToFile){
-          File.AppendAllLines(this.server.filePath, new []{ forcePlateOne.timestamp / 8.0 + ";" + d });
+          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
         }
 
         // Write to TCP buffer
@@ -228,7 +227,7 @@ class ForcePlatesCallback {
 
       // Write the raw data
       if(this.server.isWritingTrialToFile){
-        File.AppendAllLines(this.server.filePath, new []{ forcePlateOne.timestamp / 8.0 + ";" + d });
+        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
       }
 
       // Write to TCP buffer
