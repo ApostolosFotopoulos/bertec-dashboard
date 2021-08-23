@@ -93,6 +93,8 @@ namespace BertecSDK{
         BertecDeviceNET.DataFrame firstForcePlate = dataFrames[0];
         string d = "";
 
+        Console.WriteLine("Timestamp: {0}",firstForcePlate.timestamp);
+
         int channelCount = firstForcePlate.forceData.Length;
         if(channelCount > 0){
 
@@ -122,7 +124,7 @@ namespace BertecSDK{
 
           // Write the raw data
           if(this.isWriting){
-            File.AppendAllLines(this.filePath, new []{ firstForcePlate.timestamp / 8.0 + ";" + d });
+            File.AppendAllLines(this.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
           }
 
           // Write to TCP buffer
@@ -189,7 +191,7 @@ namespace BertecSDK{
 
         // Write the raw data
         if(this.isWriting){
-          File.AppendAllLines(this.filePath, new []{ firstForcePlate.timestamp / 8.0 + ";" + d });
+          File.AppendAllLines(this.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
         }
 
         if(dataCollected == this.underSamplingFrequency){
