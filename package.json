@@ -6,7 +6,8 @@
   "scripts": {
     "dev:renderer": "webpack serve --config renderer/webpack.dev.js --mode development",
     "dev:main": "nodemon --watch . --exec electron ./main",
-    "dev:win": "NODE_ENV=development npm-run-all -p dev:renderer dev:main",
+    "force-plate-connector":"node ./main/util/modules/ForcePlatesProcess.js",
+    "dev:win": "NODE_ENV=development npm-run-all -p force-plate-connector dev:renderer dev:main",
     "dev:unix": "NODE_ENV=development concurrently --kill-others \"npm run dev:renderer\" \"npm run dev:main\" ",
     "prod": "NODE_ENV=production electron ./main",
     "build:renderer": "webpack build --config renderer/webpack.prod.js --mode production",

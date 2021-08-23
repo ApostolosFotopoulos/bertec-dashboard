@@ -1,6 +1,6 @@
 const { BrowserWindow, ipcMain } = require("electron");
 const SecondaryWindow = require("./SecondaryWindow");
-const ForcePlatesProcess = require("../util/modules/ForcePlatesProcess");
+//const ForcePlatesProcess = require("../util/modules/ForcePlatesProcess");
 const path = require("path");
 var net = require("net");
 const Events = require('../util/modules/Events');
@@ -46,22 +46,20 @@ module.exports = class {
     this.createtagsw = null;
     this.window = null;
 
-    // Create TCP Client to send commands to the force plates and 
-    // also receive the data
+    // TCP / Event Listeners
+    // this.port = 12345;
+    // this.ip = "0.0.0.0";
+    // this.server = new net.Server();
+    // this.server.listen(this.port, () => {
+    //   // console.log("[STATUS] TCP server is active");
+    //   // Start the forceplate process only at windows
+    //   // if (process.platform === "win64" || process.platform == "win32") {
+    //   //   new ForcePlatesProcess().createForcePlateProcess(()=>{});
+    //   // }
+    // });
+
     this.client = new net.Socket();
     this.client.connect(54221, "127.0.0.1");
-
-    // TCP / Event Listeners
-    this.port = 12345;
-    this.ip = "0.0.0.0";
-    this.server = new net.Server();
-    this.server.listen(this.port, () => {
-      console.log("[STATUS] TCP server is active");
-      // Start the forceplate process only at windows
-      if (process.platform === "win64" || process.platform == "win32") {
-        new ForcePlatesProcess().createForcePlateProcess();
-      }
-    });
   }
 
   async createWindow() {
@@ -269,8 +267,26 @@ module.exports = class {
       }
     });
 
+    this.client?.on('data', (packet) => {
+      console.log(packet.toString());
+      let packetJSON = JSON.parse(packet.toString());
+
+      switch (packetJSON.name) {
+        case "FORCE_PLATE_SERIALS":
+          this.window.webContents.send(DEVICE_DETAILS, {
+            deviceLeft: Number(packetJSON.left),
+            deviceRight: Number(packetJSON.right),
+          });
+          break;
+        case "FORCE_PLATES_DATA":
+          console.log(packetJSON.data);
+          break;
+        default:
+          break;
+      }
+    })
     // Listen for TCP Packets to forward them to the dashboard
-    this.server.on("connection", (socket) => {
+    this.server?.on("connection", (socket) => {
       this.socket = socket;
       socket.on("data", (packet) => {
         // Retrieve the packet and break to each section
@@ -532,6 +548,17 @@ module.exports = class {
       } else {
         console.log("[ERROR] The force plates are not connected")
       }
+
+      if (this.client) {
+        console.log("[STATUS] Tried to start the trial writing");
+        this.client.write(JSON.stringify({
+          name: "START_WRITING_TRIAL_TO_FILE",
+          value: trial,
+        }));
+      } else {
+        console.log("[ERROR] The force plates are not connected")
+      }
+
     });
 
     ipcMain.on(STOP_TRIAL_WRITING, (e, d) => {
@@ -541,12 +568,33 @@ module.exports = class {
       } else {
         console.log("[ERROR] The force plates are not connected")
       }
+      
+      if (this.client) {
+        console.log("[STATUS] Tried to stop the trial writing");
+        this.client.write(JSON.stringify({
+          name: "STOP_WRITING_TRIAL_TO_FILE",
+          value: null,
+        }));
+      } else {
+        console.log("[ERROR] The force plates are not connected")
+      }
+      
     });
 
     ipcMain.on(RESET_FORCE_PLATES, (e, d) => {
       if (this.socket) {
         console.log("[STATUS] Tried to reset force plate");
         this.socket.write(RESET_FORCE_PLATES);
+      } else {
+        console.log("[ERROR] The force plates are not connected")
+      }
+
+      if (this.client) {
+        console.log("[STATUS] Tried to reset force plate");
+        this.client.write(JSON.stringify({
+          name: "RESET_FORCE_PLATES",
+          value: null
+        }));
       } else {
         console.log("[ERROR] The force plates are not connected")
       }
