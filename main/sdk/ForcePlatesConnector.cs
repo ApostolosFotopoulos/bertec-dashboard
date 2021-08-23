@@ -34,13 +34,8 @@ enum Channel{
 class CommunicationServer {
 
   int port = 54221;
-
-  int DATA_BYTES_LENGTH = 10000;
-
   public Socket client = null;
-
   public bool isWritingTrialToFile = false;
-
   public string filePath = "";
 
 
@@ -66,13 +61,11 @@ class CommunicationServer {
           this.client = listener.Accept();
 
           while (true) {
-            byte[] bytes = new Byte[this.DATA_BYTES_LENGTH];
+            byte[] bytes = new Byte[10000];
             string command = null;
 
             /** An incoming connection needs to be processed.  */
-            Console.WriteLine("PREV RECEIVE");
             int bytesRec = this.client.Receive(bytes);
-            Console.WriteLine("AFTER RECEIVE");
             command = Encoding.ASCII.GetString(bytes, 0, bytesRec);
 
             Console.WriteLine("[LOG] Command : {0}.", command);
@@ -135,36 +128,36 @@ class ForcePlatesCallback {
       int channelCount = forcePlateOne.forceData.Length;
       if(channelCount > 0){
 
-        // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
+        /** Fx1	Fy1	Fz1	Mx1	My1	Mz1 */
         for (int col = 0; col < channelCount; col++){
           d = d + forcePlateOne.forceData[col].ToString()+";";
         }
 
-        //Fx2	Fy2	Fz2	Mx2	My2	Mz2	
+        /** Fx2	Fy2	Fz2	Mx2	My2	Mz2	*/
         d = d + "0;0;0;0;0;0;";
 
-        // Copx1
+        /** Copx1 */
         Double copx1 = 1000*Convert.ToDouble(forcePlateOne.forceData[(int)Channel.MY]/forcePlateOne.forceData[(int)Channel.FZ]);
         d = d + copx1.ToString()+";";
         
-        // Copy1
+        /** Copy1 */
         Double copy1 = 1000*Convert.ToDouble(forcePlateOne.forceData[(int)Channel.MX]/forcePlateOne.forceData[(int)Channel.FZ]);
         d = d + copy1.ToString()+";";
         
-        // Copxy1
+        /** Copxy1 */
         d = d + (Math.Sqrt( Math.Pow(copx1,2)+ Math.Pow(copy1,2))).ToString()+";";
         
-        // Copx2 Copy2 Copxy2
+        /** Copx2 Copy2 Copxy2 */
         d = d + "0;0;0";
 
         d = d.Replace(",",".");
 
-        // Write the raw data
+        /** Write the raw data */
         if(this.server.isWritingTrialToFile){
           File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
         }
 
-        // Write to TCP buffer
+        /** Write to TCP buffer */
         if(collectedRows == this.configs.samplingFrequency){
           collectedRows = 0;
 
@@ -185,52 +178,52 @@ class ForcePlatesCallback {
 
       int channelCountFirst = forcePlateOne.forceData.Length;
       if(channelCountFirst > 0){
-        // Fx1	Fy1	Fz1	Mx1	My1	Mz1	
+
+        /** Fx1	Fy1	Fz1	Mx1	My1	Mz1	*/
         for (int col = 0; col < channelCountFirst; col++){
-          //Console.Write("{0};", Math.Abs(forcePlateOne.forceData[col]));
           d = d + forcePlateOne.forceData[col].ToString()+";";
         }
       }
 
       int channelCountSec = forcePlateTwo.forceData.Length;
       if(channelCountSec > 0){
-        // Fx2	Fy2	Fz2	Mx2	My2	Mz2	
+
+        /** Fx2	Fy2	Fz2	Mx2	My2	Mz2 */
         for (int col = 0; col < channelCountSec; col++){
-          //Console.Write("{0};", Math.Abs(forcePlateTwo.forceData[col]));
           d = d + forcePlateTwo.forceData[col].ToString()+";";
         }
       }
 
-      // Copx1
+      /** Copx1 */
       Double copx1 = 1000*Convert.ToDouble(forcePlateOne.forceData[(int)Channel.MY]/forcePlateOne.forceData[(int)Channel.FZ]);
       d = d + copx1.ToString()+";";
       
-      // Copy1
+      /** Copy1 */
       Double copy1 = 1000*Convert.ToDouble(forcePlateOne.forceData[(int)Channel.MX]/forcePlateOne.forceData[(int)Channel.FZ]);
       d = d + copy1.ToString()+";";
       
-      // Copxy1
+      /** Copxy1 */
       d = d + (Math.Sqrt( Math.Pow(copx1,2)+ Math.Pow(copy1,2))).ToString()+";";
       
-      // Copx2
+      /** Copx2 */
       Double copx2 = 1000*Convert.ToDouble(forcePlateTwo.forceData[(int)Channel.MY]/forcePlateTwo.forceData[(int)Channel.FZ]);
       d = d + copx2.ToString()+";";
       
-      // Copy2
+      /** Copy2 */
       Double copy2 = 1000*Convert.ToDouble(forcePlateTwo.forceData[(int)Channel.MX]/forcePlateTwo.forceData[(int)Channel.FZ]);
       d = d + copy2.ToString()+";";
       
-      // Copxy2
+      /** Copxy2 */
       d = d + (Math.Sqrt( Math.Pow(copx2,2)+ Math.Pow(copy2,2))).ToString();
 
       d = d.Replace(",",".");
 
-      // Write the raw data
+      /** Write the raw data */
       if(this.server.isWritingTrialToFile){
         File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
       }
 
-      // Write to TCP buffer
+      /** Write to TCP buffer */
       if(collectedRows == this.configs.samplingFrequency){
         collectedRows = 0;
 
