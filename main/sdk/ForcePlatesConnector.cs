@@ -158,7 +158,7 @@ class ForcePlatesCallback {
         if(collectedRows == this.configs.samplingFrequency){
           collectedRows = 0;
           this.server.writer.Flush();
-          this.server.writer.Write("{\"name\":\"FORCE_PLATE_SERIALS_AND_DATA\", \"left\" : \""+this.handler.DeviceSerialNumber(0).ToString()+"\", \"right\": \"-1\", \"data\":\""+d+"\"}");
+          this.server.writer.Write("{\"name\":\"FORCE_PLATES_EVENT\", \"left\" : \""+this.handler.DeviceSerialNumber(0).ToString()+"\", \"right\": \"-1\", \"data\":\""+d+"\"}");
           this.server.writer.Flush();
         }
         collectedRows += 1;
@@ -221,7 +221,7 @@ class ForcePlatesCallback {
       if(collectedRows == this.configs.samplingFrequency){
         collectedRows = 0;
         this.server.writer.Flush();
-        this.server.writer.Write("{\"name\":\"FORCE_PLATE_SERIALS_AND_DATA\", \"left\" : \""+this.handler.DeviceSerialNumber(0).ToString()+"\", \"right\": \""+this.handler.DeviceSerialNumber(1).ToString()+"\", \"data\":\""+d+"\"}");
+        this.server.writer.Write("{\"name\":\"FORCE_PLATES_EVENT\", \"left\" : \""+this.handler.DeviceSerialNumber(0).ToString()+"\", \"right\": \""+this.handler.DeviceSerialNumber(1).ToString()+"\", \"data\":\""+d+"\"}");
         this.server.writer.Flush();
       }
       collectedRows += 1;

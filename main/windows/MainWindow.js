@@ -268,82 +268,35 @@ module.exports = class {
     });
 
     this.client?.on('data', (packet) => {
+      try {
+        var packetJSON = JSON.parse(packet.toString());
 
-      
-      try{
-      let packetJSON = JSON.parse(packet.toString());
-      switch (packetJSON.name) {
-        case "FORCE_PLATE_SERIALS_AND_DATA":
-          //console.log(Number(packetJSON.left),Number(packetJSON.right))
-          this.window.webContents.send(DEVICE_DETAILS, {
-            deviceLeft: Number(packetJSON.left),
-            deviceRight: Number(packetJSON.right),
-          });
-          this.window.webContents.send(SESSION_OPTIONS, {
-            rows: packetJSON.data.split(";").map((i) => Number(i)),
-            isSessionRunning: this.isSessionRunning,
-            weight: this.weight,
-            filePath: this.filePath,
-            session: this.session,
-            database: this.database,
-            user: this.user,
-          });
-          break;
-        case "FORCE_PLATES_DATA":
-          //console.log(packetJSON.data);
-          break;
-        default:
-          break;
-      }
-      }
-       catch(e){
-         console.log(e)
-       }
-    })
-    // Listen for TCP Packets to forward them to the dashboard
-    this.server?.on("connection", (socket) => {
-      this.socket = socket;
-      socket.on("data", (packet) => {
-        // Retrieve the packet and break to each section
-        let packetArray = packet
-          .toString()
-          .replaceAll(/(\r\n|\n|\r)/gm, "")
-          .replaceAll(",", ".")
-          .split(";")
-          .filter((i, idx) => idx >= 4)
-          .map((i) => Number(i));
-        //packetArray = packet.slice(0,18);
-        packetArray = packetArray.slice(0, 18);
-        //console.log(packetArray);
+        if (packetJSON.name === "FORCE_PLATES_EVENT") {
+          
+          // Get all the data rows
+          var rows = packetJSON.data.split(";").map((i) => Number(i));
 
-        // Retrieve the serial numbers of the devices
-        let details = packet
-          .toString()
-          .replaceAll(/(\r\n|\n|\r)/gm, "")
-          .replaceAll(",", ".")
-          .split(";")
-          .filter((i, idx) => idx < 4);
-
-        // Send the data to the linechart window
-        if (this.linechartw && this.linechartw.window) {
-          if (this.isSessionRunning) {
-            this.linechartw.window.webContents.send(LINECHART_SESSION, {
-              rows: packetArray,
-              isSessionRunning: this.isSessionRunning,
-              weight: this.weight,
-              session: this.session,
-              database: this.database,
-              user: this.user,
-            });
-          } else {
-            this.linechartw.window.webContents.send(LINECHART_SESSION, {
-              rows: packetArray,
-              isSessionRunning: this.isSessionRunning,
-              weight: this.weight,
-              session: this.session,
-              database: this.database,
-              user: this.user,
-            });
+          // Send the data to the linechart window
+          if (this.linechartw && this.linechartw.window) {
+            if (this.isSessionRunning) {
+              this.linechartw.window.webContents.send(LINECHART_SESSION, {
+                rows: rows,
+                isSessionRunning: this.isSessionRunning,
+                weight: this.weight,
+                session: this.session,
+                database: this.database,
+                user: this.user,
+              });
+            } else {
+              this.linechartw.window.webContents.send(LINECHART_SESSION, {
+                rows: packetArray,
+                isSessionRunning: this.isSessionRunning,
+                weight: this.weight,
+                session: this.session,
+                database: this.database,
+                user: this.user,
+              });
+            }
           }
         }
 
@@ -351,7 +304,7 @@ module.exports = class {
         if (this.cpw && this.cpw.window) {
           if (this.isSessionRunning) {
             this.cpw.window.webContents.send(COP_SESSION, {
-              rows: packetArray,
+              rows: rows,
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
               session: this.session,
@@ -374,7 +327,7 @@ module.exports = class {
         if (this.cw && this.cw.window) {
           if (this.isSessionRunning) {
             this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-              rows: packetArray,
+              rows: rows,
               force: Math.random().toFixed(2),
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
@@ -401,7 +354,7 @@ module.exports = class {
             this.timelinew.window.webContents.send(
               TIMELINE_SESSION,
               {
-                rows: packetArray,
+                rows: rows,
                 force: Math.random().toFixed(2),
                 isSessionRunning: this.isSessionRunning,
                 weight: this.weight,
@@ -429,7 +382,7 @@ module.exports = class {
         // Send the details the main window with the options
         if (this.window) {
           this.window.webContents.send(SESSION_OPTIONS, {
-            rows: packetArray,
+            rows: rows,
             isSessionRunning: this.isSessionRunning,
             weight: this.weight,
             filePath: this.filePath,
@@ -440,18 +393,174 @@ module.exports = class {
 
           // Send the device serial to the dashboard
           this.window.webContents.send(DEVICE_DETAILS, {
-            deviceLeft: Number(details[1]),
-            deviceRight: Number(details[3]),
+            deviceLeft: Number(packetJSON.left),
+            deviceRight: Number(packetJSON.right),
           });
         }
 
         if (this.createuserw && this.createuserw.window) {
           this.createuserw.window.webContents.send(SESSION_OPTIONS, {
-            rows: packetArray,
+            rows: rows,
           });
         }
-      });
+        
+      } catch (e) {
+        console.log(e);
+      }
     });
+
+    // Listen for TCP Packets to forward them to the dashboard
+    // this.server?.on("connection", (socket) => {
+    //   this.socket = socket;
+    //   socket.on("data", (packet) => {
+    //     // Retrieve the packet and break to each section
+    //     let packetArray = packet
+    //       .toString()
+    //       .replaceAll(/(\r\n|\n|\r)/gm, "")
+    //       .replaceAll(",", ".")
+    //       .split(";")
+    //       .filter((i, idx) => idx >= 4)
+    //       .map((i) => Number(i));
+    //     //packetArray = packet.slice(0,18);
+    //     packetArray = packetArray.slice(0, 18);
+    //     //console.log(packetArray);
+
+    //     // Retrieve the serial numbers of the devices
+    //     let details = packet
+    //       .toString()
+    //       .replaceAll(/(\r\n|\n|\r)/gm, "")
+    //       .replaceAll(",", ".")
+    //       .split(";")
+    //       .filter((i, idx) => idx < 4);
+
+    //     // Send the data to the linechart window
+    //     if (this.linechartw && this.linechartw.window) {
+    //       if (this.isSessionRunning) {
+    //         this.linechartw.window.webContents.send(LINECHART_SESSION, {
+    //           rows: packetArray,
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       } else {
+    //         this.linechartw.window.webContents.send(LINECHART_SESSION, {
+    //           rows: packetArray,
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       }
+    //     }
+
+    //     // Send the data to the COP window
+    //     if (this.cpw && this.cpw.window) {
+    //       if (this.isSessionRunning) {
+    //         this.cpw.window.webContents.send(COP_SESSION, {
+    //           rows: packetArray,
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       } else {
+    //         this.cpw.window.webContents.send(COP_SESSION, {
+    //           rows: [],
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       }
+    //     }
+
+    //     // Send the data to the speedmeter window
+    //     if (this.cw && this.cw.window) {
+    //       if (this.isSessionRunning) {
+    //         this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+    //           rows: packetArray,
+    //           force: Math.random().toFixed(2),
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       } else {
+    //         this.cw.window.webContents.send(SPEEDMETER_SESSION, {
+    //           rows: [],
+    //           force: 0,
+    //           isSessionRunning: this.isSessionRunning,
+    //           weight: this.weight,
+    //           session: this.session,
+    //           database: this.database,
+    //           user: this.user,
+    //         });
+    //       }
+    //     }
+
+    //     // Send the data to the timeline window
+    //     if (this.timelinew && this.timelinew.window) {
+    //       if (this.isSessionRunning) {
+    //         this.timelinew.window.webContents.send(
+    //           TIMELINE_SESSION,
+    //           {
+    //             rows: packetArray,
+    //             force: Math.random().toFixed(2),
+    //             isSessionRunning: this.isSessionRunning,
+    //             weight: this.weight,
+    //             session: this.session,
+    //             database: this.database,
+    //             user: this.user,
+    //           }
+    //         );
+    //       } else {
+    //         this.timelinew.window.webContents.send(
+    //           TIMELINE_SESSION,
+    //           {
+    //             rows: [],
+    //             force: 0,
+    //             isSessionRunning: this.isSessionRunning,
+    //             weight: this.weight,
+    //             session: this.session,
+    //             database: this.database,
+    //             user: this.user,
+    //           }
+    //         );
+    //       }
+    //     }
+
+    //     // Send the details the main window with the options
+    //     if (this.window) {
+    //       this.window.webContents.send(SESSION_OPTIONS, {
+    //         rows: packetArray,
+    //         isSessionRunning: this.isSessionRunning,
+    //         weight: this.weight,
+    //         filePath: this.filePath,
+    //         session: this.session,
+    //         database: this.database,
+    //         user: this.user,
+    //       });
+
+    //       // Send the device serial to the dashboard
+    //       this.window.webContents.send(DEVICE_DETAILS, {
+    //         deviceLeft: Number(details[1]),
+    //         deviceRight: Number(details[3]),
+    //       });
+    //     }
+
+    //     if (this.createuserw && this.createuserw.window) {
+    //       this.createuserw.window.webContents.send(SESSION_OPTIONS, {
+    //         rows: packetArray,
+    //       });
+    //     }
+    //   });
+    // });
 
     //// TESTING PURPOSE PLEASE REMOVE //////
     // setInterval(() => {
