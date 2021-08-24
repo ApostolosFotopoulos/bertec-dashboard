@@ -268,22 +268,37 @@ module.exports = class {
     });
 
     this.client?.on('data', (packet) => {
-      console.log(packet.toString());
-      let packetJSON = JSON.parse(packet.toString());
 
+      
+      try{
+      let packetJSON = JSON.parse(packet.toString());
       switch (packetJSON.name) {
-        case "FORCE_PLATE_SERIALS":
+        case "FORCE_PLATE_SERIALS_AND_DATA":
+          //console.log(Number(packetJSON.left),Number(packetJSON.right))
           this.window.webContents.send(DEVICE_DETAILS, {
             deviceLeft: Number(packetJSON.left),
             deviceRight: Number(packetJSON.right),
           });
+          this.window.webContents.send(SESSION_OPTIONS, {
+            rows: packetJSON.data.split(";").map((i) => Number(i)),
+            isSessionRunning: this.isSessionRunning,
+            weight: this.weight,
+            filePath: this.filePath,
+            session: this.session,
+            database: this.database,
+            user: this.user,
+          });
           break;
         case "FORCE_PLATES_DATA":
-          console.log(packetJSON.data);
+          //console.log(packetJSON.data);
           break;
         default:
           break;
       }
+      }
+       catch(e){
+         console.log(e)
+       }
     })
     // Listen for TCP Packets to forward them to the dashboard
     this.server?.on("connection", (socket) => {

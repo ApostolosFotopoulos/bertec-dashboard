@@ -31,81 +31,45 @@ enum Channel{
   MZ
 };
 
-class ForcePlatesSerialEvent {
-  public string name;
-  public string left;
-  public string right;
-
-  public ForcePlatesSerialEvent(string name, string left, string right){
-    this.name = name;
-    this.left = left;
-    this.right = right;
-  }
-}
-
-class ForcePlatesDataEvent {
-  public string name;
-  public string data;
-
-  public ForcePlatesDataEvent(string name, string data){
-    this.name = name;
-    this.data = data;
-  }
-}
-
 class CommunicationServer {
 
   int port = 54221;
-  public Socket client = null;
+  public TcpClient client = null;
   public bool isWritingTrialToFile = false;
   public string filePath = "";
-
+  public NetworkStream stream = null; 
+  public StreamWriter writer = null;
 
   public void setup(BertecDeviceNET.BertecDevice handler){
 
-    /** Establish the local endpoint for the socket */
-    IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), this.port);
-
     /** Create a TCP/IP socket */
-    Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+    TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), this.port);
 
     /** Start a thread to communicate with the clients */
     new Thread(() => {
       /** Bind the socket to the local endpoint */
-      listener.Bind(localEndPoint);
-      Console.WriteLine("[LOG] Communication server is ready.");
-      listener.Listen(100);
+      server.Start();
 
       while(true) {
         try{
 
           /** Accept the client */
-          this.client = listener.Accept();
+          this.client = server.AcceptTcpClient();
+          this.stream = this.client.GetStream();
+          this.writer = new StreamWriter((Stream)stream);
+          byte[] bytes = new Byte[10000];
+          int bytesReaded;
 
-          new Thread(() => {
-            while(true){
-              System.Threading.Thread.Sleep(5000);
-              ForcePlatesSerialEvent fpse = new ForcePlatesSerialEvent("FORCE_PLATE_SERIALS","1234","3123213");
-              this.client.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(fpse)));
-              System.Threading.Thread.Sleep(5000);
-              ForcePlatesDataEvent fpde = new ForcePlatesDataEvent("FORCE_PLATES_DATA","adadada;adasdasd;asdasdasd;asdasd");
-              this.client.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(fpde)));
-            }
-          }).Start();
+          /** Loop to receive all the data sent by the client. */
+          while((bytesReaded= this.stream.Read(bytes, 0, bytes.Length))!=0) {
 
-          while (true) {
-            byte[] bytes = new Byte[10000];
+            /** Get the command that the client has send */
             string command = null;
-
-            /** An incoming connection needs to be processed.  */
-            int bytesRec = this.client.Receive(bytes);
-            command = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-
+            command = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
             Console.WriteLine("[LOG] Command : {0}.", command);
-
-            /** Force Plates Reset Flow */
             var commandJSON = JObject.Parse(command);
             
+            /** Reset Force Plate Flow */
             if( (string)commandJSON["name"] == "RESET_FORCE_PLATES"){
               if(handler != null){
                 Console.WriteLine("[LOG] Zeroing load.");
@@ -193,12 +157,9 @@ class ForcePlatesCallback {
         /** Write to TCP buffer */
         if(collectedRows == this.configs.samplingFrequency){
           collectedRows = 0;
-
-          ForcePlatesSerialEvent fpse = new ForcePlatesSerialEvent("FORCE_PLATE_SERIALS",this.handler.DeviceSerialNumber(0).ToString(),"-1");
-          this.server.client.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(fpse)));
-
-          ForcePlatesDataEvent fpde = new ForcePlatesDataEvent("FORCE_PLATES_DATA",d);
-          this.server.client.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(fpde)));
+          this.server.writer.Flush();
+          this.server.writer.Write("{\"name\":\"FORCE_PLATE_SERIALS_AND_DATA\", \"left\" : \""+this.handler.DeviceSerialNumber(0).ToString()+"\", \"right\": \"-1\", \"data\":\""+d+"\"}");
+          this.server.writer.Flush();
         }
         collectedRows += 1;
       }
@@ -259,12 +220,9 @@ class ForcePlatesCallback {
       /** Write to TCP buffer */
       if(collectedRows == this.configs.samplingFrequency){
         collectedRows = 0;
-        
-        ForcePlatesSerialEvent fpse = new ForcePlatesSerialEvent("FORCE_PLATE_SERIALS",this.handler.DeviceSerialNumber(0).ToString(),this.handler.DeviceSerialNumber(1).ToString());
-        this.server.client.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(fpse)));
-        
-        ForcePlatesDataEvent fpde = new ForcePlatesDataEvent("FORCE_PLATES_DATA",d);
-        this.server.client.Send(Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(fpde)));
+        this.server.writer.Flush();
+        this.server.writer.Write("{\"name\":\"FORCE_PLATE_SERIALS_AND_DATA\", \"left\" : \""+this.handler.DeviceSerialNumber(0).ToString()+"\", \"right\": \""+this.handler.DeviceSerialNumber(1).ToString()+"\", \"data\":\""+d+"\"}");
+        this.server.writer.Flush();
       }
       collectedRows += 1;
     }
@@ -307,48 +265,48 @@ class ForcePlatesConnector {
       return;
     }
 
-     /** Setup the communication server that handles the commands from the client and the data transfer */
+    /** Setup the communication server that handles the commands from the client and the data transfer */
     CommunicationServer server = new CommunicationServer();
-    server.setup(null);
+    server.setup(handler);
 
-    // new Thread(() => {
+    new Thread(() => {
 
-    //   /** Start the handler */
-    //   handler.AutoZeroing = true;
-    //   handler.Start();
+      /** Start the handler */
+      handler.AutoZeroing = true;
+      handler.Start();
 
-    //   /** Wait for the devices to connect  */
-    //   Console.WriteLine("[LOG] Waiting for devices.");
+      /** Wait for the devices to connect  */
+      Console.WriteLine("[LOG] Waiting for devices.");
 
-    //   /** When a device or more are connected then continue the process */
-    //   while (handler.Status != BertecDeviceNET.StatusErrors.DEVICES_READY) {
-    //     System.Threading.Thread.Sleep(100);
-    //     if (handler.DeviceCount > 0) {
-    //       break;
-    //     }
-    //   }
+      /** When a device or more are connected then continue the process */
+      while (handler.Status != BertecDeviceNET.StatusErrors.DEVICES_READY) {
+        System.Threading.Thread.Sleep(100);
+        if (handler.DeviceCount > 0) {
+          break;
+        }
+      }
 
-    //   /** Zeroing the load  */
-    //   Console.WriteLine("[LOG] Zeroing load.");
-    //   handler.ZeroNow();
-    //   while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
-    //     System.Threading.Thread.Sleep(100);
-    //   }
+      /** Zeroing the load  */
+      Console.WriteLine("[LOG] Zeroing load.");
+      handler.ZeroNow();
+      while (handler.AutoZeroState != BertecDeviceNET.AutoZeroStates.ZEROFOUND){
+        System.Threading.Thread.Sleep(100);
+      }
 
-    //   /** Clear the buffered data */
-    //   handler.ClearBufferedData();
+      /** Clear the buffered data */
+      handler.ClearBufferedData();
 
-    //   /** Initialize the callback for the bertec force plates handler */
-    //   ForcePlatesCallback callback = new ForcePlatesCallback(server,configs);
+      /** Initialize the callback for the bertec force plates handler */
+      ForcePlatesCallback callback = new ForcePlatesCallback(server,configs);
 
-    //   /** After the connection link the connection handler wtih callback handler */
-    //   callback.handler = handler;
+      /** After the connection link the connection handler wtih callback handler */
+      callback.handler = handler;
 
-    //   /* Setup the callback for the data streaming */
-    //   handler.OnData += callback.onDataReceived;
-    //   handler.OnStatus += callback.statusEvent;
+      /* Setup the callback for the data streaming */
+      handler.OnData += callback.onDataReceived;
+      handler.OnStatus += callback.statusEvent;
 
-    // }).Start();
+    }).Start();
 
     return;
   }
