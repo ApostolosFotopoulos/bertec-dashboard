@@ -22,6 +22,7 @@ const Processor = require('./Processor');
 const Renderer = require('./Renderer');
 var parse = require('csv-parse');
 const Metrics = require('./Metrics');
+const { DataProcessor } = require('./DataProcessor')
 
 // app.getPath("downloads")+'/.meta/databases/*.db' gia production
 function groupBy(list, keyGetter) {
@@ -1329,7 +1330,7 @@ class Events {
         const linechartAxes = Processor.lineChartAxes(records, user.weight, validSteps);
         const copAxes = Processor.copChartAxes(records, user.weight,validSteps);
         const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max,validSteps);
-
+        DataProcessor.calculateLoadingSymmetry(records,user.weight, validSteps);
         /**
          * After gathering all the data then use the renderer
          * to create the pdf

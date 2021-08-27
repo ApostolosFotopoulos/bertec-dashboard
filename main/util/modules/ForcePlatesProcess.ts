@@ -5,7 +5,7 @@ const chalk = require('chalk');
 
 /** 
  * Start the force plate setup to connect to the force plate 
- * before the application boot ups.
+ * before the application boot
  */
 (async () => {
   try {
@@ -22,4 +22,4 @@ const chalk = require('chalk');
     console.log(chalk.bold.red('[ERROR] Force Plate Connector ') + chalk.bold.red('❌'));
   }
 })();
-
+export {};

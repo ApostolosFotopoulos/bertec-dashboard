@@ -1,8 +1,35 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    /* Basic Options */
+    "target": "es6",
+    "module": "commonjs",
+    "lib": ["es6"],
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "importHelpers": true,
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "skipLibCheck": true,
+    /* Strict Type-Checking Options */
     "strict": true,
-    "module": "es2015",
-    "moduleResolution": "node",    
-  }
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "suppressImplicitAnyIndexErrors": true,
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
+  },
+  "compileOnSave": true,
 }
