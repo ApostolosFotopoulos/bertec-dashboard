@@ -1330,12 +1330,12 @@ class Events {
         const linechartAxes = Processor.lineChartAxes(records, user.weight, validSteps);
         const copAxes = Processor.copChartAxes(records, user.weight,validSteps);
         const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max,validSteps);
-        DataProcessor.calculateLoadingSymmetry(records,user.weight, validSteps);
+        let symmetries = DataProcessor.calculateSymmetries(records,user.weight, validSteps);
         /**
          * After gathering all the data then use the renderer
          * to create the pdf
          */
-        await Renderer.start(user, trial, session, linechartAxes, copAxes, timelineAxes);
+        await Renderer.start(user, trial, session, linechartAxes, copAxes, timelineAxes, symmetries);
 
         /**
          * Automatically open pdf that is created 

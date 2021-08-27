@@ -235,7 +235,7 @@ class Renderer{
     `;
   }
 
-  static genereateMeasumentsTable(fx, fy, fz) {
+  static genereateMeasumentsTable(fx, fy, fz, symmetries) {
 
     // Calculate all the metrics for every axis
     let fxMetrics = Metrics.retrieve(fx)
@@ -312,11 +312,21 @@ class Renderer{
             <td>${fzMetrics.right.timeImpactPeakForce.toFixed(3)} ms</td>
           </tr>
         </table>
+        <table class="pl-3 pr-3 mt-3">
+          <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Stance Symmetry (SNS)</td>
+            <td>${(100 * symmetries.stance.toFixed(3))} %</td>
+          </tr>
+        </table>
       </div>
     `
   }
 
-  static generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes){
+  static generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes, symmetries){
     let html = `
     <html lang="en">
       <head>
@@ -518,7 +528,7 @@ class Renderer{
             </div>
           </div>
         </div>
-        ${this.genereateMeasumentsTable(lineChartAxes.fx, lineChartAxes.fy, lineChartAxes.fz)}
+        ${this.genereateMeasumentsTable(lineChartAxes.fx, lineChartAxes.fy, lineChartAxes.fz, symmetries)}
         <script>
           ${this.generateLineChart(lineChartAxes.fxRaw.left, lineChartAxes.fxRaw.minY, lineChartAxes.fxRaw.maxY, 'left-foot-fx', '#d32d41')}
           ${this.generateLineChart(lineChartAxes.fxRaw.right,lineChartAxes.fxRaw.minY, lineChartAxes.fxRaw.maxY, 'right-foot-fx', '#6ab187')}
@@ -541,11 +551,11 @@ class Renderer{
     return encodeURIComponent(html);
   }
 
-  static async start(user, trial, session, lineChartAxes, copAxes, timelineAxes) {
+  static async start(user, trial, session, lineChartAxes, copAxes, timelineAxes, symmetries) {
     try {
       return new Promise(async (resolve, reject) => {
         try {
-          const html = this.generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes);
+          const html = this.generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes, symmetries);
           let file = { content: `${decodeURIComponent(html)}` }
           let options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf"};
           await new Promise((resolve, reject) => {

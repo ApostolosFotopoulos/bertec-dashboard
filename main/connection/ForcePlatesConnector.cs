@@ -7,6 +7,8 @@ using System.Net.Sockets;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Diagnostics;
+
 /**
 * Compile: 
 *   mcs -r:.\BertecDeviceNET.dll -r:.\Newtonsoft.Json.dll .\ForcePlatesConnector.cs
@@ -65,7 +67,7 @@ class CommunicationServer {
 
             /** Get the command that the client has send */
             string command = null;
-            command = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+            command = System.Text.Encoding.ASCII.GetString(bytes, 0, bytesReaded);
             Console.WriteLine("[LOG] Command : {0}.", command);
             var commandJSON = JObject.Parse(command);
             
@@ -151,7 +153,7 @@ class ForcePlatesCallback {
 
         /** Write the raw data */
         if(this.server.isWritingTrialToFile){
-          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
+          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString() + ";" + d });
         }
 
         /** Write to TCP buffer */
@@ -214,7 +216,7 @@ class ForcePlatesCallback {
 
       /** Write the raw data */
       if(this.server.isWritingTrialToFile){
-        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
+        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString() + ";" + d });
       }
 
       /** Write to TCP buffer */

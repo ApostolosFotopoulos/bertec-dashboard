@@ -26,11 +26,11 @@ export interface Record {
   Copxy2: string,
 };
 
-export interface FootDurations {
-  standDurations: Array<StandDuration>,
-}
-
-export interface StandDuration {
+export interface StanceDuration {
   startTimestamp: string,
   endTimestamp: string,
+}
+
+export interface Symmetries {
+  stance: number,
 }
