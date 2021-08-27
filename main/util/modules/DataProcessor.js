@@ -6,12 +6,15 @@ class DataProcessor {
     static calculateSymmetries(records, weight, validSteps) {
         let symmetries = {
             stance: 0,
+            step: 0,
         };
-        symmetries.stance = this.calculateStanceSymmetry(records, weight, validSteps);
+        const { stance, step } = this.calculateTemporalSymmetry(records, weight, validSteps);
+        symmetries.stance = stance;
+        symmetries.step = step;
         console.log(symmetries);
         return symmetries;
     }
-    static calculateStanceSymmetry(records, weight, validSteps) {
+    static calculateTemporalSymmetry(records, weight, validSteps) {
         let leftFootIsLocked = false;
         let rightFootIsLocked = false;
         let leftFootStanceDuration = {
@@ -25,6 +28,7 @@ class DataProcessor {
         let leftFootStanceDurations = [];
         let rightFootStanceDurations = [];
         let stance = 0;
+        let step = 0;
         // Calculate all the durations for every step
         for (var i = 0; i < records.length; i += constants_js_1.RAW_STEP) {
             let fz1 = Number(records[i].Fz1);
@@ -72,10 +76,17 @@ class DataProcessor {
         for (var i = 0; i < Math.min(leftFootStanceDurations.length, rightFootStanceDurations.length); i += 1) {
             if (rightFootStanceDurations[i].startTimestamp != rightFootStanceDurations[i].endTimestamp &&
                 leftFootStanceDurations[i].startTimestamp != leftFootStanceDurations[i].endTimestamp) {
-                stance += (Number(rightFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp)) / (Number(leftFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp));
+                if ((Number(rightFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp)) > (Number(leftFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp))) {
+                    stance += (Number(leftFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp)) / (Number(rightFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp));
+                    step += (Number(leftFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp) + Math.abs(Number(rightFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp))) / (Number(rightFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp) + Math.abs(Number(leftFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp)));
+                }
+                else {
+                    stance += (Number(rightFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp)) / (Number(leftFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp));
+                    step += (Number(rightFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp) + Math.abs(Number(leftFootStanceDurations[i].endTimestamp) - Number(rightFootStanceDurations[i].startTimestamp))) / (Number(leftFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp) + Math.abs(Number(rightFootStanceDurations[i].endTimestamp) - Number(leftFootStanceDurations[i].startTimestamp)));
+                }
             }
         }
-        return stance;
+        return { stance, step };
     }
 }
 exports.DataProcessor = DataProcessor;

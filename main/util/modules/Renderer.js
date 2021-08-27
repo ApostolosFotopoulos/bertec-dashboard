@@ -318,8 +318,12 @@ class Renderer{
             <th>Value</th>
           </tr>
           <tr>
+            <td>Step Symmetry (SPS)</td>
+            <td>${(symmetries.step.toFixed(3))}</td>
+          </tr>
+          <tr>
             <td>Stance Symmetry (SNS)</td>
-            <td>${(100 * symmetries.stance.toFixed(3))} %</td>
+            <td>${(symmetries.stance.toFixed(3))}</td>
           </tr>
         </table>
       </div>

@@ -31,6 +31,17 @@ export interface StanceDuration {
   endTimestamp: string,
 }
 
-export interface Symmetries {
+export interface StepDuration {
+  startTimestamp: string,
+  endTimestamp: string,
+}
+
+export interface Symmetry {
   stance: number,
+  step: number,
+}
+
+export interface TemporalSymmetry {
+  stance: number,
+  step: number,
 }
