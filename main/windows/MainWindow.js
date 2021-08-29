@@ -58,8 +58,10 @@ module.exports = class {
     //   // }
     // });
 
-    this.client = new net.Socket();
-    this.client.connect(54221, "127.0.0.1");
+    if (process.platform === 'win32' || process.platform === 'win64') {
+      this.client = new net.Socket();
+      this.client.connect(54221, "127.0.0.1");
+    }
   }
 
   async createWindow() {
