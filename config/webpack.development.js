@@ -36,7 +36,10 @@ module.exports = merge(common,{
   },
 
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.ProvidePlugin({
+			Vue: [ 'vue/dist/vue.esm.js' ]
+		})
   ],
 
   performance: {

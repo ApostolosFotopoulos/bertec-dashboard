@@ -12,7 +12,11 @@ module.exports = {
   },
 
   resolve: {
-    extensions: ['.vue','.js','.ts','.tsx','.json', '.css', '.html']
+    extensions: ['.vue','.js','.ts','.tsx','.json', '.css', '.html'],
+    symlinks: true,
+		alias: {
+			vue$: 'vue/dist/vue.esm.js'
+		}
   },
 
   module: {
