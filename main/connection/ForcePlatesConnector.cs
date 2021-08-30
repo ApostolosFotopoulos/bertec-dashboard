@@ -153,7 +153,7 @@ class ForcePlatesCallback {
 
         /** Write the raw data */
         if(this.server.isWritingTrialToFile){
-          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString() + ";" + d });
+          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToFileTime().ToString() + ";" + d });
         }
 
         /** Write to TCP buffer */
@@ -216,7 +216,7 @@ class ForcePlatesCallback {
 
       /** Write the raw data */
       if(this.server.isWritingTrialToFile){
-        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString() + ";" + d });
+        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToFileTime().ToString() + ";" + d });
       }
 
       /** Write to TCP buffer */
