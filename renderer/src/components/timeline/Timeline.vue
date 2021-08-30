@@ -80,7 +80,7 @@ export default {
             },
             formatter: (val) => {
               if (val.toFixed(0) % 10 == 0) {
-                return val.toFixed(0);
+                 return val.toFixed(0)/10 + this.$store.state.timeline.nOfLeftSteps
               }
             },
             show: true,
@@ -134,7 +134,7 @@ export default {
             },
             formatter: (val) => {
               if (val.toFixed(0) % 10 == 0) {
-                return val.toFixed(0);
+                 return val.toFixed(0)/10 + this.$store.state.timeline.nOfRightSteps
               }
             },
             show: true,
@@ -245,7 +245,7 @@ export default {
               },
               formatter: (val) => {
                 if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0);
+                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfLeftSteps
                 }
               },
               show: true,
@@ -300,7 +300,7 @@ export default {
               },
               formatter: (val) => {
                 if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0);
+                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfLeftSteps
                 }
               },
               show: true,
@@ -359,7 +359,7 @@ export default {
               },
               formatter: (val) => {
                 if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0);
+                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfRightSteps
                 }
               },
               show: true,
@@ -415,7 +415,7 @@ export default {
               },
               formatter: (val) => {
                 if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0);
+                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfRightSteps
                 }
               },
               show: true,

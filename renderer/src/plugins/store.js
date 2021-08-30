@@ -126,6 +126,8 @@ export default new Vuex.Store({
 					data: []
 				}
 			],
+			nOfLeftSteps: 0,
+			nOfRightSteps: 0,
 			isLeftPlateLocked: false,
 			isLeftPlateReset: false,
 			isRightPlateReset: false,
