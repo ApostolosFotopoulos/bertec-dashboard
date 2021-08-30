@@ -330,7 +330,6 @@ module.exports = class {
           if (this.isSessionRunning) {
             this.cw.window.webContents.send(SPEEDMETER_SESSION, {
               rows: rows,
-              force: Math.random().toFixed(2),
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
               session: this.session,
@@ -340,7 +339,6 @@ module.exports = class {
           } else {
             this.cw.window.webContents.send(SPEEDMETER_SESSION, {
               rows: [],
-              force: 0,
               isSessionRunning: this.isSessionRunning,
               weight: this.weight,
               session: this.session,
@@ -357,7 +355,6 @@ module.exports = class {
               TIMELINE_SESSION,
               {
                 rows: rows,
-                force: Math.random().toFixed(2),
                 isSessionRunning: this.isSessionRunning,
                 weight: this.weight,
                 session: this.session,
@@ -370,7 +367,6 @@ module.exports = class {
               TIMELINE_SESSION,
               {
                 rows: [],
-                force: 0,
                 isSessionRunning: this.isSessionRunning,
                 weight: this.weight,
                 session: this.session,
@@ -407,7 +403,7 @@ module.exports = class {
         }
         
       } catch (e) {
-        console.log(e);
+        //console.log(e);
       }
     });
 
@@ -668,13 +664,6 @@ module.exports = class {
 
     ipcMain.on(START_TRIAL_WRITING, (e, d) => {
       const { trial } = d
-      if (this.socket) {
-        console.log("[STATUS] Trying to start the trial writing");
-        this.socket.write(START_TRIAL_WRITING + ";" + trial);
-      } else {
-        console.log("[ERROR] The force plates are not connected")
-      }
-
       if (this.client) {
         console.log("[STATUS] Tried to start the trial writing");
         this.client.write(JSON.stringify({
@@ -688,13 +677,6 @@ module.exports = class {
     });
 
     ipcMain.on(STOP_TRIAL_WRITING, (e, d) => {
-      if (this.socket) {
-        console.log("[STATUS] Trying to stop the trial writing");
-        this.socket.write(STOP_TRIAL_WRITING);
-      } else {
-        console.log("[ERROR] The force plates are not connected")
-      }
-      
       if (this.client) {
         console.log("[STATUS] Tried to stop the trial writing");
         this.client.write(JSON.stringify({
@@ -708,13 +690,6 @@ module.exports = class {
     });
 
     ipcMain.on(RESET_FORCE_PLATES, (e, d) => {
-      if (this.socket) {
-        console.log("[STATUS] Tried to reset force plate");
-        this.socket.write(RESET_FORCE_PLATES);
-      } else {
-        console.log("[ERROR] The force plates are not connected")
-      }
-
       if (this.client) {
         console.log("[STATUS] Tried to reset force plate");
         this.client.write(JSON.stringify({
