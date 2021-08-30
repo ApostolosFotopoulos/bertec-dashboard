@@ -953,11 +953,12 @@ export default new Vuex.Store({
 									state.timeline.dataType === 'Normalized'
 										? Math.ceil(state.timeline.leftPlateMax / 10) * 10
 										: Math.ceil(state.timeline.leftPlateMax / 100) * 100;
-								state.timeline.shouldUpdateLeft = true;
+								//state.timeline.shouldUpdateLeft = true;
 							}
 						}
 					}
 					state.timeline.leftPlateMax = -1;
+					state.timeline.shouldUpdateLeft = true;
 				}
 			} else {
 				if (fz1 > threshold) {
@@ -1071,6 +1072,7 @@ export default new Vuex.Store({
 					}
 
 					state.timeline.rightPlateMax = -1;
+					state.timeline.shouldUpdateRight = true;
 				}
 			} else {
 				if (fz2 > threshold) {
