@@ -86,7 +86,7 @@ class CommunicationServer {
             if( (string)commandJSON["name"]== "START_WRITING_TRIAL_TO_FILE"){
               Console.WriteLine("[LOG] Start writing the trial to file.");
               this.filePath = (string)commandJSON["value"];
-              File.WriteAllText(this.filePath, "\ufeffTimestamp;Fx1;Fy1;Fz1;Mx1;My1;Mz1;Fx2;Fy2;Fz2;Mx2;My2;Mz2;Copx1;Copy1;Copxy1;Copx2;Copy2;Copxy2\n");
+              File.WriteAllText(this.filePath, "\ufeffDate;Timestamp;Fx1;Fy1;Fz1;Mx1;My1;Mz1;Fx2;Fy2;Fz2;Mx2;My2;Mz2;Copx1;Copy1;Copxy1;Copx2;Copy2;Copxy2\n");
               this.isWritingTrialToFile = true;
             }
 
@@ -153,7 +153,7 @@ class ForcePlatesCallback {
 
         /** Write the raw data */
         if(this.server.isWritingTrialToFile){
-          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToFileTime().ToString() + ";" + d });
+          File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("yyyy/MM/dd/ HH:mm:ss.fff")+";"+DateTime.Now.ToFileTime().ToString() + ";" + d });
         }
 
         /** Write to TCP buffer */
@@ -216,7 +216,7 @@ class ForcePlatesCallback {
 
       /** Write the raw data */
       if(this.server.isWritingTrialToFile){
-        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToFileTime().ToString() + ";" + d });
+        File.AppendAllLines(this.server.filePath, new []{ DateTime.Now.ToString("yyyy/MM/dd/ HH:mm:ss.fff")+";"+DateTime.Now.ToFileTime().ToString() + ";" + d });
       }
 
       /** Write to TCP buffer */

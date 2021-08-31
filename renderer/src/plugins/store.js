@@ -140,7 +140,7 @@ export default new Vuex.Store({
 			shouldUpdateRight: false,
 			threshold: 5,
 			trialThreshold: 50,
-			nOfPoints: 50,
+			nOfPoints: 5,
 			dataType: 'Normalized',
 			leftPlateChannel: 'FZ1',
 			rightPlateChannel: 'FZ2',
@@ -879,6 +879,8 @@ export default new Vuex.Store({
 			state.timeline.shouldUpdateRight = false;
 			state.timeline.leftAccuracy = 0
 			state.timeline.rightAccuracy = 0
+			state.timeline.nOfLeftSteps = 0;
+			state.timeline.nOfRightSteps = 0;
 		},
 		setLeftPlateAtTimeline(state, rows) {
 			let fz1 = Number(rows[2]);
@@ -1025,7 +1027,6 @@ export default new Vuex.Store({
 				if (fz2 < threshold) {
 					state.timeline.isRightPlateLocked = false;
 					state.timeline.isRightPlateReset = false;
-
 					// Add the new max to the left plate max
 					if (state.timeline.dataType === 'Normalized') {
 						if (state.timeline.rightPlateMax > state.timeline.trialThreshold) {

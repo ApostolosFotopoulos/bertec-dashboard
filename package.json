@@ -23,6 +23,7 @@
     "csv-parse": "^4.15.4",
     "electron": "^13.1.1",
     "glob": "^7.1.7",
+    "html-pdf": "^3.0.1",
     "html-pdf-node": "^1.0.7",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",

@@ -2,6 +2,7 @@ const moment = require('moment');
 const { app } = require("electron");
 const Metrics = require('./Metrics');
 var html_to_pdf = require('html-pdf-node');
+var pdf = require('html-pdf');
 
 class Renderer{
   static generateTimelineChart(row, min, max, id, color, rangeMin, rangeMax) {
@@ -557,24 +558,17 @@ class Renderer{
 
   static async start(user, trial, session, lineChartAxes, copAxes, timelineAxes, symmetries) {
     try {
-      return new Promise(async (resolve, reject) => {
-        try {
           const html = this.generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes, symmetries);
           let file = { content: `${decodeURIComponent(html)}` }
-          let options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf"};
+          let options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf", args:['--allow-file-access-from-files']};
           await new Promise((resolve, reject) => {
             html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
               console.log("PDF Buffer:-", pdfBuffer);
               resolve();
             });
           });
-          resolve();
         } catch (e) {
-          return reject(e);
-        }
-      }); 
-    } catch (e) {
-      throw new Error(e);
+      console.log(e);
     }
   }
 }

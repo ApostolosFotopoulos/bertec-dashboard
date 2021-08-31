@@ -79,9 +79,7 @@ export default {
               colors: ["#fff"],
             },
             formatter: (val) => {
-              if (val.toFixed(0) % 10 == 0) {
-                 return val.toFixed(0)/10 + this.$store.state.timeline.nOfLeftSteps
-              }
+              return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
             },
             show: true,
           },
@@ -117,7 +115,7 @@ export default {
               colors: ["#fff"],
             },
             formatter: (val) => {
-              return val.toFixed(0);
+               return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
             },
           },
         },
@@ -133,9 +131,8 @@ export default {
               colors: ["#fff"],
             },
             formatter: (val) => {
-              if (val.toFixed(0) % 10 == 0) {
-                 return val.toFixed(0)/10 + this.$store.state.timeline.nOfRightSteps
-              }
+              
+              return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
             },
             show: true,
           },
@@ -244,9 +241,7 @@ export default {
                 colors: ["#fff"],
               },
               formatter: (val) => {
-                if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfLeftSteps
-                }
+                return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfLeftSteps))
               },
               show: true,
             },
@@ -299,9 +294,7 @@ export default {
                 colors: ["#fff"],
               },
               formatter: (val) => {
-                if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfLeftSteps
-                }
+                 return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfLeftSteps))
               },
               show: true,
             },
@@ -358,9 +351,7 @@ export default {
                 colors: ["#fff"],
               },
               formatter: (val) => {
-                if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfRightSteps
-                }
+                return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
               },
               show: true,
             },
@@ -415,7 +406,7 @@ export default {
               },
               formatter: (val) => {
                 if (val.toFixed(0) % 10 == 0) {
-                  return val.toFixed(0)/10 + this.$store.state.timeline.nOfRightSteps
+                   return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
                 }
               },
               show: true,
