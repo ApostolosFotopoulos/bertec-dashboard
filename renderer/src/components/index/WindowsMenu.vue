@@ -2,12 +2,12 @@
   <v-row>
     <v-col>
       <v-checkbox
-        v-model="isChartChecked"
-        label="Speed Meters"
+        v-model="isLineChartChecked"
+        label="Line Charts"
         color="#6ab187"
         hide-details
         :disabled="!$store.state.options.isSessionRunning"
-        @change="chartCheckboxHandler"
+        @change="lineChartCheckboxHandler"
       ></v-checkbox>
     </v-col>
     <v-col>
@@ -22,12 +22,12 @@
     </v-col>
     <v-col>
       <v-checkbox
-        v-model="isLineChartChecked"
-        label="Line Charts"
+        v-model="isChartChecked"
+        label="Speed Meters"
         color="#6ab187"
         hide-details
         :disabled="!$store.state.options.isSessionRunning"
-        @change="lineChartCheckboxHandler"
+        @change="chartCheckboxHandler"
       ></v-checkbox>
     </v-col>
     <v-col>
