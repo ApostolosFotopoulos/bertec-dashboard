@@ -308,6 +308,10 @@ class ForcePlatesConnector {
       handler.OnData += callback.onDataReceived;
       handler.OnStatus += callback.statusEvent;
 
+      /* Loop endless to keep the handler active */
+      Console.WriteLine("[LOG] Waiting for the data.");
+      while(true);
+      
     }).Start();
 
     return;
