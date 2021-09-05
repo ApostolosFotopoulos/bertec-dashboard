@@ -30,7 +30,7 @@
 const { ipcRenderer } = window.require("electron");
 import VueApexCharts from "vue-apexcharts";
 import AccuracyCard from "./AccuracyCard.vue";
-const { TIMELINE_SESSION, UPDATE_TRIAL, UPDATE_TRIAL_ZONES_AND_THRESHOLD } = require("../../../../main/util/types");
+const { TIMELINE_SESSION, UPDATE_TRIAL_ZONES_AND_THRESHOLD } = require("../../../../main/util/types");
 const defaultOptions = require("../../../../assets/options/timeline.json");
 
 export default {
@@ -78,10 +78,7 @@ export default {
             style: {
               colors: ["#fff"],
             },
-            formatter: (val) => {
-              return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
-            },
-            show: true,
+            show: false,
           },
         },
         colors: ["#d32d41"],
@@ -130,11 +127,7 @@ export default {
             style: {
               colors: ["#fff"],
             },
-            formatter: (val) => {
-              
-              return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
-            },
-            show: true,
+            show: false,
           },
         },
         colors: ["#6ab187"],
@@ -177,11 +170,6 @@ export default {
       this.$store.commit("setUser", responseData.user);
 
       if(this.$store.state.options.trial != ""){
-        // ipcRenderer.send(UPDATE_TRIAL,{ 
-        //   database: responseData.database , 
-        //   trial: this.$store.state.options.trial,
-        //   data: responseData.rows,
-        // })
         ipcRenderer.send(UPDATE_TRIAL_ZONES_AND_THRESHOLD, {
           database: responseData.database , 
           trialId: this.$store.state.options.trialId,
@@ -240,10 +228,7 @@ export default {
               style: {
                 colors: ["#fff"],
               },
-              formatter: (val) => {
-                return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfLeftSteps))
-              },
-              show: true,
+              show: false,
             },
           },
           colors: ["#d32d41"],
@@ -293,10 +278,7 @@ export default {
               style: {
                 colors: ["#fff"],
               },
-              formatter: (val) => {
-                 return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfLeftSteps))
-              },
-              show: true,
+              show: false,
             },
           },
           colors: ["#d32d41"],
@@ -350,10 +332,7 @@ export default {
               style: {
                 colors: ["#fff"],
               },
-              formatter: (val) => {
-                return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
-              },
-              show: true,
+              show: false,
             },
           },
           colors: ["#6ab187"],
@@ -404,12 +383,7 @@ export default {
               style: {
                 colors: ["#fff"],
               },
-              formatter: (val) => {
-                if (val.toFixed(0) % 10 == 0) {
-                   return Number(val.toFixed(0)/1 + Number(this.$store.state.timeline.nOfRightSteps))
-                }
-              },
-              show: true,
+              show: false,
             },
           },
           colors: ["#6ab187"],
