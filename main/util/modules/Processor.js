@@ -246,19 +246,21 @@ class Processor {
     var isRightPlateLocked = false;
     var rightPlateSeries = [{ data: [] }]
     var isInsideRightRange = 0
+    var stepRightCounter = 0;
 
     // Left plate variables
     var leftPlateMax = -1;
     var isLeftPlateLocked = false;
     var leftPlateSeries = [{ data: [] }]
     var isInsideLeftRange = 0
+    var stepLeftCounter = 0;
 
     for (var i = 0; i < records.length; i+=step) {
       var fz1 = Number(records[i]['Fz1']);
       var fz2 = Number(records[i]['Fz2']);
       var entryLeft = (Number(records[i][leftColumnName]) / Number(weight))*100;
       var entryRight = (Number(records[i][rightColumnName]) / Number(weight))*100;
-      var threshold = 500;
+      var threshold = Number(WEIGHT_THRESHOLD_PERCENT * weight);;
 
       if (isRightPlateLocked) {
         if (fz2 > threshold) {
@@ -269,6 +271,7 @@ class Processor {
         
         if (fz2 < threshold) {
           isRightPlateLocked = false;
+          stepRightCounter += 1
           if (trialThreshold) {
             if (rightPlateMax > trialThreshold) {
               rightPlateSeries[0].data.push(rightPlateMax);
@@ -277,7 +280,7 @@ class Processor {
             rightPlateSeries[0].data.push(rightPlateMax);
           }
           if (rangeMin && rangeMax) {
-            if (rangeMin <= rightPlateMax && rangeMax >= rightPlateMax) {
+            if (rangeMin <= rightPlateMax && rangeMax >= rightPlateMax && validSteps && validSteps.includes((stepRightCounter).toString())) {
               isInsideRightRange +=1
             }
           }
@@ -301,6 +304,7 @@ class Processor {
           
         if (fz1 < threshold) {
           isLeftPlateLocked = false;
+          stepLeftCounter += 1
           if (trialThreshold) {
             if (leftPlateMax > trialThreshold) {
               leftPlateSeries[0].data.push(leftPlateMax);
@@ -309,7 +313,7 @@ class Processor {
             leftPlateSeries[0].data.push(leftPlateMax);
           }
           if (rangeMin && rangeMax) {
-            if (rangeMin <= leftPlateMax && rangeMax >= leftPlateMax) {
+            if (rangeMin <= leftPlateMax && rangeMax >= leftPlateMax && validSteps && validSteps.includes((stepLeftCounter).toString())) {
               isInsideLeftRange +=1
             }
           }
