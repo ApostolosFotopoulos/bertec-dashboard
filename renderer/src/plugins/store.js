@@ -145,8 +145,8 @@ export default new Vuex.Store({
 			leftPlateChannel: 'FZ1',
 			rightPlateChannel: 'FZ2',
 			yAxisMaxValue: -1,
-			rangeMax: 120,
-			rangeMin: 90,
+			rangeMax: 140,
+			rangeMin: 100,
 			leftAccuracy: 0.0,
 			rightAccuracy: 0.0,
 		}

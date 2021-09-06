@@ -4,5 +4,5 @@ exports.RAW_STEP = exports.STEP = exports.FREQUENCY = exports.FREQUENCY_THRESHOL
 exports.WEIGHT_THRESHOLD_PERCENT = 0.05;
 exports.FREQUENCY_THRESHOLD_PERCENT = 0.4;
 exports.FREQUENCY = 100;
-exports.STEP = 1;
+exports.STEP = 10;
 exports.RAW_STEP = 1;

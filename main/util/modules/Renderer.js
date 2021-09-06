@@ -3,6 +3,7 @@ const { app } = require("electron");
 const Metrics = require('./Metrics');
 var html_to_pdf = require('html-pdf-node');
 var pdf = require('html-pdf');
+const path = require('path')
 
 class Renderer{
   static generateTimelineChart(row, min, max, id, color, rangeMin, rangeMax) {
@@ -375,7 +376,7 @@ class Renderer{
         <div class="container">
           <div class="columns is-vcentered is-centered">
             <div class="column">
-              <figure class="image is-128x128 has-image-centered">
+              <figure class="image is-128x128 has-image-centered pt-3">
                 <img
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTLsGTQWarOLIuj-4ZYkmSfDKh5wh7jX-R_qBjEG_5lfHjeFGs-waC1PRw0TSu9iAjCZ8&usqp=CAU"
                 />
@@ -392,10 +393,11 @@ class Renderer{
                 ${session.name}
               </div>
             </div>
-            <div class="column">
-              <figure class="image is-128x128 has-image-centered">
+            <div class="column has-text-centered  is-vcentered is-centered pt-5">
+              <h6>Powered By: </h6>
+              <figure class="image image is-64x64 has-image-centered">
                 <img
-                  src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F000%2F414%2F592%2Foriginal%2Fvector-report-icon.jpg&f=1&nofb=1"
+                  src="https://res.cloudinary.com/daiyk31jg/image/upload/v1630910572/BME_logo_300dpi_hnkpym.png"
                 />
               </figure>
             </div>
@@ -560,7 +562,7 @@ class Renderer{
     try {
           const html = this.generateHTML(user, trial, session, lineChartAxes, copAxes, timelineAxes, symmetries);
           let file = { content: `${decodeURIComponent(html)}` }
-          let options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf", args:['--allow-file-access-from-files']};
+          let options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf", args:['--allow-file-access-from-files'], headless: false};
           await new Promise((resolve, reject) => {
             html_to_pdf.generatePdf(file, options).then(pdfBuffer => {
               console.log("PDF Buffer:-", pdfBuffer);
