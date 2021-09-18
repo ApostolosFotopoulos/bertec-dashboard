@@ -336,6 +336,7 @@ export default {
         database: this.selectedDatabase,
         trialId: this.trialToEdit.id,
         trialName: this.trialToEdit.name,
+        comments: this.trialToEdit.comments,
       });
     },
     downloadTrial(t){

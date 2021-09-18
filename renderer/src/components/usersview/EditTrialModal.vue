@@ -20,7 +20,7 @@
             <hr class="hr" />
           </v-col>
         </v-row>
-        <div class="mt-3">
+        <div class="mt-5">
           <v-alert
             outlined
             :type="updateAlertError ? 'error' : 'success'"
@@ -37,6 +37,15 @@
               label="Trial"
               outlined
               
+            />
+          </v-col>
+        </v-row>
+        <v-row align="center">
+          <v-col align="center" cols="8" offset="2">
+            <v-textarea
+              outlined
+              v-model="trialToEdit.comments"
+              label="Comments"
             />
           </v-col>
         </v-row>

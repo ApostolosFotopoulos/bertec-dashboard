@@ -86,7 +86,7 @@ class Events {
                   "create table sessions(id integer primary key autoincrement, name text, user_id integer, created_at date)"
                 );
                 db.run(
-                  "create table trials(id integer primary key autoincrement, name text, session_id integer, created_at date, user_id integer, filename text, "+
+                  "create table trials(id integer primary key autoincrement, name text, session_id integer, comments text ,created_at date, user_id integer, filename text, "+
                   " fx_zone_min integer, fx_zone_max, fx_trial_threshold, fy_zone_min integer, fy_zone_max, fy_trial_threshold, fz_zone_min integer, fz_zone_max, fz_trial_threshold)"
                 );
               });
@@ -124,25 +124,6 @@ class Events {
               await new Promise((resolve, reject) => {
                 if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials/${database}`))) {
                   fs.mkdirSync(path.resolve(__dirname, `../../../.meta/trials/${database}`));
-                  resolve(true);
-                } else {
-                  resolve(true);
-                }
-              });
-
-              await new Promise((resolve, reject) => {
-                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/calculations`))) {
-                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/calculations`));
-                  resolve(true);
-                } else {
-                  resolve(true);
-                }
-              });
-              
-              // Create the calculations folder
-              await new Promise((resolve, reject) => {
-                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/calculations/${database}`))) {
-                  fs.mkdirSync(path.resolve(__dirname, `../../../.meta/calculations/${database}`));
                   resolve(true);
                 } else {
                   resolve(true);
@@ -1151,7 +1132,7 @@ class Events {
   static updateTrialDetailsListener(win) {
     ipcMain.on(UPDATE_TRIAL_DETAILS, async (e, d) => {
       try {
-        let { database, trialId, trialName } = d;
+        let { database, trialId, trialName, comments } = d;
         console.log(d)
         if (database && trialId && trialName) {
           var db = new sqlite3.Database(
@@ -1161,9 +1142,10 @@ class Events {
           );
           await new Promise((resolve, reject) => {
             db.run(
-              `update trials set name='${trialName}' where id=${trialId}`
+              `update trials set name='${trialName}', comments='${comments}' where id=${trialId}`
               , function (error) {
                 if (error) {
+                  console.log(error)
                   reject(false);
                   return;
                 }
