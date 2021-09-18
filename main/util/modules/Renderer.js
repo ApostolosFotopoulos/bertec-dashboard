@@ -536,6 +536,12 @@ class Renderer{
           </div>
         </div>
         ${this.genereateMeasumentsTable(lineChartAxes.fx, lineChartAxes.fy, lineChartAxes.fz, symmetries)}
+        <div class="container p-1 pt-3 pl-3 pr-3">
+          <h1 class="title is-6 has-text-centered">Comments</h1>
+          <p style="text-align: justify;">
+            ${trial.comments && trial.comments != ""? trial.comments: "No comments..."}
+          </p>
+        </div>
         <script>
           ${this.generateLineChart(lineChartAxes.fxRaw.left, lineChartAxes.fxRaw.minY, lineChartAxes.fxRaw.maxY, 'left-foot-fx', '#d32d41')}
           ${this.generateLineChart(lineChartAxes.fxRaw.right,lineChartAxes.fxRaw.minY, lineChartAxes.fxRaw.maxY, 'right-foot-fx', '#6ab187')}
