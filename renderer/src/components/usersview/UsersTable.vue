@@ -103,7 +103,7 @@
                     <v-icon medium class="mr-2" @click="() => openEditTrialDialog(item)">mdi-pencil-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => downloadTrial(item)">mdi-download-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => editAverageMetrics(item)">mdi-file-document</v-icon>
-                    <v-progress-circular v-if="loadingTrialIdx && loadingTrialIdx == item.id" indeterminate color="blue"></v-progress-circular>
+                    <v-progress-circular v-if="loadingTrialIdx && loadingTrialIdx == item.id" indeterminate color="white">{{progressRation}}</v-progress-circular>
                     <v-icon medium class="mr-2" v-else @click="() => exportTrialReport(item)">mdi-file-pdf-outline</v-icon>
                     <v-icon medium class="mr-2" @click="() => openDeleteTrialDialog(item)">mdi-delete-outline</v-icon>
                   </template>
@@ -119,7 +119,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-const { DELETE_USER_RESPONSE,DELETE_SESSION_RESPONSE, DELETE_TRIAL_RESPONSE } = require("../../../../main/util/types");
+const { DELETE_USER_RESPONSE,DELETE_SESSION_RESPONSE, DELETE_TRIAL_RESPONSE, TRIAL_PROCESS_PROGRESS } = require("../../../../main/util/types");
 
 export default {
   props: {
@@ -155,6 +155,12 @@ export default {
       }, 3000);
     });
 
+    ipcRenderer.on(TRIAL_PROCESS_PROGRESS, (_, responseData) => {
+      const { ratio } = responseData;
+      console.log(ratio);
+      this.progressRation = ratio;
+    });
+
     ipcRenderer.on(DELETE_SESSION_RESPONSE, (_, responseData) => {
       this.deleteAlert = true;
       this.deleteAlertError = responseData.error ? true : false;
@@ -180,6 +186,7 @@ export default {
   },
   data(){
     return{
+      progressRation: 0,
       deleteAlert:false,
       deleteAlertError:false,
       deleteAlertMessage:"",

@@ -11,7 +11,7 @@ const {
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, CREATE_SESSION, CREATE_SESSION_RESPONSE,
   CREATE_TRIAL_RESPONSE, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE, UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE,
   DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, AFTER_TRIAL_PROCESS_RESPONSE, AFTER_TRIAL_PROCESS,
-  EDIT_AVERAGE_METRICS
+  EDIT_AVERAGE_METRICS, TRIAL_PROCESS_PROGRESS
 } = require('../types')
 const path = require('path')
 const fs = require('fs')
@@ -1220,6 +1220,9 @@ class Events {
          * Connect to the database to retrieve all the related 
          * data that is saved.
          */
+
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 0 })
+
         var db = new sqlite3.Database(
           process.env.NODE_ENV
           ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
@@ -1239,6 +1242,7 @@ class Events {
             resolve(rows)
           });
         });
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 10 })
 
         /**
          * Get from the database the trial of the user
@@ -1253,6 +1257,7 @@ class Events {
             resolve(rows)
           });
         });
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 20 })
 
         /**
          * Get the user that is related with the above trial.
@@ -1267,6 +1272,7 @@ class Events {
           });
         });
         db.close();
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 30 })
 
         /**
          * Read the raw data from the csv that is saved for the current 
@@ -1285,6 +1291,7 @@ class Events {
             resolve(records);
           }));
         });
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 40 })
 
         /**
          * Read the metrics data from the csv to see what steps to include
@@ -1302,6 +1309,7 @@ class Events {
             resolve(records);
           }));
         });
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 50 })
         
         /** Get only the valid steps that the user has selected */
         let validSteps = metrics.map(m => m["Step"]).filter(s => Number(s) != NaN && Number(s) != 0)
@@ -1310,15 +1318,21 @@ class Events {
          * Calculate every parameter for every section of the report.
          */
         const linechartAxes = Processor.lineChartAxes(records, user.weight, validSteps);
-        const copAxes = Processor.copChartAxes(records, user.weight,validSteps);
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 60 })
+        const copAxes = Processor.copChartAxes(records, user.weight, validSteps);
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 70 })
         const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max,validSteps);
-        let symmetries = DataProcessor.calculateSymmetries(records,user.weight, validSteps);
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 80 })
+        let symmetries = DataProcessor.calculateSymmetries(records, user.weight, validSteps);
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 90 })
+
         /**
          * After gathering all the data then use the renderer
          * to create the pdf
          */
         await Renderer.start(user, trial, session, linechartAxes, copAxes, timelineAxes, symmetries);
-
+        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 100 })
+        
         /**
          * Automatically open pdf that is created 
          */
