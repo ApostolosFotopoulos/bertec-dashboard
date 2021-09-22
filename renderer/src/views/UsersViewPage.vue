@@ -32,6 +32,7 @@
       :downloadTrial="downloadTrial"
       :exportTrialReport="exportTrialReport"
       :editAverageMetrics="editAverageMetrics"
+      :regenerateAverageMetrics="regenerateAverageMetrics"
       :loadingTrialIdx="loadingTrialIdx"
     />
     <UserDetails
@@ -65,7 +66,8 @@ const {
   DOWNLOAD_TRIAL,
   EXPORT_TRIAL_REPORT,
   EXPORT_TRIAL_REPORT_RESPONSE,
-  EDIT_AVERAGE_METRICS
+  EDIT_AVERAGE_METRICS,
+  AFTER_TRIAL_PROCESS
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
@@ -349,6 +351,12 @@ export default {
     },
     editAverageMetrics(t){
       ipcRenderer.send(EDIT_AVERAGE_METRICS, {
+        database: this.selectedDatabase,
+        trialId: t.id,
+      });
+    },
+    regenerateAverageMetrics(t){
+      ipcRenderer.send(AFTER_TRIAL_PROCESS, {
         database: this.selectedDatabase,
         trialId: t.id,
       });

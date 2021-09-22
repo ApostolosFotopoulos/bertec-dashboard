@@ -100,12 +100,91 @@
                   class="elevation-1"
                 >
                   <template v-slot:[`item.actions`]="{ item }">
-                    <v-icon medium class="mr-2" @click="() => openEditTrialDialog(item)">mdi-pencil-outline</v-icon>
-                    <v-icon medium class="mr-2" @click="() => downloadTrial(item)">mdi-download-outline</v-icon>
-                    <v-icon medium class="mr-2" @click="() => editAverageMetrics(item)">mdi-file-document</v-icon>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium  
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => openEditTrialDialog(item)"
+                        >
+                          mdi-pencil-outline
+                        </v-icon>
+                      </template>
+                      <span>Edit the details of a trial</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium 
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => downloadTrial(item)"
+                        >
+                          mdi-download-outline
+                        </v-icon>
+                      </template>
+                      <span>Download trial</span>
+                    </v-tooltip>
                     <v-progress-circular v-if="loadingTrialIdx && loadingTrialIdx == item.id" indeterminate color="white">{{progressRation}}</v-progress-circular>
-                    <v-icon medium class="mr-2" v-else @click="() => exportTrialReport(item)">mdi-file-pdf-outline</v-icon>
-                    <v-icon medium class="mr-2" @click="() => openDeleteTrialDialog(item)">mdi-delete-outline</v-icon>
+                    <v-tooltip top v-else>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium 
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => exportTrialReport(item)"
+                        >
+                          mdi-file-pdf-outline
+                        </v-icon>
+                      </template>
+                      <span>Export trial report</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium 
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => openDeleteTrialDialog(item)"
+                        >
+                          mdi-delete-outline
+                        </v-icon>
+                      </template>
+                      <span>Delete trial</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium 
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => editAverageMetrics(item)"
+                        >
+                          mdi-chart-timeline-variant
+                        </v-icon>
+                      </template>
+                      <span>Edit average metrics</span>
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium 
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => regenerateAverageMetrics(item)"
+                        >
+                          mdi-restart
+                        </v-icon>
+                      </template>
+                      <span>Regenerate the average metrics</span>
+                    </v-tooltip>
                   </template>
                 </v-data-table>
               </td>
@@ -141,6 +220,7 @@ export default {
     downloadTrial: Function,
     exportTrialReport: Function,
     editAverageMetrics:Function,
+    regenerateAverageMetrics: Function,
     loadingTrialIdx: Number,
   },
   mounted(){
