@@ -82,7 +82,7 @@ module.exports = class {
       });
 
       if (process.env.NODE_ENV === "development") {
-        const winURL = `http://localhost:1337/`;
+        const winURL = `http://localhost:8081/`;
         this.window.loadURL(winURL);
       } else {
         this.window.loadURL(
