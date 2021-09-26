@@ -9,7 +9,7 @@ const chalk = require('chalk');
  * Start the force plate setup to connect to the force plate
  * before the application boot
  */
-(() => tslib_1.__awaiter(void 0, void 0, void 0, function* () {
+(() => (0, tslib_1.__awaiter)(void 0, void 0, void 0, function* () {
     try {
         yield spawn(process.env.NODE_ENV == "development"
             ? path.resolve(__dirname, '../../connection/ForcePlatesConnector.exe')

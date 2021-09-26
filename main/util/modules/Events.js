@@ -18,11 +18,14 @@ const fs = require('fs')
 const { ipcMain, dialog, app } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-const Processor = require('./Processor');
-const Renderer = require('./Renderer');
+// const Processor = require('./_Processor');
+// const Renderer = require('./Renderer');
 var parse = require('csv-parse');
-const Metrics = require('./Metrics');
 const { DataProcessor } = require('./DataProcessor')
+const { Metrics } = require('./Metrics')
+const { FREQUENCY } = require('../constants')
+// const Metrics = require('./Metrics');
+// const { DataProcessor } = require('./_DataProcessor')
 
 // app.getPath("downloads")+'/.meta/databases/*.db' gia production
 function groupBy(list, keyGetter) {
@@ -1214,144 +1217,221 @@ class Events {
   static exportTrialReportListener(win) {
     ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
       let { database, trialId } = d;
-      if (database && trialId){
-
-        /**
-         * Connect to the database to retrieve all the related 
-         * data that is saved.
-         */
-
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 0 })
-
-        var db = new sqlite3.Database(
-          process.env.NODE_ENV
-          ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-          : app.getPath("downloads") + `/.meta/databases/${database}`
-        );
-
-        /**
-         * Get from the database the trial of the user
-         * with all the details.
-         */
-        let [trial] = await new Promise((resolve, reject) => {
-          db.all(`select * from trials where id=${trialId}`, function (error, rows) {
-            if (error) {
-              reject([]);
-              return
-            }
-            resolve(rows)
-          });
-        });
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 10 })
-
-        /**
-         * Get from the database the trial of the user
-         * with all the details.
-         */
-        let [session] = await new Promise((resolve, reject) => {
-          db.all(`select * from sessions where id=${trial.session_id}`, function (error, rows) {
-            if (error) {
-              reject([]);
-              return
-            }
-            resolve(rows)
-          });
-        });
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 20 })
-
-        /**
-         * Get the user that is related with the above trial.
-         */
-        let [user] = await new Promise((resolve, reject) => {
-          db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
-            if (error) {
-              reject([]);
-              return
-            }
-            resolve(rows)
-          });
-        });
-        db.close();
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 30 })
-
-        /**
-         * Read the raw data from the csv that is saved for the current 
-         * trial.
-         */
-        let records = await new Promise((resolve, reject) => {
-          fs.createReadStream(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
-            : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
-            ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
-            if (error) {
-              reject(error)
-              return
-            }
-            resolve(records);
-          }));
-        });
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 40 })
-
-        /**
-         * Read the metrics data from the csv to see what steps to include
-         */
-        let metrics = await new Promise((resolve, reject) => {
-          fs.createReadStream(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
-            : app.getPath("downloads") + `/.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`
-            ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
-            if (error) {
-              reject(error)
-              return
-            }
-            resolve(records);
-          }));
-        });
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 50 })
+      try {
+        if (database && trialId) {
         
-        /** Get only the valid steps that the user has selected */
-        let validSteps = metrics.map(m => m["Step"]).filter(s => Number(s) != NaN && Number(s) != 0)
-        console.log(validSteps)
-        /**
-         * Calculate every parameter for every section of the report.
-         */
-        const linechartAxes = Processor.lineChartAxes(records, user.weight, validSteps);
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 60 })
-        const copAxes = Processor.copChartAxes(records, user.weight, validSteps);
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 70 })
-        const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max,validSteps);
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 80 })
-        let symmetries = DataProcessor.calculateSymmetries(records, user.weight, validSteps);
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 90 })
+          // Connect to the database 
+          const db = new sqlite3.Database(
+            process.env.NODE_ENV
+              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
+              : app.getPath("downloads") + `/.meta/databases/${database}`
+          );
 
-        /**
-         * After gathering all the data then use the renderer
-         * to create the pdf
-         */
-        await Renderer.start(user, trial, session, linechartAxes, copAxes, timelineAxes, symmetries);
-        e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 100 })
-        
-        /**
-         * Automatically open pdf that is created 
-         */
-        if (process.platform === "win64" || process.platform == "win32") {
-          require('electron').shell.openExternal(`${app.getPath("downloads")}/${trial.name}.pdf`);
-        } else {
-          require('electron').shell.openPath(`${app.getPath("downloads")}/${trial.name}.pdf`);
-        }
+          // Retrieve the trial from the database
+          const [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
 
-        /**
-         * Reply to the window to stop the loading for the
-         * pdf preparation
-         */
-        if (win && win.window && !win.window.isDestroyed()) {
-          e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
+          // Retrieve the session that is connected with the trial from the database
+          const [session] = await new Promise((resolve, reject) => {
+            db.all(`select * from sessions where id=${trial.session_id}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+
+          // Retrieve the user that is connected with the trial from the database
+          const [user] = await new Promise((resolve, reject) => {
+            db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+          db.close();
+
+          // Get all the raw data from the csv file of the trial
+          const records = await new Promise((resolve, reject) => {
+            fs.createReadStream(
+              process.env.NODE_ENV
+                ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
+                : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
+            ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+              if (error) {
+                reject(error)
+                return
+              }
+              resolve(records);
+            }));
+          });
+      
+          DataProcessor.formSteps(records, user.weight, FREQUENCY, "Fz1", "Fz2");
+          DataProcessor.formCOPs(records, user.weight, FREQUENCY, "Fz1", "Fz2");
+          DataProcessor.formTimelines(records,user.weight,FREQUENCY, 100,120,"Fz1","Fz2",[])
+    
+          // Reply that the export has finished to stop the loading
+          if (win && win.window && !win.window.isDestroyed()) {
+            e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
+          }
         }
+      } catch (e) {
+        throw new Error(e);
       }
     });
   }
+
+  // static exportTrialReportListener(win) {
+  //   ipcMain.on(EXPORT_TRIAL_REPORT, async (e, d) => {
+  //     let { database, trialId } = d;
+  //     if (database && trialId){
+
+  //       /**
+  //        * Connect to the database to retrieve all the related 
+  //        * data that is saved.
+  //        */
+
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 0 })
+
+  //       var db = new sqlite3.Database(
+  //         process.env.NODE_ENV
+  //         ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
+  //         : app.getPath("downloads") + `/.meta/databases/${database}`
+  //       );
+
+  //       /**
+  //        * Get from the database the trial of the user
+  //        * with all the details.
+  //        */
+  //       let [trial] = await new Promise((resolve, reject) => {
+  //         db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+  //           if (error) {
+  //             reject([]);
+  //             return
+  //           }
+  //           resolve(rows)
+  //         });
+  //       });
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 10 })
+
+  //       /**
+  //        * Get from the database the trial of the user
+  //        * with all the details.
+  //        */
+  //       let [session] = await new Promise((resolve, reject) => {
+  //         db.all(`select * from sessions where id=${trial.session_id}`, function (error, rows) {
+  //           if (error) {
+  //             reject([]);
+  //             return
+  //           }
+  //           resolve(rows)
+  //         });
+  //       });
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 20 })
+
+  //       /**
+  //        * Get the user that is related with the above trial.
+  //        */
+  //       let [user] = await new Promise((resolve, reject) => {
+  //         db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
+  //           if (error) {
+  //             reject([]);
+  //             return
+  //           }
+  //           resolve(rows)
+  //         });
+  //       });
+  //       db.close();
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 30 })
+
+  //       /**
+  //        * Read the raw data from the csv that is saved for the current 
+  //        * trial.
+  //        */
+  //       let records = await new Promise((resolve, reject) => {
+  //         fs.createReadStream(
+  //           process.env.NODE_ENV
+  //           ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
+  //           : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
+  //           ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+  //           if (error) {
+  //             reject(error)
+  //             return
+  //           }
+  //           resolve(records);
+  //         }));
+  //       });
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 40 })
+
+  //       /**
+  //        * Read the metrics data from the csv to see what steps to include
+  //        */
+  //       let metrics = await new Promise((resolve, reject) => {
+  //         fs.createReadStream(
+  //           process.env.NODE_ENV
+  //           ? path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+  //           : app.getPath("downloads") + `/.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`
+  //           ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+  //           if (error) {
+  //             reject(error)
+  //             return
+  //           }
+  //           resolve(records);
+  //         }));
+  //       });
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 50 })
+        
+  //       /** Get only the valid steps that the user has selected */
+  //       let validSteps = metrics.map(m => m["Step"]).filter(s => Number(s) != NaN && Number(s) != 0)
+  //       console.log(validSteps)
+  //       /**
+  //        * Calculate every parameter for every section of the report.
+  //        */
+  //       const linechartAxes = Processor.lineChartAxes(records, user.weight, validSteps);
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 60 })
+  //       const copAxes = Processor.copChartAxes(records, user.weight, validSteps);
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 70 })
+  //       const timelineAxes = Processor.timelineAxes(records, user.weight , trial.fx_threshold, trial.fx_zone_min, trial.fx_zone_max, trial.fy_threshold, trial.fy_zone_min, trial.fy_zone_max, trial.fz_threshold, trial.fz_zone_min, trial.fz_zone_max,validSteps);
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 80 })
+  //       let symmetries = DataProcessor.calculateSymmetries(records, user.weight, validSteps);
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 90 })
+
+  //       /**
+  //        * After gathering all the data then use the renderer
+  //        * to create the pdf
+  //        */
+  //       await Renderer.start(user, trial, session, linechartAxes, copAxes, timelineAxes, symmetries);
+  //       e.reply(TRIAL_PROCESS_PROGRESS, { ratio: 100 })
+        
+  //       /**
+  //        * Automatically open pdf that is created 
+  //        */
+  //       if (process.platform === "win64" || process.platform == "win32") {
+  //         require('electron').shell.openExternal(`${app.getPath("downloads")}/${trial.name}.pdf`);
+  //       } else {
+  //         require('electron').shell.openPath(`${app.getPath("downloads")}/${trial.name}.pdf`);
+  //       }
+
+  //       /**
+  //        * Reply to the window to stop the loading for the
+  //        * pdf preparation
+  //        */
+  //       if (win && win.window && !win.window.isDestroyed()) {
+  //         e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
+  //       }
+  //     }
+  //   });
+  // }
 
   static downloadTrialListener(win) {
     ipcMain.on(DOWNLOAD_TRIAL, async (e, d) => {
@@ -1429,16 +1509,16 @@ class Events {
       try {
         let { database, trialId } = d;
         if (database && trialId) {
-          var db = new sqlite3.Database(
+
+          // Connect to the database 
+          const db = new sqlite3.Database(
             process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
+              : app.getPath("downloads") + `/.meta/databases/${database}`
           );
 
-          /**
-           * Find the trial that has the provided id
-           */
-          let [trial] = await new Promise((resolve, reject) => {
+          // Retrieve the trial from the database
+          const [trial] = await new Promise((resolve, reject) => {
             db.all(`select * from trials where id=${trialId}`, function (error, rows) {
               if (error) {
                 reject([]);
@@ -1448,10 +1528,8 @@ class Events {
             });
           });
 
-          /**
-           * Get the user that is related with the above trial.
-           */
-          let [user] = await new Promise((resolve, reject) => {
+          // Retrieve the user that is connected with the trial from the database
+          const [user] = await new Promise((resolve, reject) => {
             db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
               if (error) {
                 reject([]);
@@ -1462,93 +1540,78 @@ class Events {
           });
           db.close();
 
-            /**
-             * Read the raw data from the csv that is saved for the current 
-             * trial.
-             */
-            let records = await new Promise((resolve, reject) => {
-              fs.createReadStream(
-                process.env.NODE_ENV
+          // Get all the raw data from the csv file of the trial
+          const records = await new Promise((resolve, reject) => {
+            fs.createReadStream(
+              process.env.NODE_ENV
                 ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
                 : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
-                ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
-                if (error) {
-                  reject(error)
-                  return
-                }
-                resolve(records);
-              }));
-            });
-            
-            
-            /**
-             *  Calculate the linechart data and the average metrics
-             *  for each axis and each foot
-             */
-            const linechartAxes = Processor.lineChartAxes(records, user.weight);
-            const averageMetricLeftFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fx.left)
-            const averageMetricRightFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fx.right)
-            const averageMetricLeftFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fy.left)
-            const averageMetricRightFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fy.right)  
-            const averageMetricLeftFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fz.left)
-            const averageMetricRightFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fz.right)
-            const maxLength = Math.max(...[
-              averageMetricLeftFX.averageImpulses.length,
-              averageMetricLeftFX.averageLRates.length,
-              averageMetricLeftFX.averageImpactPeakForce.length,
-              averageMetricLeftFX.averageTimeImpactPeakForce.length,
-              averageMetricRightFX.averageImpulses.length,
-              averageMetricRightFX.averageLRates.length,
-              averageMetricRightFX.averageImpactPeakForce.length,
-              averageMetricRightFX.averageTimeImpactPeakForce.length,
-              averageMetricLeftFY.averageImpulses.length,
-              averageMetricLeftFY.averageLRates.length,
-              averageMetricLeftFY.averageImpactPeakForce.length,
-              averageMetricLeftFY.averageTimeImpactPeakForce.length,
-              averageMetricRightFY.averageImpulses.length,
-              averageMetricRightFY.averageLRates.length,
-              averageMetricRightFY.averageImpactPeakForce.length,
-              averageMetricRightFY.averageTimeImpactPeakForce.length,
-              averageMetricLeftFZ.averageImpulses.length,
-              averageMetricLeftFZ.averageLRates.length,
-              averageMetricLeftFZ.averageImpactPeakForce.length,
-              averageMetricLeftFZ.averageTimeImpactPeakForce.length,
-              averageMetricRightFZ.averageImpulses.length,
-              averageMetricRightFZ.averageLRates.length,
-              averageMetricRightFZ.averageImpactPeakForce.length,
-              averageMetricRightFZ.averageTimeImpactPeakForce.length,
-            ])
-            let csv = 'Step;ImpulseLeft(FX);LoadingRateLeft(FX);ImpactPeakForceLeft(FX);TimeImpactPeakForceLeft(FX);ImpulseRight(FX);LoadingRateRight(FX);ImpactPeakForceRight(FX);TimeImpactPeakForceRight(FX);' +
-              'ImpulseLeft(FY);LoadingRtaeLeft(FY);ImpactPeakForceLeft(FY);TimeImpactPeakForceLeft(FY);ImpulseRight(FY);LoadingRateRight(FY);ImpactPeakForceRight(FY);TimeImpactPeakForceRight(FY);' +
-              'ImpulseLeft(FZ);LoadingRateLeft(FZ);ImpactPeakForceLeft(FZ);TimeImpactPeakForceLeft(FZ);ImpulseRight(FZ);LoadingRateRight(FZ);ImpactPeakForceRight(FZ);TimeImpactPeakForceRight(FZ)\n'
-            for (var i = 0; i < maxLength; i++){
-              csv = csv +`${i+1};${averageMetricLeftFX.averageImpulses[i] || ''};${averageMetricLeftFX.averageLRates[i] || ''};${averageMetricLeftFX.averageImpactPeakForce[i] || ''};${averageMetricLeftFX.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFX.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFX.averageLRates[i] || ''};${averageMetricRightFX.averageImpactPeakForce[i] || ''};${averageMetricRightFX.averageTimeImpactPeakForce[i] || ''};` +
-                `${averageMetricLeftFY.averageImpulses[i] || ''};${averageMetricLeftFY.averageLRates[i] || ''};${averageMetricLeftFY.averageImpactPeakForce[i] || ''};${averageMetricLeftFY.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFY.averageLRates[i] || ''};${averageMetricRightFY.averageImpactPeakForce[i] || ''};${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''};` +
-                `${averageMetricLeftFZ.averageImpulses[i]|| ''};${averageMetricLeftFZ.averageLRates[i]|| ''};${averageMetricLeftFZ.averageImpactPeakForce[i]|| ''};${averageMetricLeftFZ.averageTimeImpactPeakForce[i]|| ''};${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''};${averageMetricRightFZ.averageLRates[i]|| ''};${averageMetricRightFX.averageImpactPeakForce[i]|| ''};${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''}\n`
-            }
-            
-            csv = csv +';;;;;;;;;;;;;;;;;;;;;;;;\n'
-            csv = csv +';;;;;;;;;;;;;;;;;;;;;;;;\n'
+            ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+              if (error) {
+                reject(error)
+                return
+              }
+              resolve(records);
+            }));
+          });
 
-            // Calculate the averages of the column
-            csv = csv + `;=AVERAGE(B2:B${maxLength + 1});=AVERAGE(C2:C${maxLength + 1});=AVERAGE(D2:D${maxLength + 1});=AVERAGE(E2:E${maxLength + 1});=AVERAGE(F2:F${maxLength + 1});=AVERAGE(G2:G${maxLength + 1});` +
-              `=AVERAGE(H2: H${maxLength + 1});=AVERAGE(I2: I${maxLength + 1});=AVERAGE(J2:J${maxLength + 1});=AVERAGE(K2:K${maxLength + 1});=AVERAGE(L2:L${maxLength + 1});=AVERAGE(M2:M${maxLength + 1});=AVERAGE(N2:N${maxLength + 1});` +
-              `=AVERAGE(O2:O${maxLength + 1});=AVERAGE(P2:P${maxLength + 1});=AVERAGE(Q2:Q${maxLength + 1});=AVERAGE(R2:R${maxLength + 1});=AVERAGE(S2:S${maxLength + 1});=AVERAGE(T2:T${maxLength + 1});=AVERAGE(U2:U${maxLength + 1});=AVERAGE(V2:V${maxLength + 1});` +
-              `=AVERAGE(W2:W${maxLength + 1});=AVERAGE(X2:X${maxLength + 1});=AVERAGE(Y2:Y${maxLength + 1})\n`
+          // Prepare the data to calculate the metrics from the steps
+          const steps = DataProcessor.formStepsForAverageMetrics(records, user.weight, FREQUENCY);
+          const averageMetrics = Metrics.generateAverage(steps, FREQUENCY);
+          console.log(averageMetrics)
 
-            await new Promise((resolve, reject) => {
-              fs.writeFile(path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`),csv, (error) => {
-                if (error) {
-                  reject(false);
-                  return
-                }
-                resolve(true);
-              })
-            });
+          // Create the headers of the csv
+          const csvHeaders = 'Step;ImpulseLeftFoot(FX);ImpulseLeftFoot(FY);ImpulseLeftFoot(FZ);ImpulseRightFoot(FX);ImpulseRightFoot(FY);ImpulseRightFoot(FZ);'
+            + `LoadingRateLeftFoot(FX);LoadingRateLeftFoot(FY);LoadingRateLeftFoot(FZ);LoadingRateRightFoot(FX);LoadingRateRightFoot(FY);LoadingRateRightFoot(FZ);`
+            + `ImpactPeakForceLeftFoot(FX);ImpactPeakForceLeftFoot(FY);ImpactPeakForceLeftFoot(FZ);ImpactPeakForceRightFoot(FX);ImpactPeakForceRightFoot(FY);ImpactPeakForceRightFoot(FZ);`
+            + `TimeToImpactPeakLeftFoot(FX);TimeToImpactPeakLeftFoot(FY);TimeToImpactPeakLeftFoot(FZ);TimeToImpactPeakRightFoot(FX);TimeToImpactPeakRightFoot(FY);TimeToImpactPeakRightFoot(FZ);`
+            + `ActivePeakForceLeftFoot(FX);ActivePeakForceLeftFoot(FY);ActivePeakForceLeftFoot(FZ);ActivePeakForceRightFoot(FX);ActivePeakForceRightFoot(FY);ActivePeakForceRightFoot(FZ);`
+            + `TimeToActivePeakLeftFoot(FX);TimeToActivePeakLeftFoot(FY);TimeToActivePeakLeftFoot(FZ);TimeToActivePeakRightFoot(FX);TimeToActivePeakRightFoot(FY);TimeToActivePeakRightFoot(FZ);`
+            + `PushOffRateLeftFoot(FX);PushOffRateLeftFoot(FY);PushOffRateLeftFoot(FZ);PushOffRateRightFoot(FX);PushOffRateRightFoot(FY);PushOffRateRightFoot(FZ)\n`
+        
+          // Add the averages of each metric for each step
+          let csv = csvHeaders;
+          for (var i = 0; i < averageMetrics.length; i++){
+            csv = csv + `${i + 1};${averageMetrics.left.fx.impulses[i]};${averageMetrics.left.fy.impulses[i]};${averageMetrics.left.fz.impulses[i]};` +
+              `${averageMetrics.right.fx.impulses[i]};${averageMetrics.right.fy.impulses[i]};${averageMetrics.right.fz.impulses[i]};` +
+              `${averageMetrics.left.fx.loadingRates[i]};${averageMetrics.left.fy.loadingRates[i]};${averageMetrics.left.fz.loadingRates[i]};` +
+              `${averageMetrics.right.fx.loadingRates[i]};${averageMetrics.right.fy.loadingRates[i]};${averageMetrics.right.fz.loadingRates[i]};`+
+              `${averageMetrics.left.fx.impactPeakForces[i]};${averageMetrics.left.fy.impactPeakForces[i]};${averageMetrics.left.fz.impactPeakForces[i]};` +
+              `${averageMetrics.right.fx.impactPeakForces[i]};${averageMetrics.right.fy.impactPeakForces[i]};${averageMetrics.right.fz.impactPeakForces[i]};`+
+              `${averageMetrics.left.fx.timeToImpactPeaks[i]};${averageMetrics.left.fy.timeToImpactPeaks[i]};${averageMetrics.left.fz.timeToImpactPeaks[i]};` +
+              `${averageMetrics.right.fx.timeToImpactPeaks[i]};${averageMetrics.right.fy.timeToImpactPeaks[i]};${averageMetrics.right.fz.timeToImpactPeaks[i]};`+
+              `${averageMetrics.left.fx.activePeakForces[i]};${averageMetrics.left.fy.activePeakForces[i]};${averageMetrics.left.fz.activePeakForces[i]};` +
+              `${averageMetrics.right.fx.activePeakForces[i]};${averageMetrics.right.fy.activePeakForces[i]};${averageMetrics.right.fz.activePeakForces[i]};`+
+              `${averageMetrics.left.fx.timeToActivePeaks[i]};${averageMetrics.left.fy.timeToActivePeaks[i]};${averageMetrics.left.fz.timeToActivePeaks[i]};` +
+              `${averageMetrics.right.fx.timeToActivePeaks[i]};${averageMetrics.right.fy.timeToActivePeaks[i]};${averageMetrics.right.fz.timeToActivePeaks[i]};`+
+              `${averageMetrics.left.fx.pushOffRates[i]};${averageMetrics.left.fy.pushOffRates[i]};${averageMetrics.left.fz.pushOffRates[i]};` +
+              `${averageMetrics.right.fx.pushOffRates[i]};${averageMetrics.right.fy.pushOffRates[i]};${averageMetrics.right.fz.pushOffRates[i]}\n`
+          }
 
-          /**
-           * Automatically open pdf that is created 
-           */
+
+          // Calculate the average of each column
+          csv = csv + ';;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;\n';
+
+          csv = csv + `;=AVERAGE(B2:B${averageMetrics.length + 1});=AVERAGE(C2:C${averageMetrics.length + 1});=AVERAGE(D2:D${averageMetrics.length + 1});=AVERAGE(E2:E${averageMetrics.length + 1});=AVERAGE(F2:F${averageMetrics.length + 1});=AVERAGE(G2:G${averageMetrics.length + 1})` +
+            `;=AVERAGE(H2:H${averageMetrics.length + 1});=AVERAGE(I2:I${averageMetrics.length + 1});=AVERAGE(J2:J${averageMetrics.length + 1});=AVERAGE(K2:K${averageMetrics.length + 1});=AVERAGE(L2:L${averageMetrics.length + 1});=AVERAGE(M2:M${averageMetrics.length + 1})` +
+            `;=AVERAGE(N2:N${averageMetrics.length + 1});=AVERAGE(O2:O${averageMetrics.length + 1});=AVERAGE(P2:P${averageMetrics.length + 1});=AVERAGE(Q2:Q${averageMetrics.length + 1});=AVERAGE(R2:R${averageMetrics.length + 1});=AVERAGE(S2:S${averageMetrics.length + 1})` +
+            `;=AVERAGE(T2:T${averageMetrics.length + 1});=AVERAGE(U2:U${averageMetrics.length + 1});=AVERAGE(V2:V${averageMetrics.length + 1});=AVERAGE(W2:W${averageMetrics.length + 1});=AVERAGE(X2:X${averageMetrics.length + 1});=AVERAGE(Y2:Y${averageMetrics.length + 1})` +
+            `;=AVERAGE(Z2:Z${averageMetrics.length + 1});=AVERAGE(AA2:AA${averageMetrics.length + 1});=AVERAGE(AB2:AB${averageMetrics.length + 1});=AVERAGE(AC2:AC${averageMetrics.length + 1});=AVERAGE(AD2:AD${averageMetrics.length + 1});=AVERAGE(AE2:AE${averageMetrics.length + 1})` +
+            `;=AVERAGE(AF2:AF${averageMetrics.length + 1});=AVERAGE(AG2:AG${averageMetrics.length + 1});=AVERAGE(AH2:AH${averageMetrics.length + 1});=AVERAGE(AI2:AI${averageMetrics.length + 1});=AVERAGE(AJ2:AJ${averageMetrics.length + 1});=AVERAGE(AK2:AK${averageMetrics.length + 1})` +
+            `;=AVERAGE(AL2:AL${averageMetrics.length + 1});=AVERAGE(AM2:AM${averageMetrics.length + 1});=AVERAGE(AN2:AN${averageMetrics.length + 1});=AVERAGE(AO2:AO${averageMetrics.length + 1});=AVERAGE(AP2:AP${averageMetrics.length + 1});=AVERAGE(AQ2:AQ${averageMetrics.length + 1})\n`
+
+          // Write the csv data to the file
+          await new Promise((resolve, reject) => {
+            fs.writeFile(path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`),csv, (error) => {
+              if (error) {
+                reject(false);
+                return
+              }
+              resolve(true);
+            })
+          });
+
+          // Open the created csv file
           if (process.platform === "win64" || process.platform == "win32") {
             require('electron').shell.openExternal(
                path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
@@ -1558,19 +1621,161 @@ class Events {
               path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
             );
           }
-          
-          /**
-           * Reply to the window to stop the loading for the
-           * csv preparation
-           */
-           e.reply(AFTER_TRIAL_PROCESS_RESPONSE, {});
+
+          e.reply(AFTER_TRIAL_PROCESS_RESPONSE, {});
         }
       } catch (e) {
-        console.log(e)
         throw new Error(e);
       }
     });
   }
+  // static afterTrialProcess(win) {
+  //   ipcMain.on(AFTER_TRIAL_PROCESS, async (e, d) => {
+  //     try {
+  //       let { database, trialId } = d;
+  //       if (database && trialId) {
+  //         var db = new sqlite3.Database(
+  //           process.env.NODE_ENV
+  //           ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
+  //           : app.getPath("downloads") + `/.meta/databases/${database}`
+  //         );
+
+  //         /**
+  //          * Find the trial that has the provided id
+  //          */
+  //         let [trial] = await new Promise((resolve, reject) => {
+  //           db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+  //             if (error) {
+  //               reject([]);
+  //               return
+  //             }
+  //             resolve(rows)
+  //           });
+  //         });
+
+  //         /**
+  //          * Get the user that is related with the above trial.
+  //          */
+  //         let [user] = await new Promise((resolve, reject) => {
+  //           db.all(`select * from users where id=${trial.user_id}`, function (error, rows) {
+  //             if (error) {
+  //               reject([]);
+  //               return
+  //             }
+  //             resolve(rows)
+  //           });
+  //         });
+  //         db.close();
+
+  //           /**
+  //            * Read the raw data from the csv that is saved for the current 
+  //            * trial.
+  //            */
+  //           let records = await new Promise((resolve, reject) => {
+  //             fs.createReadStream(
+  //               process.env.NODE_ENV
+  //               ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
+  //               : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
+  //               ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+  //               if (error) {
+  //                 reject(error)
+  //                 return
+  //               }
+  //               resolve(records);
+  //             }));
+  //           });
+            
+            
+  //           /**
+  //            *  Calculate the linechart data and the average metrics
+  //            *  for each axis and each foot
+  //            */
+  //           const linechartAxes = Processor.lineChartAxes(records, user.weight);
+  //           const averageMetricLeftFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fx.left)
+  //           const averageMetricRightFX = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fx.right)
+  //           const averageMetricLeftFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fy.left)
+  //           const averageMetricRightFY = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fy.right)  
+  //           const averageMetricLeftFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fz.left)
+  //           const averageMetricRightFZ = Metrics.calculateAverageMetricsPerFoot(linechartAxes.fz.right)
+  //           const maxLength = Math.max(...[
+  //             averageMetricLeftFX.averageImpulses.length,
+  //             averageMetricLeftFX.averageLRates.length,
+  //             averageMetricLeftFX.averageImpactPeakForce.length,
+  //             averageMetricLeftFX.averageTimeImpactPeakForce.length,
+  //             averageMetricRightFX.averageImpulses.length,
+  //             averageMetricRightFX.averageLRates.length,
+  //             averageMetricRightFX.averageImpactPeakForce.length,
+  //             averageMetricRightFX.averageTimeImpactPeakForce.length,
+  //             averageMetricLeftFY.averageImpulses.length,
+  //             averageMetricLeftFY.averageLRates.length,
+  //             averageMetricLeftFY.averageImpactPeakForce.length,
+  //             averageMetricLeftFY.averageTimeImpactPeakForce.length,
+  //             averageMetricRightFY.averageImpulses.length,
+  //             averageMetricRightFY.averageLRates.length,
+  //             averageMetricRightFY.averageImpactPeakForce.length,
+  //             averageMetricRightFY.averageTimeImpactPeakForce.length,
+  //             averageMetricLeftFZ.averageImpulses.length,
+  //             averageMetricLeftFZ.averageLRates.length,
+  //             averageMetricLeftFZ.averageImpactPeakForce.length,
+  //             averageMetricLeftFZ.averageTimeImpactPeakForce.length,
+  //             averageMetricRightFZ.averageImpulses.length,
+  //             averageMetricRightFZ.averageLRates.length,
+  //             averageMetricRightFZ.averageImpactPeakForce.length,
+  //             averageMetricRightFZ.averageTimeImpactPeakForce.length,
+  //           ])
+  //           let csv = 'Step;ImpulseLeft(FX);LoadingRateLeft(FX);ImpactPeakForceLeft(FX);TimeImpactPeakForceLeft(FX);ImpulseRight(FX);LoadingRateRight(FX);ImpactPeakForceRight(FX);TimeImpactPeakForceRight(FX);' +
+  //             'ImpulseLeft(FY);LoadingRtaeLeft(FY);ImpactPeakForceLeft(FY);TimeImpactPeakForceLeft(FY);ImpulseRight(FY);LoadingRateRight(FY);ImpactPeakForceRight(FY);TimeImpactPeakForceRight(FY);' +
+  //             'ImpulseLeft(FZ);LoadingRateLeft(FZ);ImpactPeakForceLeft(FZ);TimeImpactPeakForceLeft(FZ);ImpulseRight(FZ);LoadingRateRight(FZ);ImpactPeakForceRight(FZ);TimeImpactPeakForceRight(FZ)\n'
+  //           for (var i = 0; i < maxLength; i++){
+  //             csv = csv +`${i+1};${averageMetricLeftFX.averageImpulses[i] || ''};${averageMetricLeftFX.averageLRates[i] || ''};${averageMetricLeftFX.averageImpactPeakForce[i] || ''};${averageMetricLeftFX.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFX.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFX.averageLRates[i] || ''};${averageMetricRightFX.averageImpactPeakForce[i] || ''};${averageMetricRightFX.averageTimeImpactPeakForce[i] || ''};` +
+  //               `${averageMetricLeftFY.averageImpulses[i] || ''};${averageMetricLeftFY.averageLRates[i] || ''};${averageMetricLeftFY.averageImpactPeakForce[i] || ''};${averageMetricLeftFY.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''};${averageMetricRightFY.averageLRates[i] || ''};${averageMetricRightFY.averageImpactPeakForce[i] || ''};${averageMetricRightFY.averageTimeImpactPeakForce[i] || ''};` +
+  //               `${averageMetricLeftFZ.averageImpulses[i]|| ''};${averageMetricLeftFZ.averageLRates[i]|| ''};${averageMetricLeftFZ.averageImpactPeakForce[i]|| ''};${averageMetricLeftFZ.averageTimeImpactPeakForce[i]|| ''};${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''};${averageMetricRightFZ.averageLRates[i]|| ''};${averageMetricRightFX.averageImpactPeakForce[i]|| ''};${averageMetricRightFZ.averageTimeImpactPeakForce[i]|| ''}\n`
+  //           }
+            
+  //           csv = csv +';;;;;;;;;;;;;;;;;;;;;;;;\n'
+  //           csv = csv +';;;;;;;;;;;;;;;;;;;;;;;;\n'
+
+  //           // Calculate the averages of the column
+  //           csv = csv + `;=AVERAGE(B2:B${maxLength + 1});=AVERAGE(C2:C${maxLength + 1});=AVERAGE(D2:D${maxLength + 1});=AVERAGE(E2:E${maxLength + 1});=AVERAGE(F2:F${maxLength + 1});=AVERAGE(G2:G${maxLength + 1});` +
+  //             `=AVERAGE(H2: H${maxLength + 1});=AVERAGE(I2: I${maxLength + 1});=AVERAGE(J2:J${maxLength + 1});=AVERAGE(K2:K${maxLength + 1});=AVERAGE(L2:L${maxLength + 1});=AVERAGE(M2:M${maxLength + 1});=AVERAGE(N2:N${maxLength + 1});` +
+  //             `=AVERAGE(O2:O${maxLength + 1});=AVERAGE(P2:P${maxLength + 1});=AVERAGE(Q2:Q${maxLength + 1});=AVERAGE(R2:R${maxLength + 1});=AVERAGE(S2:S${maxLength + 1});=AVERAGE(T2:T${maxLength + 1});=AVERAGE(U2:U${maxLength + 1});=AVERAGE(V2:V${maxLength + 1});` +
+  //             `=AVERAGE(W2:W${maxLength + 1});=AVERAGE(X2:X${maxLength + 1});=AVERAGE(Y2:Y${maxLength + 1})\n`
+
+  //           await new Promise((resolve, reject) => {
+  //             fs.writeFile(path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`),csv, (error) => {
+  //               if (error) {
+  //                 reject(false);
+  //                 return
+  //               }
+  //               resolve(true);
+  //             })
+  //           });
+
+  //         /**
+  //          * Automatically open pdf that is created 
+  //          */
+  //         if (process.platform === "win64" || process.platform == "win32") {
+  //           require('electron').shell.openExternal(
+  //              path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+  //           );
+  //         } else {
+  //           require('electron').shell.openPath(
+  //             path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+  //           );
+  //         }
+          
+  //         /**
+  //          * Reply to the window to stop the loading for the
+  //          * csv preparation
+  //          */
+  //          e.reply(AFTER_TRIAL_PROCESS_RESPONSE, {});
+  //       }
+  //     } catch (e) {
+  //       console.log(e)
+  //       throw new Error(e);
+  //     }
+  //   });
+  // }
   static editAverageMetrics(win) {
     ipcMain.on(EDIT_AVERAGE_METRICS, async (e, d) => {
       try {

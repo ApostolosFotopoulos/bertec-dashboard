@@ -1,111 +1,99 @@
-const { FREQUENCY } = require('../constants')
-const math = require('../math')
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Metrics = void 0;
+const Calculus_1 = require("./Calculus");
 class Metrics {
-
-  static retrieve(rows) {
-    return {
-      left: this.calculateMetricsPerFoot(rows.left),
-      right:this.calculateMetricsPerFoot(rows.right)
+    static generate(steps, frequency) {
+        console.log(steps);
     }
-  }
-
-  static calculateMetricsPerFoot(rows) {
-
-    var nOfIntegrals = 0;
-    var sOfIntegrals = 0;
-    var nOfLRates = 0;
-    var sOfLRates = 0;
-    var nOfImpactPeakForce = 0;
-    var sOfImpactPeakForce = 0;
-    var nOfTimeImpactPeakForce = 0;
-    var sOfTimeImpactPeakForce = 0;
-
-    for (var i = 0; i < rows.length; i++) {
-      
-      // Calculate the impulse
-      let x = rows[i].data.map((_, id) => id / FREQUENCY);
-      let y = rows[i].data
-      let intg = math.integral(x, y)
-      if (intg != 0) {
-        nOfIntegrals += 1
-        sOfIntegrals += intg
-      }
-
-      // Calculate the loading rate
-      let [m] = math.localMax(rows[i].data)
-      if (m) {
-        let maxIdx = rows[i].data.indexOf(m)
-        let from = (20 * maxIdx) / m
-        let to = (80 * maxIdx) / m
-        let sp = math.slope(from/ FREQUENCY, 20, to/ FREQUENCY, 80)
-        if (sp) {
-          nOfLRates += 1
-          sOfLRates += sp
-        }
-
-        // Calculate the impact peak force
-        nOfImpactPeakForce += 1
-        sOfImpactPeakForce += m
-        
-        // Calculate the time of impact peak force
-        if (maxIdx) {
-          nOfTimeImpactPeakForce += 1
-          sOfTimeImpactPeakForce += (maxIdx / FREQUENCY)
-        }
-      }
+    static generateAverage(steps, frequency) {
+        const averageMetrics = {
+            left: {
+                fx: this.calculateMetricsPerFoot(steps.fx.left, frequency),
+                fy: this.calculateMetricsPerFoot(steps.fy.left, frequency),
+                fz: this.calculateMetricsPerFoot(steps.fz.left, frequency),
+            },
+            right: {
+                fx: this.calculateMetricsPerFoot(steps.fx.right, frequency),
+                fy: this.calculateMetricsPerFoot(steps.fy.right, frequency),
+                fz: this.calculateMetricsPerFoot(steps.fz.right, frequency),
+            }
+        };
+        return Object.assign(Object.assign({}, averageMetrics), { length: Math.max(...[
+                steps.fz.left.length,
+                steps.fz.right.length,
+            ]) });
     }
-    return {
-      impulse: nOfIntegrals > 0 ? (sOfIntegrals / nOfIntegrals) : 0,
-      loadingRate: nOfLRates > 0 ? (sOfLRates / nOfLRates) : 0,
-      impactPeakForce: nOfImpactPeakForce > 0 ? (sOfImpactPeakForce / nOfImpactPeakForce) : 0,
-      timeImpactPeakForce: nOfTimeImpactPeakForce > 0 ? (sOfTimeImpactPeakForce / nOfTimeImpactPeakForce) :0
-    };
-  }
-  static calculateAverageMetricsPerFoot(rows) {
-
-    var averageImpulses = [];
-    var averageLRates = [];
-    var averageImpactPeakForce = [];
-    var averageTimeImpactPeakForce = [];
-
-    for (var i = 0; i < rows.length; i++) {
-      
-      // Calculate the impulse
-      let x = rows[i].data.map((_, id) => id / FREQUENCY);
-      let y = rows[i].data
-      let intg = math.integral(x, y)
-      if (intg != 0) {
-        averageImpulses.push(intg)
-      }
-
-      // Calculate the loading rate
-      let [m] = math.localMax(rows[i].data)
-      if (m) {
-        let maxIdx = rows[i].data.indexOf(m)
-        let from = (20 * maxIdx) / m
-        let to = (80 * maxIdx) / m
-        let sp = math.slope(from/ FREQUENCY, 20, to/ FREQUENCY, 80)
-        if (sp) {
-          averageLRates.push(sp)
+    static calculateMetricsPerFoot(rows, frequency) {
+        let impulses = [];
+        let impactPeakForces = [];
+        let loadingRates = [];
+        let timeToImpactPeaks = [];
+        let activePeakForces = [];
+        let timeToActivePeaks = [];
+        let pushOffRates = [];
+        for (var i = 0; i < rows.length; i++) {
+            // Calculate the vertical impulse of every step
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            impulses.push(this.calculateImpulse(x, y));
+            // Calculate the loading rate of every step
+            loadingRates.push(this.calculateLoadingRate(y, frequency));
+            // Calculate the impact peak force rate of every step
+            impactPeakForces.push(this.calculateImpactPeakForce(y));
+            // Calculate the time to impact peak of every step
+            timeToImpactPeaks.push(this.calculateTimeToImpactPeak(y, frequency));
+            // Calculate the active peak force of every step
+            activePeakForces.push(this.calculateActivePeakForce(y));
+            // Calculate the time of active peak force of every step
+            timeToActivePeaks.push(this.calculateTimeToActivePeak(y, frequency));
+            // Calculate the push off rate of every step
+            pushOffRates.push(this.calculatePushOffRate(y, frequency));
         }
-
-        // Calculate the impact peak force
-        averageImpactPeakForce.push(m)
-        
-        // Calculate the time of impact peak force
-        if (maxIdx) {
-          averageTimeImpactPeakForce.push(maxIdx / FREQUENCY)
-        }
-      }
+        return {
+            impulses,
+            impactPeakForces,
+            loadingRates,
+            timeToImpactPeaks,
+            activePeakForces,
+            timeToActivePeaks,
+            pushOffRates
+        };
     }
-    return {
-      averageImpulses,
-      averageLRates,
-      averageImpactPeakForce,
-      averageTimeImpactPeakForce,
-    };
-  }
+    static calculateImpulse(x, y) {
+        return Calculus_1.Calculus.integral(x, y);
+    }
+    static calculateLoadingRate(y, frequency) {
+        let mx = Calculus_1.Calculus.findFirstlocalMax(y);
+        if (mx !== 0) {
+            const mxId = y.indexOf(mx);
+            const from = (20 * mxId) / mx;
+            const to = (80 * mxId) / mx;
+            return Calculus_1.Calculus.slope(from / frequency, 20, to / frequency, 80);
+        }
+        return 0;
+    }
+    static calculateImpactPeakForce(y) {
+        return Calculus_1.Calculus.findFirstlocalMax(y);
+    }
+    static calculateTimeToImpactPeak(y, frequency) {
+        return Calculus_1.Calculus.findIndexOfFirstlocalMax(y) / frequency;
+    }
+    static calculateActivePeakForce(y) {
+        return Calculus_1.Calculus.findMaxFromLocalMaxs(y);
+    }
+    static calculateTimeToActivePeak(y, frequency) {
+        return Calculus_1.Calculus.findIndexOfMaxFromLocalMaxs(y) / frequency;
+    }
+    static calculatePushOffRate(y, frequency) {
+        let mx = Calculus_1.Calculus.findIndexOfMaxFromLocalMaxs(y);
+        if (mx !== 0) {
+            const mxId = y.indexOf(mx);
+            const from = (80 * mxId) / mx;
+            const to = (20 * mxId) / mx;
+            return Calculus_1.Calculus.slope(from / frequency, 80, to / frequency, 20);
+        }
+        return 0;
+    }
 }
-
-module.exports = Metrics;
+exports.Metrics = Metrics;

@@ -1,6 +1,6 @@
 const moment = require('moment');
 const { app } = require("electron");
-const Metrics = require('./Metrics');
+const Metrics = require('./_Metrics');
 var html_to_pdf = require('html-pdf-node');
 var pdf = require('html-pdf');
 const path = require('path')
@@ -314,20 +314,22 @@ class Renderer{
             <td>${fzMetrics.right.timeImpactPeakForce.toFixed(3)} ms</td>
           </tr>
         </table>
-        <table class="pl-3 pr-3 mt-3">
-          <tr>
-            <th>Parameter</th>
-            <th>Value</th>
-          </tr>
-          <tr>
-            <td>Step Symmetry (SPS)</td>
-            <td>${(symmetries.step.toFixed(3))}</td>
-          </tr>
-          <tr>
-            <td>Stance Symmetry (SNS)</td>
-            <td>${(symmetries.stance.toFixed(3))}</td>
-          </tr>
-        </table>
+        <div>
+          <table class="pl-3 pr-3 mt-3">
+            <tr>
+              <th>Parameter</th>
+              <th>Value</th>
+            </tr>
+            <tr>
+              <td>Step Symmetry (SPS)</td>
+              <td>${(symmetries.step.toFixed(3))}</td>
+            </tr>
+            <tr>
+              <td>Stance Symmetry (SNS)</td>
+              <td>${(symmetries.stance.toFixed(3))}</td>
+            </tr>
+          </table>
+        </div>
       </div>
     `
   }

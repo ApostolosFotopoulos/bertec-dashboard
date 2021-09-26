@@ -26,6 +26,38 @@ export interface Record {
   Copxy2: string,
 };
 
+export interface LineChartSeries {
+  data: Array<number>
+}
+
+export interface COPChartSeries {
+  data: Array<Array<number>>
+}
+
+export interface StepsDataForAverageMetrics {
+  fx: {
+    left: Array<LineChartSeries>
+    right:  Array<LineChartSeries>
+  },
+  fy: {
+    left: Array<LineChartSeries>
+    right:  Array<LineChartSeries>
+  },
+  fz: {
+    left: Array<LineChartSeries>
+    right:  Array<LineChartSeries>
+  },
+}
+
+export interface AverageMetrics {
+  impulses: Array<number>,
+  impactPeakForces: Array<number>,
+  loadingRates: Array<number>,
+  timeToImpactPeaks: Array<number>,
+  activePeakForces: Array<number>,
+  timeToActivePeaks: Array<number>,
+  pushOffRates: Array<number>
+}
 export interface StanceDuration {
   startTimestamp: string,
   endTimestamp: string,
