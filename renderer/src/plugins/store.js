@@ -139,7 +139,6 @@ export default new Vuex.Store({
 			shouldUpdateLeft: false,
 			shouldUpdateRight: false,
 			threshold: 5,
-			trialThreshold: 50,
 			nOfPoints: 5,
 			dataType: 'Normalized',
 			leftPlateChannel: 'FZ1',
@@ -917,7 +916,7 @@ export default new Vuex.Store({
 
 					// Add the new max to the left plate max
 					if (state.timeline.dataType === 'Normalized') {
-						if (state.timeline.leftPlateMax > state.timeline.trialThreshold) {
+						// if (state.timeline.leftPlateMax > state.timeline.trialThreshold) {
 							state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
 
 							// Calculate the accuracy ratio 
@@ -937,9 +936,9 @@ export default new Vuex.Store({
 										: Math.ceil(state.timeline.leftPlateMax / 100) * 100;
 								state.timeline.shouldUpdateLeft = true;
 							}
-						}
+						//}
 					} else {
-						if (state.timeline.leftPlateMax > state.timeline.trialThreshold / 100 * state.options.weight) {
+						//if (state.timeline.leftPlateMax > state.timeline.trialThreshold / 100 * state.options.weight) {
 							state.timeline.leftPlateSeries[0].data.push(state.timeline.leftPlateMax);
 
 							// Calculate the accuracy ratio 
@@ -959,7 +958,7 @@ export default new Vuex.Store({
 										: Math.ceil(state.timeline.leftPlateMax / 100) * 100;
 								//state.timeline.shouldUpdateLeft = true;
 							}
-						}
+						//}
 					}
 					state.timeline.leftPlateMax = -1;
 					state.timeline.shouldUpdateLeft = true;
@@ -1029,7 +1028,7 @@ export default new Vuex.Store({
 					state.timeline.isRightPlateReset = false;
 					// Add the new max to the left plate max
 					if (state.timeline.dataType === 'Normalized') {
-						if (state.timeline.rightPlateMax > state.timeline.trialThreshold) {
+						//if (state.timeline.rightPlateMax > state.timeline.trialThreshold) {
 							state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
 
 							// Calculate the accuracy ratio 
@@ -1049,9 +1048,9 @@ export default new Vuex.Store({
 										: Math.ceil(state.timeline.rightPlateMax / 100) * 100;
 								state.timeline.shouldUpdateRight = true;
 							}
-						}
+						//}
 					} else {
-						if (state.timeline.rightPlateMax > state.timeline.trialThreshold / 100 * state.options.weight) {
+						//if (state.timeline.rightPlateMax > state.timeline.trialThreshold / 100 * state.options.weight) {
 							state.timeline.rightPlateSeries[0].data.push(state.timeline.rightPlateMax);
 
 							// Calculate the accuracy ratio 
@@ -1071,7 +1070,7 @@ export default new Vuex.Store({
 										: Math.ceil(state.timeline.rightPlateMax / 100) * 100;
 								state.timeline.shouldUpdateRight = true;
 							}
-						}
+						//}
 					}
 
 					state.timeline.rightPlateMax = -1;

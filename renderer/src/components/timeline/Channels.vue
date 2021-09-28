@@ -37,7 +37,7 @@
           outlined
         ></v-select>
       </v-col>
-      <v-col>
+      <!-- <v-col>
         <v-text-field
           class="mt-3"
           @input="(v) => $store.commit('setTrialThreshold', Number(v))"
@@ -46,7 +46,7 @@
           outlined
           :disabled="$store.state.options.isSessionRunning"
         />
-      </v-col>
+      </v-col> -->
       <v-col>
         <v-text-field
           class="mt-3"
