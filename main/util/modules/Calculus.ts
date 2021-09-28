@@ -9,7 +9,10 @@ class Calculus {
     return area / 2;
   }
 
-  static slope(x1: number, y1: number, x2:number, y2:number): number{
+  static slope(x1: number, y1: number, x2: number, y2: number): number{
+    if ((x2 - x1) == 0) {
+      return 0;
+    }
     return (y2 - y1)/(x2 - x1);
   }
 

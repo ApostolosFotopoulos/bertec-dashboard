@@ -23,7 +23,8 @@ const moment = require("moment");
 var parse = require('csv-parse');
 const { DataProcessor } = require('./DataProcessor')
 const { Metrics } = require('./Metrics')
-const { FREQUENCY } = require('../constants')
+const { FREQUENCY } = require('../constants');
+const { Renderer } = require('./Renderer');
 // const Metrics = require('./Metrics');
 // const { DataProcessor } = require('./_DataProcessor')
 
@@ -1275,11 +1276,37 @@ class Events {
               resolve(records);
             }));
           });
-      
-          DataProcessor.formSteps(records, user.weight, FREQUENCY, "Fz1", "Fz2");
-          DataProcessor.formCOPs(records, user.weight, FREQUENCY, "Fz1", "Fz2");
-          DataProcessor.formTimelines(records,user.weight,FREQUENCY, 100,120,"Fz1","Fz2",[])
-    
+
+
+          // Retrieve the average metrics of the trial to calculate how much steps do we want to be 
+          // included at the report 
+          let averageMetrics = await new Promise((resolve, reject) => {
+            fs.createReadStream(
+              process.env.NODE_ENV
+              ? path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
+              : app.getPath("downloads") + `/.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`
+              ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
+              if (error) {
+                reject(error)
+                return
+              }
+              resolve(records);
+            }));
+          });
+
+          // Get the steps that are selected only
+          const selectedSteps = averageMetrics.map(m => m["Step"]).filter(s => Number(s) != NaN && Number(s) != 0).map(s => Number(s));
+         
+          // Create the pdf
+          await Renderer.start(user, trial, session,records, selectedSteps);
+
+          // Open the generated pdf
+          if (process.platform === "win64" || process.platform == "win32") {
+            require('electron').shell.openExternal(`${app.getPath("downloads")}/${trial.name}.pdf`);
+          } else {
+            require('electron').shell.openPath(`${app.getPath("downloads")}/${trial.name}.pdf`);
+          }
+             
           // Reply that the export has finished to stop the loading
           if (win && win.window && !win.window.isDestroyed()) {
             e.reply(EXPORT_TRIAL_REPORT_RESPONSE, {});
@@ -1590,7 +1617,7 @@ class Events {
 
 
           // Calculate the average of each column
-          csv = csv + ';;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;\n';
+          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
 
           csv = csv + `;=AVERAGE(B2:B${averageMetrics.length + 1});=AVERAGE(C2:C${averageMetrics.length + 1});=AVERAGE(D2:D${averageMetrics.length + 1});=AVERAGE(E2:E${averageMetrics.length + 1});=AVERAGE(F2:F${averageMetrics.length + 1});=AVERAGE(G2:G${averageMetrics.length + 1})` +
             `;=AVERAGE(H2:H${averageMetrics.length + 1});=AVERAGE(I2:I${averageMetrics.length + 1});=AVERAGE(J2:J${averageMetrics.length + 1});=AVERAGE(K2:K${averageMetrics.length + 1});=AVERAGE(L2:L${averageMetrics.length + 1});=AVERAGE(M2:M${averageMetrics.length + 1})` +

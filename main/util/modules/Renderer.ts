@@ -1,37 +1,37 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Renderer = void 0;
-const tslib_1 = require("tslib");
-const moment_1 = (0, tslib_1.__importDefault)(require("moment"));
-const DataProcessor_1 = require("./DataProcessor");
-const electron_1 = require("electron");
-const path_1 = (0, tslib_1.__importDefault)(require("path"));
-const fs_1 = (0, tslib_1.__importDefault)(require("fs"));
-const constants_1 = require("../constants");
-const Metrics_1 = require("./Metrics");
+import moment from "moment";
+import { User, Trial, Session,Record, LineChartSeries, LineCharts,COPs, COPChartSeries, Timelines, PerFootMetrics, StepDurationsPerFoot } from "./Interfaces";
+import { DataProcessor } from "./DataProcessor";
+import { app } from 'electron';
+import path from 'path';
+import fs from 'fs';
+import { FREQUENCY } from "../constants";
+import { Metrics } from "./Metrics";
 const htmlToPdf = require('html-pdf-node');
+
+
 class Renderer {
-    static generateHeader(user, trial, session) {
-        return `
+
+  static generateHeader(user: User, trial: Trial, session: Session): string {
+    return `
       <div class="container">
         <div class="columns is-vcentered is-centered">
           <div class="column">
             <figure class="image is-128x128 has-image-centered pt-3">
               <img
                 width="128"
-                src="data:image/png;base64,${fs_1.default.readFileSync(path_1.default.resolve(__dirname, '../../../assets/uth.png'), 'base64')}"
+                src="data:image/png;base64,${fs.readFileSync(path.resolve(__dirname,'../../../assets/uth.png'), 'base64')}"
               />
             </figure>
           </div>
           <div class="column has-text-centered">
             <div>
-              ${user.first_name + " " + user.last_name}
+              ${user.first_name +" "+user.last_name}
             </div>
             <div>
               ${session.name}
             </div>
             <div>
-              ${(0, moment_1.default)(new Date(trial.created_at)).format("DD-MM-YYYY HH:mm")}
+              ${moment(new Date(trial.created_at)).format("DD-MM-YYYY HH:mm")}
             </div>
           </div>
           <div class="column has-text-centered  is-vcentered is-centered pt-5">
@@ -39,16 +39,17 @@ class Renderer {
             <figure class="image image is-64x64 has-image-centered">
               <img
                 width="64"
-                src="data:image/jpeg;base64,${fs_1.default.readFileSync(path_1.default.resolve(__dirname, '../../../assets/logo.jpg'), 'base64')}"
+                src="data:image/jpeg;base64,${fs.readFileSync(path.resolve(__dirname,'../../../assets/logo.jpg'), 'base64')}"
               />
             </figure>
           </div>
         </div>
       </div>
     `;
-    }
-    static generateTimelineChart(row, min, max, id, color, rangeMin, rangeMax) {
-        return `
+  }
+
+  static generateTimelineChart(row: Array<number>, min: number, max: number, id: string, color: string, rangeMin: number, rangeMax: number) {
+    return `
       var options = {
         series:[{
           name:"",
@@ -90,8 +91,8 @@ class Renderer {
           type:"category",
         },
         yaxis: {
-          min: ${min > 10 ? min - 10 : min},
-          ${max != -1 ? "max: " + (max + 10) + "," : ``}
+          min: ${min > 10? min - 10:min},
+          ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
             formatter: (val) => {
@@ -114,36 +115,39 @@ class Renderer {
         ],
         annotations: {
           yaxis: ${(rangeMax && rangeMin) ? JSON.stringify([{
-                y: rangeMin,
-                y2: rangeMax,
-                borderColor: "#000",
-                fillColor: "#FEB019",
-            }]) : JSON.stringify([])},
+            y: rangeMin,
+            y2: rangeMax,
+            borderColor: "#000",
+            fillColor: "#FEB019",
+          }]):JSON.stringify([])},
         },
       };
 
       var chart = new ApexCharts(document.querySelector("#${id}"), options);
       chart.render();
     `;
-    }
-    static generateTimelinesSection(tl, trial) {
-        return `
+  }
+  
+  static generateTimelinesSection(tl: Timelines, trial: Trial): string {
+    return `
       <div class="container">
         <h1 class="title is-6 has-text-centered">Timeline Charts</h1>
         <h1 class="title is-6 p-0 has-text-centered">Fx</h1>
-        ${tl.fx.inRangeleft != -1 && tl.fx.inRangeRight ?
-            `
+        ${
+          tl.fx.inRangeleft != -1 && tl.fx.inRangeRight ?
+          `
             <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
               <div class="column has-text-centered p-0">
-          ` + (tl.fx.inRangeleft) * 100 + ` %` +
-                `  </div>
-          ` + `
+          `+ (tl.fx.inRangeleft) * 100 + ` %`+
+          `  </div>
+          `+`
               <div class="column has-text-centered p-0">
-          ` + (tl.fx.inRangeRight) * 100 + ` %` +
-                `  </div>
+          `+ (tl.fx.inRangeRight) * 100 + ` %`+
+          `  </div>
             </div>
           `
-            : ""}
+          :""
+        }
         <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
           <div class="column has-text-centered p-0">
             <div id="left-foot-timeline-fx" style="height:200px; width:380px;"></div>
@@ -153,19 +157,21 @@ class Renderer {
           </div>
         </div>
         <h1 class="title is-6 pt-6 has-text-centered" style="margin-top:20%;">Fy</h1>
-        ${tl.fy.inRangeleft != -1 && tl.fy.inRangeRight ?
-            `
+        ${
+          tl.fy.inRangeleft != -1 && tl.fy.inRangeRight ?
+          `
             <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
               <div class="column has-text-centered p-0">
-          ` + (tl.fy.inRangeleft) * 100 + ` %` +
-                `  </div>
-          ` + `
+          `+ (tl.fy.inRangeleft) * 100 + ` %`+
+          `  </div>
+          `+`
               <div class="column has-text-centered p-0">
-          ` + (tl.fy.inRangeRight) * 100 + ` %` +
-                `  </div>
+          `+ (tl.fy.inRangeRight) * 100 + ` %`+
+          `  </div>
             </div>
           `
-            : ""}
+          :""
+        }
         <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
           <div class="column has-text-centered p-0">
             <div id="left-foot-timeline-fy" style="height:200px; width:380px;"></div>
@@ -175,19 +181,21 @@ class Renderer {
           </div>
         </div>
         <h1 class="title is-6 pt-6 has-text-centered">Fz</h1>
-        ${tl.fz.inRangeleft != -1 && tl.fz.inRangeRight ?
-            `
+        ${
+          tl.fz.inRangeleft != -1 && tl.fz.inRangeRight ?
+          `
             <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
               <div class="column has-text-centered p-0">
-          ` + (tl.fz.inRangeleft) * 100 + ` %` +
-                `  </div>
-          ` + `
+          `+ (tl.fz.inRangeleft) * 100 + ` %`+
+          `  </div>
+          `+`
               <div class="column has-text-centered p-0">
-          ` + (tl.fz.inRangeRight) * 100 + ` %` +
-                `  </div>
+          `+ (tl.fz.inRangeRight) * 100 + ` %`+
+          `  </div>
             </div>
           `
-            : ""}
+          :""
+        }
         <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
           <div class="column has-text-centered p-0">
             <div id="left-foot-timeline-fz" style="height:200px; width:380px;"></div>
@@ -202,19 +210,20 @@ class Renderer {
           ${this.generateTimelineChart(tl.fy.left, tl.fy.min, tl.fy.max, 'left-foot-timeline-fy', '#d32d41', trial.fy_zone_min, trial.fy_zone_max)}
           ${this.generateTimelineChart(tl.fy.right, tl.fy.min, tl.fy.max, 'right-foot-timeline-fy', '#6ab187', trial.fy_zone_min, trial.fy_zone_max)}
           ${this.generateTimelineChart(tl.fz.left, tl.fz.min, tl.fz.max, 'left-foot-timeline-fz', '#d32d41', trial.fz_zone_min, trial.fz_zone_max)}
-          ${this.generateTimelineChart(tl.fz.right, tl.fz.min, tl.fz.max, 'right-foot-timeline-fz', '#6ab187', trial.fz_zone_min, trial.fz_zone_max)}
+          ${this.generateTimelineChart(tl.fz.right, tl.fz.min, tl.fz.max, 'right-foot-timeline-fz','#6ab187', trial.fz_zone_min, trial.fz_zone_max)}
         </script>
       </div>
-    `;
-    }
-    static generateCOPChart(row, id, color) {
-        return `
+    `
+  }
+
+  static generateCOPChart(row: Array<COPChartSeries>, id: string, color: string) {
+    return `
       var options = {
         series:${JSON.stringify(row.map((r) => {
-            return {
-                data: r.data,
-                name: "",
-            };
+        return {
+            data: r.data,
+            name: "",
+          }
         }))},
         dataLabels:{
           enabled:false,
@@ -286,9 +295,10 @@ class Renderer {
       var chart = new ApexCharts(document.querySelector("#${id}"), options);
       chart.render();
     `;
-    }
-    static generateCOPsSection(cps) {
-        return `
+  }
+
+  static generateCOPsSection(cps: COPs): string {
+    return `
       <div class="container p-1 pt-5" style="margin-top:20%;">
         <h1 class="title is-6 has-text-centered">COP Charts</h1>
         <div class="columns is-vcentered is-centered p-0 p-0 pl-3 pr-3">
@@ -312,16 +322,17 @@ class Renderer {
           ${this.generateCOPChart(cps.right, 'right-foot-cop', '#6ab187')}
         </script>
       </div>
-    `;
-    }
-    static generateLineChart(row, min, max, id, color) {
-        return `
+    `
+  }
+
+  static generateLineChart(row: Array<LineChartSeries>, min: number, max: number, id: string, color: string) {
+    return `
       var options = {
         series:${JSON.stringify(row.map((r) => {
-            return {
-                data: r.data,
-                name: "",
-            };
+        return {
+            data: r.data,
+            name: "",
+          }
         }))},
         dataLabels:{
           enabled:false,
@@ -355,8 +366,8 @@ class Renderer {
           tickAmount: 10,
         },
         yaxis: {
-          min: ${min > 10 ? min - 10 : min},
-          ${max != -1 ? "max: " + (max + 10) + "," : ``}
+          min: ${min > 10? min - 10:min},
+          ${max != -1?"max: "+(max + 10)+",":``}
           forceNiceScale: false,
           labels:{
             formatter: (val) => {
@@ -382,9 +393,10 @@ class Renderer {
       var chart = new ApexCharts(document.querySelector("#${id}"), options);
       chart.render();
     `;
-    }
-    static generateLineChartsSection(lcs) {
-        return `
+  }
+
+  static generateLineChartsSection(lcs: LineCharts): string {
+    return `
       <div class="container pl-3 pr-3">
         <h1 class="title is-6 has-text-centered">Line Charts</h1>
         <h1 class="title is-6 p-0 has-text-centered">Fx</h1>
@@ -432,10 +444,11 @@ class Renderer {
         </script>
       </div>
     `;
-    }
-    static generateAsymmetriesTable(sd) {
-        const { step, stance } = Metrics_1.Metrics.generateAsymmetries(sd);
-        return `
+  }
+
+  static generateAsymmetriesTable(sd: StepDurationsPerFoot): string {
+    const { step, stance } = Metrics.generateAsymmetries(sd);
+    return `
       <div class="container p-1 pt-3 pl-3 pr-3" style="margin-top:25%;">
         <h1 class="title is-6 has-text-centered">Symmetries</h1>
         <table class="pl-3 pr-3">
@@ -454,9 +467,10 @@ class Renderer {
         </table>
       </div>
     `;
-    }
-    static generateMeasurementsTable(metrics) {
-        return `
+  }
+  
+  static generateMeasurementsTable(metrics: PerFootMetrics): string {
+    return `
       <div class="container p-1 pt-3 pl-3 pr-3" style="margin-top:25%;">
         <h1 class="title is-6 has-text-centered">Measurements</h1>
         <table class="pl-3 pr-3">
@@ -573,9 +587,10 @@ class Renderer {
         </table>
       </div>
     `;
-    }
-    static generateComments(comments) {
-        return `
+  }
+
+  static generateComments(comments: string ): string {
+    return `
       <div class='container p-1 pt-3 pl-3 pr-3'>
         <h1 class='title is-6 has-text-centered'>Comments</h1>
         <p style="text-align: justify;">
@@ -583,9 +598,10 @@ class Renderer {
         </p>
       </div>
     `;
-    }
-    static generateHTML(user, trial, session, lcs, cps, tl, sd, metrics) {
-        return encodeURIComponent(`
+  }
+
+  static generateHTML(user: User, trial: Trial, session: Session, lcs: LineCharts, cps: COPs, tl: Timelines, sd: StepDurationsPerFoot, metrics: PerFootMetrics): string {
+    return encodeURIComponent(`
       <!DOCTYPE html>
       <html lang="en">
         <head>
@@ -636,32 +652,38 @@ class Renderer {
         </body>
       </html>
     `);
+  }
+
+  static async start(user: User, trial: Trial, session: Session, records: Array<Record>, selectedSteps: Array<number>) :Promise<void> {
+    try {
+
+      // Generate the data for each category
+      const lcs: LineCharts = DataProcessor.formStepsForEveryAxes(records, selectedSteps, user.weight, FREQUENCY);
+      const cps: COPs = DataProcessor.formCOPs(records, selectedSteps, user.weight, FREQUENCY);
+      const tl: Timelines = DataProcessor.formTimelinesForEveryAxes(records, selectedSteps, user.weight, FREQUENCY, trial);
+      const sd: StepDurationsPerFoot = DataProcessor.formStepsForAsymmetry(records, user.weight,FREQUENCY, selectedSteps);
+      
+      const steps = DataProcessor.formStepsForMetrics(records, user.weight, FREQUENCY, selectedSteps);
+      const metrics: PerFootMetrics  = Metrics.generate(steps, FREQUENCY);
+      
+      // Generate the html
+      const html = this.generateHTML(user, trial, session, lcs, cps, tl, sd, metrics);
+      const file = { content: `${decodeURIComponent(html)}` }
+
+      // Produce the pdf from the HTML that we generated
+      const options = { format: 'A4' , path: app.getPath("downloads")+"/"+trial.name+".pdf", args:['--allow-file-access-from-files'], headless: false };
+      await new Promise((resolve, reject) => {
+        htmlToPdf.generatePdf(file, options).then((pdfBuffer:any) => {
+          resolve(pdfBuffer);
+        }).catch((error:any)=> {
+          reject(error);
+        });
+      });
+    
+    } catch (e: any) {
+      throw new Error(e);
     }
-    static async start(user, trial, session, records, selectedSteps) {
-        try {
-            // Generate the data for each category
-            const lcs = DataProcessor_1.DataProcessor.formStepsForEveryAxes(records, selectedSteps, user.weight, constants_1.FREQUENCY);
-            const cps = DataProcessor_1.DataProcessor.formCOPs(records, selectedSteps, user.weight, constants_1.FREQUENCY);
-            const tl = DataProcessor_1.DataProcessor.formTimelinesForEveryAxes(records, selectedSteps, user.weight, constants_1.FREQUENCY, trial);
-            const sd = DataProcessor_1.DataProcessor.formStepsForAsymmetry(records, user.weight, constants_1.FREQUENCY, selectedSteps);
-            const steps = DataProcessor_1.DataProcessor.formStepsForMetrics(records, user.weight, constants_1.FREQUENCY, selectedSteps);
-            const metrics = Metrics_1.Metrics.generate(steps, constants_1.FREQUENCY);
-            // Generate the html
-            const html = this.generateHTML(user, trial, session, lcs, cps, tl, sd, metrics);
-            const file = { content: `${decodeURIComponent(html)}` };
-            // Produce the pdf from the HTML that we generated
-            const options = { format: 'A4', path: electron_1.app.getPath("downloads") + "/" + trial.name + ".pdf", args: ['--allow-file-access-from-files'], headless: false };
-            await new Promise((resolve, reject) => {
-                htmlToPdf.generatePdf(file, options).then((pdfBuffer) => {
-                    resolve(pdfBuffer);
-                }).catch((error) => {
-                    reject(error);
-                });
-            });
-        }
-        catch (e) {
-            throw new Error(e);
-        }
-    }
+  }
 }
-exports.Renderer = Renderer;
+
+export { Renderer }
