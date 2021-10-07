@@ -11,7 +11,7 @@ const {
   FETCH_USERS_TO_VIEW_ALL, FETCH_USERS_TO_VIEW_ALL_RESPONSE, DELETE_USER, DELETE_USER_RESPONSE, CREATE_TRIAL, CREATE_SESSION, CREATE_SESSION_RESPONSE,
   CREATE_TRIAL_RESPONSE, DELETE_TRIAL, DELETE_SESSION, DELETE_TRIAL_RESPONSE, DELETE_SESSION_RESPONSE, UPDATE_TRIAL_DETAILS, UPDATE_TRIAL_DETAILS_RESPONSE,
   DOWNLOAD_TRIAL, EXPORT_TRIAL_REPORT, EXPORT_TRIAL_REPORT_RESPONSE, UPDATE_TRIAL_ZONES_AND_THRESHOLD, AFTER_TRIAL_PROCESS_RESPONSE, AFTER_TRIAL_PROCESS,
-  EDIT_AVERAGE_METRICS, TRIAL_PROCESS_PROGRESS
+  EDIT_AVERAGE_METRICS, DOWNLOAD_C3D_FILE,
 } = require('../types')
 const path = require('path')
 const fs = require('fs')
@@ -25,6 +25,7 @@ const { DataProcessor } = require('./DataProcessor')
 const { Metrics } = require('./Metrics')
 const { FREQUENCY } = require('../constants');
 const { Renderer } = require('./Renderer');
+const { C3DConverter } = require('./C3DConverter');
 // const Metrics = require('./Metrics');
 // const { DataProcessor } = require('./_DataProcessor')
 
@@ -133,6 +134,7 @@ class Events {
                   resolve(true);
                 }
               });
+
               
               db.close();
               console.log("[SUCCESS]: Database successfully created")
@@ -1844,6 +1846,52 @@ class Events {
         }
       } catch (e) {
         console.log(e)
+        throw new Error(e);
+      }
+    });
+  }
+
+  static downloadC3DFile(win) {
+    ipcMain.on(DOWNLOAD_C3D_FILE, async (e, d) => {
+      try {
+        
+        let { database, trialId } = d;
+        if (database && trialId) {
+          var db = new sqlite3.Database(
+            process.env.NODE_ENV
+              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
+              : app.getPath("downloads") + `/.meta/databases/${database}`
+          );
+
+           // Retrieve the trial from the database
+          const [trial] = await new Promise((resolve, reject) => {
+            db.all(`select * from trials where id=${trialId}`, function (error, rows) {
+              if (error) {
+                reject([]);
+                return
+              }
+              resolve(rows)
+            });
+          });
+
+          // Open the dialog to get the filepath where the user wants to save the c3d file
+          let file = await dialog.showSaveDialog({
+            title: 'Select to save the c3d file',
+            buttonLabel: 'Save',
+            defaultPath: app.getPath("downloads")+`/${trial.name}.c3d`,
+          })
+
+
+          // Generate the c3d file
+          if (!file.canceled) {
+            await C3DConverter.run(
+              path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`),
+              `${file.filePath}`,
+            );
+          }
+          
+        }
+      } catch (e) {
         throw new Error(e);
       }
     });

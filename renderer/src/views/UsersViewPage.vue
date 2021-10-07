@@ -34,6 +34,7 @@
       :editAverageMetrics="editAverageMetrics"
       :regenerateAverageMetrics="regenerateAverageMetrics"
       :loadingTrialIdx="loadingTrialIdx"
+      :downloadC3DFile="downloadC3DFile"
     />
     <UserDetails
       :userDetails="userDetails"
@@ -67,7 +68,8 @@ const {
   EXPORT_TRIAL_REPORT,
   EXPORT_TRIAL_REPORT_RESPONSE,
   EDIT_AVERAGE_METRICS,
-  AFTER_TRIAL_PROCESS
+  AFTER_TRIAL_PROCESS,
+  DOWNLOAD_C3D_FILE
 } = require("../../../main/util/types");
 import moment from "moment";
 import UsersTableFilters from "../components/usersview/UsersTableFilters.vue";
@@ -366,6 +368,12 @@ export default {
       this.loadingTrialIdx = t.id
       console.log(this.loadingTrialIdx)
       ipcRenderer.send(EXPORT_TRIAL_REPORT, {
+        database: this.selectedDatabase,
+        trialId: t.id,
+      });
+    },
+    downloadC3DFile(t){
+      ipcRenderer.send(DOWNLOAD_C3D_FILE, {
         database: this.selectedDatabase,
         trialId: t.id,
       });

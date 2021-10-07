@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Renderer = void 0;
 const tslib_1 = require("tslib");
-const moment_1 = (0, tslib_1.__importDefault)(require("moment"));
+const moment_1 = tslib_1.__importDefault(require("moment"));
 const DataProcessor_1 = require("./DataProcessor");
 const electron_1 = require("electron");
-const path_1 = (0, tslib_1.__importDefault)(require("path"));
-const fs_1 = (0, tslib_1.__importDefault)(require("fs"));
+const path_1 = tslib_1.__importDefault(require("path"));
+const fs_1 = tslib_1.__importDefault(require("fs"));
 const constants_1 = require("../constants");
 const Metrics_1 = require("./Metrics");
 const htmlToPdf = require('html-pdf-node');
@@ -31,7 +31,7 @@ class Renderer {
               ${session.name}
             </div>
             <div>
-              ${(0, moment_1.default)(new Date(trial.created_at)).format("DD-MM-YYYY HH:mm")}
+              ${moment_1.default(new Date(trial.created_at)).format("DD-MM-YYYY HH:mm")}
             </div>
           </div>
           <div class="column has-text-centered  is-vcentered is-centered pt-5">

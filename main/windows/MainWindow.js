@@ -235,6 +235,7 @@ module.exports = class {
     Events.exportTrialReportListener(this.usersw);
     Events.afterTrialProcess(this.usersw);
     Events.editAverageMetrics(this.usersw);
+    Events.downloadC3DFile(this.usersw);
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {

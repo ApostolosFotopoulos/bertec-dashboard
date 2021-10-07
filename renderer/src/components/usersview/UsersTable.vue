@@ -185,6 +185,20 @@
                       </template>
                       <span>Regenerate the average metrics</span>
                     </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-icon 
+                          medium 
+                          v-bind="attrs"
+                          v-on="on" 
+                          class="mr-2" 
+                          @click="() => downloadC3DFile(item)"
+                        >
+                          mdi-cube-outline
+                        </v-icon>
+                      </template>
+                      <span>Download C3D file</span>
+                    </v-tooltip>
                   </template>
                 </v-data-table>
               </td>
@@ -222,6 +236,7 @@ export default {
     editAverageMetrics:Function,
     regenerateAverageMetrics: Function,
     loadingTrialIdx: Number,
+    downloadC3DFile: Function,
   },
   mounted(){
     ipcRenderer.on(DELETE_USER_RESPONSE, (_, responseData) => {
