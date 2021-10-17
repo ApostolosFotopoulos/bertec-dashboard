@@ -47,6 +47,7 @@ class Metrics {
       left: {
         fx: {
           ...this.calculateMetricsPerFoot(steps.fx.left, frequency),
+          ...this.calculateLateralMetrics(steps.fx.left, frequency,true)
         },
         fy: {
           ...this.calculateMetricsPerFoot(steps.fy.left, frequency),
@@ -60,6 +61,7 @@ class Metrics {
       right: {
         fx: {
           ...this.calculateMetricsPerFoot(steps.fx.right, frequency),
+          ...this.calculateLateralMetrics(steps.fx.right, frequency,false)
         },
         fy: {
           ...this.calculateMetricsPerFoot(steps.fy.right, frequency),
@@ -86,6 +88,7 @@ class Metrics {
       left: {
         fx: {
           ...this.calculateAverageMetricsPerFoot(steps.fx.left, frequency),
+          ...this.calculateAverageLateralMetrics(steps.fx.left, frequency, true),
         },
         fy: {
           ...this.calculateAverageMetricsPerFoot(steps.fy.left, frequency),
@@ -99,6 +102,7 @@ class Metrics {
       right: {
         fx: {
           ...this.calculateAverageMetricsPerFoot(steps.fx.right, frequency),
+          ...this.calculateAverageLateralMetrics(steps.fx.right, frequency, false),
         },
         fy: {
           ...this.calculateAverageMetricsPerFoot(steps.fy.right, frequency),
@@ -219,6 +223,7 @@ class Metrics {
       propulsiveImpulse: 0,
       propulsivePeakForce: 0,
       timeToPropulsivePeak: 0,
+      lateralStrikeImpulse: 0,
     }
   }
 
@@ -368,14 +373,14 @@ class Metrics {
       let x: Array<number> = rows[i].data.map((_, idx) => idx / frequency);
       let y: Array<number> = rows[i].data;
 
-        const xNeg = [];
-        const yNeg = [];
-        for (var j = 0; j < y.length; j++) {
-          if (y[j] < 0) {
-            yNeg.push(y[j]);
-            xNeg.push(x[j]);
-          }
+      const xNeg = [];
+      const yNeg = [];
+      for (var j = 0; j < y.length; j++) {
+        if (y[j] < 0) {
+          yNeg.push(y[j]);
+          xNeg.push(x[j]);
         }
+      }
       
       if (xNeg.length === 0 || yNeg.length === 0) {
         propulsiveImpulses.push(0);
@@ -395,7 +400,7 @@ class Metrics {
     }
   }
 
-   static calculatePropulsiveMetrics(rows: Array<LineChartSeries>, frequency: number) {
+  static calculatePropulsiveMetrics(rows: Array<LineChartSeries>, frequency: number) {
 
     var propulsiveImpulses = [];
     var propulsivePeakForces = [];
@@ -406,14 +411,14 @@ class Metrics {
       let x: Array<number> = rows[i].data.map((_, idx) => idx / frequency);
       let y: Array<number> = rows[i].data;
 
-        const xNeg = [];
-        const yNeg = [];
-        for (var j = 0; j < y.length; j++) {
-          if (y[j] < 0) {
-            yNeg.push(y[j]);
-            xNeg.push(x[j]);
-          }
+      const xNeg = [];
+      const yNeg = [];
+      for (var j = 0; j < y.length; j++) {
+        if (y[j] < 0) {
+          yNeg.push(y[j]);
+          xNeg.push(x[j]);
         }
+      }
       
       if (xNeg.length === 0 || yNeg.length === 0) {
         propulsiveImpulses.push(0);
@@ -432,6 +437,88 @@ class Metrics {
       timeToPropulsivePeak: (timeToPropulsivePeaks.reduce((a, c) => a + c) / timeToPropulsivePeaks.map(i => i != 0).length),
     }
   }
+  
+  static calculateAverageLateralMetrics(rows: Array<LineChartSeries>, frequency: number, isLeftFoot: boolean) {
+
+    var lateralStrikeImpulses = [];
+
+    for (var i = 0; i < rows.length; i++){
+
+      let x: Array<number> = rows[i].data.map((_, idx) => idx / frequency);
+      let y: Array<number> = rows[i].data;
+
+      const firstCurveX = [];
+      const firstCurveY = [];
+
+      if (isLeftFoot) {
+        for (var j = 0; j < y.length; j++) {
+          if (y[j] < 0) {
+            firstCurveY.push(y[j]);
+            firstCurveX.push(x[j]);
+          }
+        }
+      } else {
+        for (var j = 0; j < y.length; j++) {
+          if (y[j] > 0) {
+            firstCurveY.push(y[j]);
+            firstCurveX.push(x[j]);
+          }
+        }
+      }
+
+      if (firstCurveX.length === 0 || firstCurveY.length === 0) {
+        lateralStrikeImpulses.push(0);
+      } else {
+        lateralStrikeImpulses.push(Calculus.integral(firstCurveX, firstCurveY));
+      }
+      
+    }
+
+    return {
+      lateralStrikeImpulses,
+    }
+  }
+
+  static calculateLateralMetrics(rows: Array<LineChartSeries>, frequency: number, isLeftFoot: boolean) {
+    var lateralStrikeImpulses = [];
+
+    for (var i = 0; i < rows.length; i++){
+
+      let x: Array<number> = rows[i].data.map((_, idx) => idx / frequency);
+      let y: Array<number> = rows[i].data;
+
+      const firstCurveX = [];
+      const firstCurveY = [];
+
+      if (isLeftFoot) {
+        for (var j = 0; j < y.length; j++) {
+          if (y[j] < 0) {
+            firstCurveY.push(y[j]);
+            firstCurveX.push(x[j]);
+          }
+        }
+      } else {
+        for (var j = 0; j < y.length; j++) {
+          if (y[j] > 0) {
+            firstCurveY.push(y[j]);
+            firstCurveX.push(x[j]);
+          }
+        }
+      }
+
+      if (firstCurveX.length === 0 || firstCurveY.length === 0) {
+        lateralStrikeImpulses.push(0);
+      } else {
+        lateralStrikeImpulses.push(Calculus.integral(firstCurveX, firstCurveY));
+      }
+      
+    }
+
+    return {
+      lateralStrikeImpulse: (lateralStrikeImpulses.reduce((a, c) => a + c) / lateralStrikeImpulses.map(i => i != 0).length),
+    }
+  }
+  
 }
 
 export { Metrics }

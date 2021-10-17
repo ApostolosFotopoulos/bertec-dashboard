@@ -1600,7 +1600,7 @@ class Events {
             `PushOffRateLeftFoot(FX);PushOffRateLeftFoot(FY);PushOffRateLeftFoot(FZ);PushOffRateRightFoot(FX);PushOffRateRightFoot(FY);PushOffRateRightFoot(FZ);` +
             `BrakingImpulseLeftFoot;BrakingImpulseRightFoot;BrakingPeakForceLeftFoot;BrakingPeakForceRightFoot;TimeToBrakingPeakLeftFoot;TimeToBrakingPeakRightFoot;` +
             `TimeToBPTransitionLeftFoot;TimeToBPTransitionRightFoot;PropulsiveImpulseLeftFoot;PropulsiveImpulseRightFoot;PropulsivePeakForceLeftFoot;PropulsivePeakForceRightFoot;` +
-            `TimeToPropulsivePeakLeftFoot;TimeToPropulsivePeakRightFoot\n`;
+            `TimeToPropulsivePeakLeftFoot;TimeToPropulsivePeakRightFoot;LateralStrikeImpulseLeftFoot;LateralStrikeImpulseRightFoot\n`;
         
           // Add the averages of each metric for each step
           let csv = csvHeaders;
@@ -1622,12 +1622,12 @@ class Events {
               `${averageMetrics.left.fy.brakingImpulses[i]};${averageMetrics.right.fy.brakingImpulses[i]};${averageMetrics.left.fy.brakingPeakForces[i]};${averageMetrics.right.fy.brakingPeakForces[i]};` +
               `${averageMetrics.left.fy.timeToBrakingPeaks[i]};${averageMetrics.right.fy.timeToBrakingPeaks[i]};${averageMetrics.left.fy.timeToBPTransitions[i]};${averageMetrics.right.fy.timeToBPTransitions[i]};` +
               `${averageMetrics.left.fy.propulsiveImpulses[i]};${averageMetrics.right.fy.propulsiveImpulses[i]};${averageMetrics.left.fy.propulsivePeakForces[i]};${averageMetrics.right.fy.propulsivePeakForces[i]};` +
-              `${averageMetrics.left.fy.timeToPropulsivePeaks[i]};${averageMetrics.right.fy.timeToPropulsivePeaks[i]}\n`;
+              `${averageMetrics.left.fy.timeToPropulsivePeaks[i]};${averageMetrics.right.fy.timeToPropulsivePeaks[i]};${averageMetrics.left.fx.lateralStrikeImpulses[i]};${averageMetrics.right.fx.lateralStrikeImpulses[i]}\n`;
           }
 
 
           // Calculate the average of each column
-          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
+          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
 
           csv = csv + `;=AVERAGE(B2:B${averageMetrics.length + 1});=AVERAGE(C2:C${averageMetrics.length + 1});=AVERAGE(D2:D${averageMetrics.length + 1});=AVERAGE(E2:E${averageMetrics.length + 1});=AVERAGE(F2:F${averageMetrics.length + 1});=AVERAGE(G2:G${averageMetrics.length + 1})` +
             `;=AVERAGE(H2:H${averageMetrics.length + 1});=AVERAGE(I2:I${averageMetrics.length + 1});=AVERAGE(J2:J${averageMetrics.length + 1});=AVERAGE(K2:K${averageMetrics.length + 1});=AVERAGE(L2:L${averageMetrics.length + 1});=AVERAGE(M2:M${averageMetrics.length + 1})` +
@@ -1638,7 +1638,7 @@ class Events {
             `;=AVERAGE(AL2:AL${averageMetrics.length + 1});=AVERAGE(AM2:AM${averageMetrics.length + 1});=AVERAGE(AN2:AN${averageMetrics.length + 1});=AVERAGE(AO2:AO${averageMetrics.length + 1});=AVERAGE(AP2:AP${averageMetrics.length + 1});=AVERAGE(AQ2:AQ${averageMetrics.length + 1})` +
             `;=AVERAGE(AR2:AR${averageMetrics.length + 1});=AVERAGE(AS2:AS${averageMetrics.length + 1});=AVERAGE(AT2:AT${averageMetrics.length + 1});=AVERAGE(AU2:AU${averageMetrics.length + 1});=AVERAGE(AV2:AV${averageMetrics.length + 1});=AVERAGE(AW2:AW${averageMetrics.length + 1})` +
             `;=AVERAGE(AX2:AX${averageMetrics.length + 1});=AVERAGE(AY2:AY${averageMetrics.length + 1});=AVERAGE(AZ2:AZ${averageMetrics.length + 1});=AVERAGE(BA2:BA${averageMetrics.length + 1});=AVERAGE(BB2:BB${averageMetrics.length + 1});=AVERAGE(BC2:BC${averageMetrics.length + 1})` +
-            `;=AVERAGE(BD2:BD${averageMetrics.length + 1});=AVERAGE(BE2:BE${averageMetrics.length + 1})\n`;
+            `;=AVERAGE(BD2:BD${averageMetrics.length + 1});=AVERAGE(BE2:BE${averageMetrics.length + 1});=AVERAGE(BF2:BF${averageMetrics.length + 1});=AVERAGE(BG2:BG${averageMetrics.length + 1})\n`;
 
           // Write the csv data to the file
           await new Promise((resolve, reject) => {

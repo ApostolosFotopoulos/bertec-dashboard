@@ -605,6 +605,11 @@ class Renderer {
             <td>${metrics.left.fy.timeToPropulsivePeak.toFixed(2)} s</td>
             <td>${metrics.right.fy.timeToPropulsivePeak.toFixed(2)} s</td>
           </tr>
+          <tr>
+            <td>Lateral Strike Impulse </td>
+            <td>${metrics.left.fx.lateralStrikeImpulse.toFixed(2)} N.s</td>
+            <td>${metrics.right.fx.lateralStrikeImpulse.toFixed(2)} N.s</td>
+          </tr>
         </table>
       </div>
     `;

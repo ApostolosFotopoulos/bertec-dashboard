@@ -39,6 +39,7 @@ class Metrics {
             left: {
                 fx: {
                     ...this.calculateMetricsPerFoot(steps.fx.left, frequency),
+                    ...this.calculateLateralMetrics(steps.fx.left, frequency, true)
                 },
                 fy: {
                     ...this.calculateMetricsPerFoot(steps.fy.left, frequency),
@@ -52,6 +53,7 @@ class Metrics {
             right: {
                 fx: {
                     ...this.calculateMetricsPerFoot(steps.fx.right, frequency),
+                    ...this.calculateLateralMetrics(steps.fx.right, frequency, false)
                 },
                 fy: {
                     ...this.calculateMetricsPerFoot(steps.fy.right, frequency),
@@ -76,6 +78,7 @@ class Metrics {
             left: {
                 fx: {
                     ...this.calculateAverageMetricsPerFoot(steps.fx.left, frequency),
+                    ...this.calculateAverageLateralMetrics(steps.fx.left, frequency, true),
                 },
                 fy: {
                     ...this.calculateAverageMetricsPerFoot(steps.fy.left, frequency),
@@ -89,6 +92,7 @@ class Metrics {
             right: {
                 fx: {
                     ...this.calculateAverageMetricsPerFoot(steps.fx.right, frequency),
+                    ...this.calculateAverageLateralMetrics(steps.fx.right, frequency, false),
                 },
                 fy: {
                     ...this.calculateAverageMetricsPerFoot(steps.fy.right, frequency),
@@ -185,6 +189,7 @@ class Metrics {
             propulsiveImpulse: 0,
             propulsivePeakForce: 0,
             timeToPropulsivePeak: 0,
+            lateralStrikeImpulse: 0,
         };
     }
     static calculateImpulse(x, y) {
@@ -358,6 +363,74 @@ class Metrics {
             propulsiveImpulse: (propulsiveImpulses.reduce((a, c) => a + c) / propulsiveImpulses.map(i => i != 0).length),
             propulsivePeakForce: (propulsivePeakForces.reduce((a, c) => a + c) / propulsivePeakForces.map(i => i != 0).length),
             timeToPropulsivePeak: (timeToPropulsivePeaks.reduce((a, c) => a + c) / timeToPropulsivePeaks.map(i => i != 0).length),
+        };
+    }
+    static calculateAverageLateralMetrics(rows, frequency, isLeftFoot) {
+        var lateralStrikeImpulses = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            const firstCurveX = [];
+            const firstCurveY = [];
+            if (isLeftFoot) {
+                for (var j = 0; j < y.length; j++) {
+                    if (y[j] < 0) {
+                        firstCurveY.push(y[j]);
+                        firstCurveX.push(x[j]);
+                    }
+                }
+            }
+            else {
+                for (var j = 0; j < y.length; j++) {
+                    if (y[j] > 0) {
+                        firstCurveY.push(y[j]);
+                        firstCurveX.push(x[j]);
+                    }
+                }
+            }
+            if (firstCurveX.length === 0 || firstCurveY.length === 0) {
+                lateralStrikeImpulses.push(0);
+            }
+            else {
+                lateralStrikeImpulses.push(Calculus_1.Calculus.integral(firstCurveX, firstCurveY));
+            }
+        }
+        return {
+            lateralStrikeImpulses,
+        };
+    }
+    static calculateLateralMetrics(rows, frequency, isLeftFoot) {
+        var lateralStrikeImpulses = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            const firstCurveX = [];
+            const firstCurveY = [];
+            if (isLeftFoot) {
+                for (var j = 0; j < y.length; j++) {
+                    if (y[j] < 0) {
+                        firstCurveY.push(y[j]);
+                        firstCurveX.push(x[j]);
+                    }
+                }
+            }
+            else {
+                for (var j = 0; j < y.length; j++) {
+                    if (y[j] > 0) {
+                        firstCurveY.push(y[j]);
+                        firstCurveX.push(x[j]);
+                    }
+                }
+            }
+            if (firstCurveX.length === 0 || firstCurveY.length === 0) {
+                lateralStrikeImpulses.push(0);
+            }
+            else {
+                lateralStrikeImpulses.push(Calculus_1.Calculus.integral(firstCurveX, firstCurveY));
+            }
+        }
+        return {
+            lateralStrikeImpulse: (lateralStrikeImpulses.reduce((a, c) => a + c) / lateralStrikeImpulses.map(i => i != 0).length),
         };
     }
 }
