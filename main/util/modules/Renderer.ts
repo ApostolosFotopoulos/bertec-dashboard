@@ -624,6 +624,21 @@ class Renderer {
             <td>${metrics.left.fx.lateralStrikeImpulse.toFixed(2)} N.s</td>
             <td>${metrics.right.fx.lateralStrikeImpulse.toFixed(2)} N.s</td>
           </tr>
+          <tr>
+            <td>Lateral Strike Peak Force </td>
+            <td>${metrics.left.fx.lateralStrikePeakForce.toFixed(2)} N</td>
+            <td>${metrics.right.fx.lateralStrikePeakForce.toFixed(2)} N</td>
+          </tr>
+          <tr>
+            <td>Lateral Strike Push Impulse </td>
+            <td>${metrics.left.fx.lateralPushImpulse.toFixed(2)} N.s</td>
+            <td>${metrics.right.fx.lateralPushImpulse.toFixed(2)} N.s</td>
+          </tr>
+          <tr>
+            <td>Lateral Strike Push Peak Force </td>
+            <td>${metrics.left.fx.lateralPushPeakForce.toFixed(2)} N</td>
+            <td>${metrics.right.fx.lateralPushPeakForce.toFixed(2)} N</td>
+          </tr>
         </table>
       </div>
     `;

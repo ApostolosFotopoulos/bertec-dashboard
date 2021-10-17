@@ -203,6 +203,9 @@ export interface NormalMetrics {
   propulsivePeakForce: number,
   timeToPropulsivePeak: number,
   lateralStrikeImpulse: number,
+  lateralStrikePeakForce: number,
+  lateralPushImpulse: number,
+  lateralPushPeakForce: number,
 }
 
 export interface StanceDuration {

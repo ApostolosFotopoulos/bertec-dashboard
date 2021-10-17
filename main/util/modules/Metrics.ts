@@ -224,6 +224,9 @@ class Metrics {
       propulsivePeakForce: 0,
       timeToPropulsivePeak: 0,
       lateralStrikeImpulse: 0,
+      lateralStrikePeakForce: 0,
+      lateralPushImpulse: 0,
+      lateralPushPeakForce: 0,
     }
   }
 
@@ -441,6 +444,9 @@ class Metrics {
   static calculateAverageLateralMetrics(rows: Array<LineChartSeries>, frequency: number, isLeftFoot: boolean) {
 
     var lateralStrikeImpulses = [];
+    var lateralStrikePeakForces = [];
+    var lateralPushImpulses = [];
+    var lateralPushPeakForces = [];
 
     for (var i = 0; i < rows.length; i++){
 
@@ -450,11 +456,19 @@ class Metrics {
       const firstCurveX = [];
       const firstCurveY = [];
 
+      const secondCurveX = [];
+      const secondCurveY = [];
+
       if (isLeftFoot) {
         for (var j = 0; j < y.length; j++) {
           if (y[j] < 0) {
             firstCurveY.push(y[j]);
             firstCurveX.push(x[j]);
+          }
+
+          if (y[j] > 0) {
+            secondCurveY.push(y[j]);
+            secondCurveX.push(x[j]);
           }
         }
       } else {
@@ -463,24 +477,47 @@ class Metrics {
             firstCurveY.push(y[j]);
             firstCurveX.push(x[j]);
           }
+
+          if (y[j] < 0) {
+            secondCurveY.push(y[j]);
+            secondCurveX.push(x[j]);
+          }
         }
+        console.log(secondCurveY)
       }
 
       if (firstCurveX.length === 0 || firstCurveY.length === 0) {
         lateralStrikeImpulses.push(0);
+        lateralStrikePeakForces.push(0);
       } else {
         lateralStrikeImpulses.push(Calculus.integral(firstCurveX, firstCurveY));
+        lateralStrikePeakForces.push(Calculus.findFirstlocalMax(firstCurveY));
       }
-      
+
+      if (secondCurveX.length === 0 || secondCurveY.length === 0) {
+        lateralPushImpulses.push(0);
+        lateralPushPeakForces.push(0);
+      } else {
+        lateralPushImpulses.push(Calculus.integral(secondCurveX, secondCurveY));
+        lateralPushPeakForces.push((Calculus.findFirstlocalMax(secondCurveY)));
+      }
+
     }
 
     return {
       lateralStrikeImpulses,
+      lateralStrikePeakForces,
+      lateralPushImpulses,
+      lateralPushPeakForces,
     }
   }
 
   static calculateLateralMetrics(rows: Array<LineChartSeries>, frequency: number, isLeftFoot: boolean) {
+    
     var lateralStrikeImpulses = [];
+    var lateralStrikePeakForces = [];
+    var lateralPushImpulses = [];
+    var lateralPushPeakForces = [];
 
     for (var i = 0; i < rows.length; i++){
 
@@ -490,11 +527,19 @@ class Metrics {
       const firstCurveX = [];
       const firstCurveY = [];
 
+      const secondCurveX = [];
+      const secondCurveY = [];
+
       if (isLeftFoot) {
         for (var j = 0; j < y.length; j++) {
           if (y[j] < 0) {
             firstCurveY.push(y[j]);
             firstCurveX.push(x[j]);
+          }
+
+          if (y[j] > 0) {
+            secondCurveY.push(y[j]);
+            secondCurveX.push(x[j]);
           }
         }
       } else {
@@ -503,19 +548,37 @@ class Metrics {
             firstCurveY.push(y[j]);
             firstCurveX.push(x[j]);
           }
+
+          if (y[j] < 0) {
+            secondCurveY.push(y[j]);
+            secondCurveX.push(x[j]);
+          }
         }
       }
 
       if (firstCurveX.length === 0 || firstCurveY.length === 0) {
         lateralStrikeImpulses.push(0);
+        lateralStrikePeakForces.push(0);
       } else {
         lateralStrikeImpulses.push(Calculus.integral(firstCurveX, firstCurveY));
+        lateralStrikePeakForces.push(Calculus.findFirstlocalMax(firstCurveY));
       }
       
+
+      if (secondCurveX.length === 0 || secondCurveY.length === 0) {
+        lateralPushImpulses.push(0);
+        lateralPushPeakForces.push(0);
+      } else {
+        lateralPushImpulses.push(Calculus.integral(secondCurveX, secondCurveY));
+        lateralPushPeakForces.push((Calculus.findFirstlocalMax(secondCurveY)));
+      }
     }
 
     return {
       lateralStrikeImpulse: (lateralStrikeImpulses.reduce((a, c) => a + c) / lateralStrikeImpulses.map(i => i != 0).length),
+      lateralStrikePeakForce: (lateralStrikePeakForces.reduce((a, c) => a + c) / lateralStrikePeakForces.map(i => i != 0).length),
+      lateralPushImpulse: (lateralPushImpulses.reduce((a, c) => a + c) / lateralPushImpulses.map(i => i != 0).length),
+      lateralPushPeakForce:  (lateralPushPeakForces.reduce((a, c) => a + c) / lateralPushPeakForces.map(i => i != 0).length),
     }
   }
   
