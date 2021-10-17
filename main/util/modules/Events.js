@@ -1590,13 +1590,17 @@ class Events {
           console.log(averageMetrics)
 
           // Create the headers of the csv
-          const csvHeaders = 'Step;ImpulseLeftFoot(FX);ImpulseLeftFoot(FY);ImpulseLeftFoot(FZ);ImpulseRightFoot(FX);ImpulseRightFoot(FY);ImpulseRightFoot(FZ);'
-            + `LoadingRateLeftFoot(FX);LoadingRateLeftFoot(FY);LoadingRateLeftFoot(FZ);LoadingRateRightFoot(FX);LoadingRateRightFoot(FY);LoadingRateRightFoot(FZ);`
-            + `ImpactPeakForceLeftFoot(FX);ImpactPeakForceLeftFoot(FY);ImpactPeakForceLeftFoot(FZ);ImpactPeakForceRightFoot(FX);ImpactPeakForceRightFoot(FY);ImpactPeakForceRightFoot(FZ);`
-            + `TimeToImpactPeakLeftFoot(FX);TimeToImpactPeakLeftFoot(FY);TimeToImpactPeakLeftFoot(FZ);TimeToImpactPeakRightFoot(FX);TimeToImpactPeakRightFoot(FY);TimeToImpactPeakRightFoot(FZ);`
-            + `ActivePeakForceLeftFoot(FX);ActivePeakForceLeftFoot(FY);ActivePeakForceLeftFoot(FZ);ActivePeakForceRightFoot(FX);ActivePeakForceRightFoot(FY);ActivePeakForceRightFoot(FZ);`
-            + `TimeToActivePeakLeftFoot(FX);TimeToActivePeakLeftFoot(FY);TimeToActivePeakLeftFoot(FZ);TimeToActivePeakRightFoot(FX);TimeToActivePeakRightFoot(FY);TimeToActivePeakRightFoot(FZ);`
-            + `PushOffRateLeftFoot(FX);PushOffRateLeftFoot(FY);PushOffRateLeftFoot(FZ);PushOffRateRightFoot(FX);PushOffRateRightFoot(FY);PushOffRateRightFoot(FZ)\n`
+          const csvHeaders =
+            "Step;ImpulseLeftFoot(FX);ImpulseLeftFoot(FY);ImpulseLeftFoot(FZ);ImpulseRightFoot(FX);ImpulseRightFoot(FY);ImpulseRightFoot(FZ);" +
+            `LoadingRateLeftFoot(FX);LoadingRateLeftFoot(FY);LoadingRateLeftFoot(FZ);LoadingRateRightFoot(FX);LoadingRateRightFoot(FY);LoadingRateRightFoot(FZ);` +
+            `ImpactPeakForceLeftFoot(FX);ImpactPeakForceLeftFoot(FY);ImpactPeakForceLeftFoot(FZ);ImpactPeakForceRightFoot(FX);ImpactPeakForceRightFoot(FY);ImpactPeakForceRightFoot(FZ);` +
+            `TimeToImpactPeakLeftFoot(FX);TimeToImpactPeakLeftFoot(FY);TimeToImpactPeakLeftFoot(FZ);TimeToImpactPeakRightFoot(FX);TimeToImpactPeakRightFoot(FY);TimeToImpactPeakRightFoot(FZ);` +
+            `ActivePeakForceLeftFoot(FX);ActivePeakForceLeftFoot(FY);ActivePeakForceLeftFoot(FZ);ActivePeakForceRightFoot(FX);ActivePeakForceRightFoot(FY);ActivePeakForceRightFoot(FZ);` +
+            `TimeToActivePeakLeftFoot(FX);TimeToActivePeakLeftFoot(FY);TimeToActivePeakLeftFoot(FZ);TimeToActivePeakRightFoot(FX);TimeToActivePeakRightFoot(FY);TimeToActivePeakRightFoot(FZ);` +
+            `PushOffRateLeftFoot(FX);PushOffRateLeftFoot(FY);PushOffRateLeftFoot(FZ);PushOffRateRightFoot(FX);PushOffRateRightFoot(FY);PushOffRateRightFoot(FZ);` +
+            `BrakingImpulseLeftFoot;BrakingImpulseRightFoot;BrakingPeakForceLeftFoot;BrakingPeakForceRightFoot;TimeToBrakingPeakLeftFoot;TimeToBrakingPeakRightFoot;` +
+            `TimeToBPTransitionLeftFoot;TimeToBPTransitionRightFoot;PropulsiveImpulseLeftFoot;PropulsiveImpulseRightFoot;PropulsivePeakForceLeftFoot;PropulsivePeakForceRightFoot;` +
+            `TimeToPropulsivePeakLeftFoot;TimeToPropulsivePeakRightFoot\n`;
         
           // Add the averages of each metric for each step
           let csv = csvHeaders;
@@ -1604,22 +1608,26 @@ class Events {
             csv = csv + `${i + 1};${averageMetrics.left.fx.impulses[i]};${averageMetrics.left.fy.impulses[i]};${averageMetrics.left.fz.impulses[i]};` +
               `${averageMetrics.right.fx.impulses[i]};${averageMetrics.right.fy.impulses[i]};${averageMetrics.right.fz.impulses[i]};` +
               `${averageMetrics.left.fx.loadingRates[i]};${averageMetrics.left.fy.loadingRates[i]};${averageMetrics.left.fz.loadingRates[i]};` +
-              `${averageMetrics.right.fx.loadingRates[i]};${averageMetrics.right.fy.loadingRates[i]};${averageMetrics.right.fz.loadingRates[i]};`+
+              `${averageMetrics.right.fx.loadingRates[i]};${averageMetrics.right.fy.loadingRates[i]};${averageMetrics.right.fz.loadingRates[i]};` +
               `${averageMetrics.left.fx.impactPeakForces[i]};${averageMetrics.left.fy.impactPeakForces[i]};${averageMetrics.left.fz.impactPeakForces[i]};` +
-              `${averageMetrics.right.fx.impactPeakForces[i]};${averageMetrics.right.fy.impactPeakForces[i]};${averageMetrics.right.fz.impactPeakForces[i]};`+
+              `${averageMetrics.right.fx.impactPeakForces[i]};${averageMetrics.right.fy.impactPeakForces[i]};${averageMetrics.right.fz.impactPeakForces[i]};` +
               `${averageMetrics.left.fx.timeToImpactPeaks[i]};${averageMetrics.left.fy.timeToImpactPeaks[i]};${averageMetrics.left.fz.timeToImpactPeaks[i]};` +
-              `${averageMetrics.right.fx.timeToImpactPeaks[i]};${averageMetrics.right.fy.timeToImpactPeaks[i]};${averageMetrics.right.fz.timeToImpactPeaks[i]};`+
+              `${averageMetrics.right.fx.timeToImpactPeaks[i]};${averageMetrics.right.fy.timeToImpactPeaks[i]};${averageMetrics.right.fz.timeToImpactPeaks[i]};` +
               `${averageMetrics.left.fx.activePeakForces[i]};${averageMetrics.left.fy.activePeakForces[i]};${averageMetrics.left.fz.activePeakForces[i]};` +
-              `${averageMetrics.right.fx.activePeakForces[i]};${averageMetrics.right.fy.activePeakForces[i]};${averageMetrics.right.fz.activePeakForces[i]};`+
+              `${averageMetrics.right.fx.activePeakForces[i]};${averageMetrics.right.fy.activePeakForces[i]};${averageMetrics.right.fz.activePeakForces[i]};` +
               `${averageMetrics.left.fx.timeToActivePeaks[i]};${averageMetrics.left.fy.timeToActivePeaks[i]};${averageMetrics.left.fz.timeToActivePeaks[i]};` +
-              `${averageMetrics.right.fx.timeToActivePeaks[i]};${averageMetrics.right.fy.timeToActivePeaks[i]};${averageMetrics.right.fz.timeToActivePeaks[i]};`+
+              `${averageMetrics.right.fx.timeToActivePeaks[i]};${averageMetrics.right.fy.timeToActivePeaks[i]};${averageMetrics.right.fz.timeToActivePeaks[i]};` +
               `${averageMetrics.left.fx.pushOffRates[i]};${averageMetrics.left.fy.pushOffRates[i]};${averageMetrics.left.fz.pushOffRates[i]};` +
-              `${averageMetrics.right.fx.pushOffRates[i]};${averageMetrics.right.fy.pushOffRates[i]};${averageMetrics.right.fz.pushOffRates[i]}\n`
+              `${averageMetrics.right.fx.pushOffRates[i]};${averageMetrics.right.fy.pushOffRates[i]};${averageMetrics.right.fz.pushOffRates[i]};` +
+              `${averageMetrics.left.fy.brakingImpulses[i]};${averageMetrics.right.fy.brakingImpulses[i]};${averageMetrics.left.fy.brakingPeakForces[i]};${averageMetrics.right.fy.brakingPeakForces[i]};` +
+              `${averageMetrics.left.fy.timeToBrakingPeaks[i]};${averageMetrics.right.fy.timeToBrakingPeaks[i]};${averageMetrics.left.fy.timeToBPTransitions[i]};${averageMetrics.right.fy.timeToBPTransitions[i]};` +
+              `${averageMetrics.left.fy.propulsiveImpulses[i]};${averageMetrics.right.fy.propulsiveImpulses[i]};${averageMetrics.left.fy.propulsivePeakForces[i]};${averageMetrics.right.fy.propulsivePeakForces[i]};` +
+              `${averageMetrics.left.fy.timeToPropulsivePeaks[i]};${averageMetrics.right.fy.timeToPropulsivePeaks[i]}\n`;
           }
 
 
           // Calculate the average of each column
-          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
+          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
 
           csv = csv + `;=AVERAGE(B2:B${averageMetrics.length + 1});=AVERAGE(C2:C${averageMetrics.length + 1});=AVERAGE(D2:D${averageMetrics.length + 1});=AVERAGE(E2:E${averageMetrics.length + 1});=AVERAGE(F2:F${averageMetrics.length + 1});=AVERAGE(G2:G${averageMetrics.length + 1})` +
             `;=AVERAGE(H2:H${averageMetrics.length + 1});=AVERAGE(I2:I${averageMetrics.length + 1});=AVERAGE(J2:J${averageMetrics.length + 1});=AVERAGE(K2:K${averageMetrics.length + 1});=AVERAGE(L2:L${averageMetrics.length + 1});=AVERAGE(M2:M${averageMetrics.length + 1})` +
@@ -1627,7 +1635,10 @@ class Events {
             `;=AVERAGE(T2:T${averageMetrics.length + 1});=AVERAGE(U2:U${averageMetrics.length + 1});=AVERAGE(V2:V${averageMetrics.length + 1});=AVERAGE(W2:W${averageMetrics.length + 1});=AVERAGE(X2:X${averageMetrics.length + 1});=AVERAGE(Y2:Y${averageMetrics.length + 1})` +
             `;=AVERAGE(Z2:Z${averageMetrics.length + 1});=AVERAGE(AA2:AA${averageMetrics.length + 1});=AVERAGE(AB2:AB${averageMetrics.length + 1});=AVERAGE(AC2:AC${averageMetrics.length + 1});=AVERAGE(AD2:AD${averageMetrics.length + 1});=AVERAGE(AE2:AE${averageMetrics.length + 1})` +
             `;=AVERAGE(AF2:AF${averageMetrics.length + 1});=AVERAGE(AG2:AG${averageMetrics.length + 1});=AVERAGE(AH2:AH${averageMetrics.length + 1});=AVERAGE(AI2:AI${averageMetrics.length + 1});=AVERAGE(AJ2:AJ${averageMetrics.length + 1});=AVERAGE(AK2:AK${averageMetrics.length + 1})` +
-            `;=AVERAGE(AL2:AL${averageMetrics.length + 1});=AVERAGE(AM2:AM${averageMetrics.length + 1});=AVERAGE(AN2:AN${averageMetrics.length + 1});=AVERAGE(AO2:AO${averageMetrics.length + 1});=AVERAGE(AP2:AP${averageMetrics.length + 1});=AVERAGE(AQ2:AQ${averageMetrics.length + 1})\n`
+            `;=AVERAGE(AL2:AL${averageMetrics.length + 1});=AVERAGE(AM2:AM${averageMetrics.length + 1});=AVERAGE(AN2:AN${averageMetrics.length + 1});=AVERAGE(AO2:AO${averageMetrics.length + 1});=AVERAGE(AP2:AP${averageMetrics.length + 1});=AVERAGE(AQ2:AQ${averageMetrics.length + 1})` +
+            `;=AVERAGE(AR2:AR${averageMetrics.length + 1});=AVERAGE(AS2:AS${averageMetrics.length + 1});=AVERAGE(AT2:AT${averageMetrics.length + 1});=AVERAGE(AU2:AU${averageMetrics.length + 1});=AVERAGE(AV2:AV${averageMetrics.length + 1});=AVERAGE(AW2:AW${averageMetrics.length + 1})` +
+            `;=AVERAGE(AX2:AX${averageMetrics.length + 1});=AVERAGE(AY2:AY${averageMetrics.length + 1});=AVERAGE(AZ2:AZ${averageMetrics.length + 1});=AVERAGE(BA2:BA${averageMetrics.length + 1});=AVERAGE(BB2:BB${averageMetrics.length + 1});=AVERAGE(BC2:BC${averageMetrics.length + 1})` +
+            `;=AVERAGE(BD2:BD${averageMetrics.length + 1});=AVERAGE(BE2:BE${averageMetrics.length + 1})\n`;
 
           // Write the csv data to the file
           await new Promise((resolve, reject) => {

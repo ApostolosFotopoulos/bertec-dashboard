@@ -184,7 +184,7 @@ export interface AverageMetrics {
   timeToImpactPeaks: Array<number>,
   activePeakForces: Array<number>,
   timeToActivePeaks: Array<number>,
-  pushOffRates: Array<number>
+  pushOffRates: Array<number>,
 }
 
 export interface NormalMetrics {
@@ -195,6 +195,13 @@ export interface NormalMetrics {
   activePeakForce: number,
   timeToActivePeak: number,
   pushOffRate: number,
+  brakingImpulse: number,
+  brakingPeakForce: number,
+  timeToBrakingPeak: number,
+  timeToBPTransition: number,
+  propulsiveImpulse: number,
+  propulsivePeakForce: number,
+  timeToPropulsivePeak: number,
 }
 
 export interface StanceDuration {

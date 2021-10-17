@@ -53,5 +53,15 @@ class Calculus {
         }
         return lms.length > 0 ? x.indexOf(Math.max(...lms)) : 0;
     }
+    static findIndexOfSignChange(x) {
+        let ilm = 0;
+        for (var i = 1; i < x.length - 1; ++i) {
+            if (x[i - 1] >= 0 && x[i] <= 0 && x[i + 1] <= 0) {
+                ilm = i + 1;
+                break;
+            }
+        }
+        return ilm;
+    }
 }
 exports.Calculus = Calculus;

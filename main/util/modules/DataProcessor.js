@@ -104,7 +104,6 @@ class DataProcessor {
         if (!isLeftCompleteStep) {
             leftFootStanceDurations.pop();
         }
-        console.log(rightFootStanceDurations.length, leftFootStanceDurations.length);
         return {
             left: selectedSteps ? leftFootStanceDurations.filter((_, idx) => selectedSteps.includes(idx)) : leftFootStanceDurations,
             right: selectedSteps ? rightFootStanceDurations.filter((_, idx) => selectedSteps.includes(idx)) : rightFootStanceDurations,

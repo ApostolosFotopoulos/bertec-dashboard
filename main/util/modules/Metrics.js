@@ -16,8 +16,6 @@ class Metrics {
     static generateAsymmetries(sd) {
         let stance = 0;
         let step = 0;
-        console.log(sd.right);
-        console.log(sd.left);
         for (var i = 0; i < sd.length; i++) {
             if (sd.right[i].startTimestamp != sd.right[i].endTimestamp &&
                 sd.left[i].startTimestamp != sd.left[i].endTimestamp) {
@@ -39,14 +37,30 @@ class Metrics {
     static generate(steps, frequency) {
         const metrics = {
             left: {
-                fx: this.calculateMetricsPerFoot(steps.fx.left, frequency),
-                fy: this.calculateMetricsPerFoot(steps.fy.left, frequency),
-                fz: this.calculateMetricsPerFoot(steps.fz.left, frequency),
+                fx: {
+                    ...this.calculateMetricsPerFoot(steps.fx.left, frequency),
+                },
+                fy: {
+                    ...this.calculateMetricsPerFoot(steps.fy.left, frequency),
+                    ...this.calculateBrakingMetrics(steps.fy.left, frequency),
+                    ...this.calculatePropulsiveMetrics(steps.fy.left, frequency),
+                },
+                fz: {
+                    ...this.calculateMetricsPerFoot(steps.fz.left, frequency),
+                },
             },
             right: {
-                fx: this.calculateMetricsPerFoot(steps.fx.right, frequency),
-                fy: this.calculateMetricsPerFoot(steps.fy.right, frequency),
-                fz: this.calculateMetricsPerFoot(steps.fz.right, frequency),
+                fx: {
+                    ...this.calculateMetricsPerFoot(steps.fx.right, frequency),
+                },
+                fy: {
+                    ...this.calculateMetricsPerFoot(steps.fy.right, frequency),
+                    ...this.calculateBrakingMetrics(steps.fy.right, frequency),
+                    ...this.calculatePropulsiveMetrics(steps.fy.right, frequency),
+                },
+                fz: {
+                    ...this.calculateMetricsPerFoot(steps.fz.right, frequency),
+                },
             }
         };
         return {
@@ -60,14 +74,30 @@ class Metrics {
     static generateAverage(steps, frequency) {
         const averageMetrics = {
             left: {
-                fx: this.calculateAverageMetricsPerFoot(steps.fx.left, frequency),
-                fy: this.calculateAverageMetricsPerFoot(steps.fy.left, frequency),
-                fz: this.calculateAverageMetricsPerFoot(steps.fz.left, frequency),
+                fx: {
+                    ...this.calculateAverageMetricsPerFoot(steps.fx.left, frequency),
+                },
+                fy: {
+                    ...this.calculateAverageMetricsPerFoot(steps.fy.left, frequency),
+                    ...this.calculateAverageBrakingMetrics(steps.fy.left, frequency),
+                    ...this.calculateAveragePropulsiveMetrics(steps.fy.left, frequency),
+                },
+                fz: {
+                    ...this.calculateAverageMetricsPerFoot(steps.fz.left, frequency),
+                }
             },
             right: {
-                fx: this.calculateAverageMetricsPerFoot(steps.fx.right, frequency),
-                fy: this.calculateAverageMetricsPerFoot(steps.fy.right, frequency),
-                fz: this.calculateAverageMetricsPerFoot(steps.fz.right, frequency),
+                fx: {
+                    ...this.calculateAverageMetricsPerFoot(steps.fx.right, frequency),
+                },
+                fy: {
+                    ...this.calculateAverageMetricsPerFoot(steps.fy.right, frequency),
+                    ...this.calculateAverageBrakingMetrics(steps.fy.right, frequency),
+                    ...this.calculateAveragePropulsiveMetrics(steps.fy.right, frequency),
+                },
+                fz: {
+                    ...this.calculateAverageMetricsPerFoot(steps.fz.right, frequency),
+                }
             }
         };
         return {
@@ -140,7 +170,6 @@ class Metrics {
             // Calculate the push off rate of every step
             pushOffRates.push(this.calculatePushOffRate(y, frequency));
         }
-        console.log(loadingRates);
         return {
             impulse: (impulses.reduce((a, c) => a + c) / impulses.map(i => i != 0).length),
             impactPeakForce: (impactPeakForces.reduce((a, c) => a + c) / impactPeakForces.map(i => i != 0).length),
@@ -149,6 +178,13 @@ class Metrics {
             activePeakForce: (activePeakForces.reduce((a, c) => a + c) / activePeakForces.map(i => i != 0).length),
             timeToActivePeak: (timeToActivePeaks.reduce((a, c) => a + c) / timeToActivePeaks.map(i => i != 0).length),
             pushOffRate: (pushOffRates.reduce((a, c) => a + c) / pushOffRates.map(i => i != 0).length),
+            brakingImpulse: 0,
+            brakingPeakForce: 0,
+            timeToBrakingPeak: 0,
+            timeToBPTransition: 0,
+            propulsiveImpulse: 0,
+            propulsivePeakForce: 0,
+            timeToPropulsivePeak: 0,
         };
     }
     static calculateImpulse(x, y) {
@@ -189,6 +225,140 @@ class Metrics {
             return Calculus_1.Calculus.slope(fromId, from, toId, to);
         }
         return 0;
+    }
+    static calculateAverageBrakingMetrics(rows, frequency) {
+        var brakingImpulses = [];
+        var brakingPeakForces = [];
+        var timeToBrakingPeaks = [];
+        var timeToBPTransitions = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            const xPos = [];
+            const yPos = [];
+            for (var j = 0; j < y.length; j++) {
+                if (y[j] > 0) {
+                    yPos.push(y[j]);
+                    xPos.push(x[j]);
+                }
+            }
+            if (yPos.length === 0 || xPos.length == 0) {
+                brakingImpulses.push(0);
+                brakingPeakForces.push(0);
+                timeToBrakingPeaks.push(0);
+            }
+            else {
+                brakingImpulses.push(Calculus_1.Calculus.integral(xPos, yPos));
+                brakingPeakForces.push(Calculus_1.Calculus.findFirstlocalMax(yPos));
+                timeToBrakingPeaks.push(x[Calculus_1.Calculus.findIndexOfFirstlocalMax(y)]);
+            }
+            timeToBPTransitions.push(x[Calculus_1.Calculus.findIndexOfSignChange(y)]);
+        }
+        return {
+            brakingImpulses,
+            brakingPeakForces,
+            timeToBrakingPeaks,
+            timeToBPTransitions,
+        };
+    }
+    static calculateBrakingMetrics(rows, frequency) {
+        var brakingImpulses = [];
+        var brakingPeakForces = [];
+        var timeToBrakingPeaks = [];
+        var timeToBPTransitions = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            const xPos = [];
+            const yPos = [];
+            for (var j = 0; j < y.length; j++) {
+                if (y[j] > 0) {
+                    yPos.push(y[j]);
+                    xPos.push(x[j]);
+                }
+            }
+            if (yPos.length === 0 || xPos.length == 0) {
+                brakingImpulses.push(0);
+                brakingPeakForces.push(0);
+                timeToBrakingPeaks.push(0);
+            }
+            else {
+                brakingImpulses.push(Calculus_1.Calculus.integral(xPos, yPos));
+                brakingPeakForces.push(Calculus_1.Calculus.findFirstlocalMax(yPos));
+                timeToBrakingPeaks.push(x[Calculus_1.Calculus.findIndexOfFirstlocalMax(y)]);
+            }
+            timeToBPTransitions.push(x[Calculus_1.Calculus.findIndexOfSignChange(y)]);
+        }
+        return {
+            brakingImpulse: (brakingImpulses.reduce((a, c) => a + c) / brakingImpulses.map(i => i != 0).length),
+            brakingPeakForce: (brakingPeakForces.reduce((a, c) => a + c) / brakingPeakForces.map(i => i != 0).length),
+            timeToBrakingPeak: (timeToBrakingPeaks.reduce((a, c) => a + c) / timeToBrakingPeaks.map(i => i != 0).length),
+            timeToBPTransition: (timeToBPTransitions.reduce((a, c) => a + c) / timeToBPTransitions.map(i => i != 0).length)
+        };
+    }
+    static calculateAveragePropulsiveMetrics(rows, frequency) {
+        var propulsiveImpulses = [];
+        var propulsivePeakForces = [];
+        var timeToPropulsivePeaks = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            const xNeg = [];
+            const yNeg = [];
+            for (var j = 0; j < y.length; j++) {
+                if (y[j] < 0) {
+                    yNeg.push(y[j]);
+                    xNeg.push(x[j]);
+                }
+            }
+            if (xNeg.length === 0 || yNeg.length === 0) {
+                propulsiveImpulses.push(0);
+                propulsivePeakForces.push(0);
+                timeToPropulsivePeaks.push(0);
+            }
+            else {
+                propulsiveImpulses.push(Calculus_1.Calculus.integral(xNeg, yNeg));
+                propulsivePeakForces.push(Calculus_1.Calculus.findFirstlocalMax(yNeg));
+                timeToPropulsivePeaks.push(xNeg[Calculus_1.Calculus.findIndexOfFirstlocalMax(yNeg)]);
+            }
+        }
+        return {
+            propulsiveImpulses,
+            propulsivePeakForces,
+            timeToPropulsivePeaks
+        };
+    }
+    static calculatePropulsiveMetrics(rows, frequency) {
+        var propulsiveImpulses = [];
+        var propulsivePeakForces = [];
+        var timeToPropulsivePeaks = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            const xNeg = [];
+            const yNeg = [];
+            for (var j = 0; j < y.length; j++) {
+                if (y[j] < 0) {
+                    yNeg.push(y[j]);
+                    xNeg.push(x[j]);
+                }
+            }
+            if (xNeg.length === 0 || yNeg.length === 0) {
+                propulsiveImpulses.push(0);
+                propulsivePeakForces.push(0);
+                timeToPropulsivePeaks.push(0);
+            }
+            else {
+                propulsiveImpulses.push(Calculus_1.Calculus.integral(xNeg, yNeg));
+                propulsivePeakForces.push(Calculus_1.Calculus.findFirstlocalMax(yNeg));
+                timeToPropulsivePeaks.push(xNeg[Calculus_1.Calculus.findIndexOfFirstlocalMax(yNeg)]);
+            }
+        }
+        return {
+            propulsiveImpulse: (propulsiveImpulses.reduce((a, c) => a + c) / propulsiveImpulses.map(i => i != 0).length),
+            propulsivePeakForce: (propulsivePeakForces.reduce((a, c) => a + c) / propulsivePeakForces.map(i => i != 0).length),
+            timeToPropulsivePeak: (timeToPropulsivePeaks.reduce((a, c) => a + c) / timeToPropulsivePeaks.map(i => i != 0).length),
+        };
     }
 }
 exports.Metrics = Metrics;

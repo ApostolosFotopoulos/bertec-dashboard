@@ -584,6 +584,41 @@ class Renderer {
             <td>${metrics.left.fz.pushOffRate.toFixed(2)} N/s</td>
             <td>${metrics.right.fz.pushOffRate.toFixed(2)} N/s</td>
           </tr>
+          <tr>
+            <td>Braking Impulse</td>
+            <td>${metrics.left.fy.brakingImpulse.toFixed(2)} N.s</td>
+            <td>${metrics.right.fy.brakingImpulse.toFixed(2)} N.s</td>
+          </tr>
+          <tr>
+            <td>Braking Peak Force</td>
+            <td>${metrics.left.fy.brakingPeakForce.toFixed(2)} N</td>
+            <td>${metrics.right.fy.brakingPeakForce.toFixed(2)} N</td>
+          </tr>
+          <tr>
+            <td>Time to Braking Peak</td>
+            <td>${metrics.left.fy.timeToBrakingPeak.toFixed(2)} s</td>
+            <td>${metrics.right.fy.timeToBrakingPeak.toFixed(2)} s</td>
+          </tr>
+          <tr>
+            <td>Time to B-P Transition</td>
+            <td>${metrics.left.fy.timeToBPTransition.toFixed(2)} s</td>
+            <td>${metrics.right.fy.timeToBPTransition.toFixed(2)} s</td>
+          </tr>
+          <tr>
+            <td>Propulsive Impulse</td>
+            <td>${metrics.left.fy.propulsiveImpulse.toFixed(2)} N.s</td>
+            <td>${metrics.right.fy.propulsiveImpulse.toFixed(2)} N.s</td>
+          </tr>
+          <tr>
+            <td>Propulsive Peak Force</td>
+            <td>${metrics.left.fy.propulsivePeakForce.toFixed(2)} N</td>
+            <td>${metrics.right.fy.propulsivePeakForce.toFixed(2)} N</td>
+          </tr>
+          <tr>
+            <td>Time to Propulsive Peak</td>
+            <td>${metrics.left.fy.timeToPropulsivePeak.toFixed(2)} s</td>
+            <td>${metrics.right.fy.timeToPropulsivePeak.toFixed(2)} s</td>
+          </tr>
         </table>
       </div>
     `;
