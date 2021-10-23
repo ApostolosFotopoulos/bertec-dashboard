@@ -9,6 +9,7 @@
     <v-row align="center">
       <v-col align="center">
         <v-select
+          dense
           :items="
             databases.map((d) => ({
               text: d.substr(0, d.lastIndexOf('.')),
@@ -23,6 +24,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.firstName"
           label="First Name"
           outlined
@@ -31,6 +33,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.lastName"
           label="Last Name"
           outlined
@@ -39,6 +42,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.hospitalID"
           label="Hospital ID"
           outlined
@@ -47,6 +51,7 @@
       </v-col>
       <v-col align="center">
         <v-select
+          dense
           v-model="search.affectedSide"
           :items="affectedSideOptions"
           label="Affected Side"
@@ -56,6 +61,7 @@
       </v-col>
       <v-col align="center">
         <v-select
+          dense
           v-model="search.sex"
           :items="sexOptions"
           label="Sex"
@@ -67,6 +73,7 @@
     <v-row align="center">
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.year[0]"
           label="Year - Min"
           outlined
@@ -75,6 +82,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.year[1]"
           label="Year - Max"
           outlined
@@ -83,6 +91,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.height[0]"
           label="Height - Min"
           outlined
@@ -91,6 +100,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.height[1]"
           label="Height - Max"
           outlined
@@ -101,6 +111,7 @@
     <v-row align="center">
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.legLength[0]"
           label="Leg Length - Min"
           outlined
@@ -109,6 +120,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.legLength[1]"
           label="Leg Length - Max"
           outlined
@@ -117,6 +129,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.weight[0]"
           label="Weight - Min"
           outlined
@@ -125,6 +138,7 @@
       </v-col>
       <v-col align="center">
         <v-text-field
+          dense
           v-model="search.weight[1]"
           label="Weight - Max"
           outlined
@@ -144,6 +158,7 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
+              dense
               :value="`${search.surgeryRange.start!='' && search.surgeryRange.end!='' ?moment(search.surgeryRange.start).format('DD/MM/YYYY')+' - '+moment(search.surgeryRange.end).format('DD/MM/YYYY'):''}`"
               label="Surgery Date Range"
               outlined
@@ -171,6 +186,7 @@
         >
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
+              dense
               :value="`${search.injuryRange.start!='' && search.injuryRange.end!='' ?moment(search.injuryRange.start).format('DD/MM/YYYY')+' - '+moment(search.injuryRange.end).format('DD/MM/YYYY'):''}`"
               label="Injury Date Range"
               outlined
@@ -189,6 +205,7 @@
       </v-col>
       <v-col align="center">
         <v-combobox
+          dense
           v-model="search.selectedTags"
           :items="tags.map((t) => t.name)"
           label="Tags"
