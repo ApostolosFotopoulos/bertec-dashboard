@@ -56,6 +56,7 @@ class Metrics {
         },
         fz: {
           ...this.calculateMetricsPerFoot(steps.fz.left, frequency),
+          ...this.calculateStepDurations(steps.fz.left, frequency)
         },
       },
       right: {
@@ -70,6 +71,7 @@ class Metrics {
         },
         fz: {
           ...this.calculateMetricsPerFoot(steps.fz.right, frequency),
+          ...this.calculateStepDurations(steps.fz.right, frequency)
         },
       }
     };
@@ -97,6 +99,7 @@ class Metrics {
         },
         fz: {
           ...this.calculateAverageMetricsPerFoot(steps.fz.left, frequency),
+          ...this.calculateAverageStepDurations(steps.fz.left, frequency)
         }
       },
       right: {
@@ -111,6 +114,7 @@ class Metrics {
         },
         fz: {
           ...this.calculateAverageMetricsPerFoot(steps.fz.right, frequency),
+          ...this.calculateAverageStepDurations(steps.fz.right, frequency)
         }
       }
     };
@@ -227,6 +231,10 @@ class Metrics {
       lateralStrikePeakForce: 0,
       lateralPushImpulse: 0,
       lateralPushPeakForce: 0,
+      contactDuration: 0,
+      stepDuration: 0,
+      doubleSupportDuration: 0,
+      singleSupportDuration: 0,
     }
   }
 
@@ -405,9 +413,9 @@ class Metrics {
 
   static calculatePropulsiveMetrics(rows: Array<LineChartSeries>, frequency: number) {
 
-    var propulsiveImpulses = [];
-    var propulsivePeakForces = [];
-    var timeToPropulsivePeaks = [];
+    var propulsiveImpulses: Array<number> = [];
+    var propulsivePeakForces: Array<number> = [];
+    var timeToPropulsivePeaks: Array<number>= [];
 
     for (var i = 0; i < rows.length; i++){
 
@@ -443,10 +451,10 @@ class Metrics {
   
   static calculateAverageLateralMetrics(rows: Array<LineChartSeries>, frequency: number, isLeftFoot: boolean) {
 
-    var lateralStrikeImpulses = [];
-    var lateralStrikePeakForces = [];
-    var lateralPushImpulses = [];
-    var lateralPushPeakForces = [];
+    var lateralStrikeImpulses: Array<number> = [];
+    var lateralStrikePeakForces: Array<number> = [];
+    var lateralPushImpulses: Array<number> = [];
+    var lateralPushPeakForces: Array<number> = [];
 
     for (var i = 0; i < rows.length; i++){
 
@@ -514,10 +522,10 @@ class Metrics {
 
   static calculateLateralMetrics(rows: Array<LineChartSeries>, frequency: number, isLeftFoot: boolean) {
     
-    var lateralStrikeImpulses = [];
-    var lateralStrikePeakForces = [];
-    var lateralPushImpulses = [];
-    var lateralPushPeakForces = [];
+    var lateralStrikeImpulses: Array<number> = [];
+    var lateralStrikePeakForces: Array<number> = [];
+    var lateralPushImpulses: Array<number> = [];
+    var lateralPushPeakForces: Array<number> = [];
 
     for (var i = 0; i < rows.length; i++){
 
@@ -582,6 +590,71 @@ class Metrics {
     }
   }
   
+  static calculateAverageStepDurations(rows: Array<LineChartSeries>, frequency: number) {
+
+    var contactDurations: Array<number> = [];
+    var stepDurations: Array<number> = [];
+    var doubleSupportDurations: Array<number> = [];
+    var singleSupportDurations: Array<number> = [];
+
+    for (var i = 0; i < rows.length; i++) {
+
+      let x: Array<number> = rows[i].data.map((_, idx) => idx / frequency);
+      let y: Array<number> = rows[i].data;
+      
+      if (x.length > 0) {
+        contactDurations.push(x[x.length - 1]);
+        stepDurations.push(x[Calculus.findIndexOfSecondLocalMax(y)]);
+        doubleSupportDurations.push(x[Calculus.findIndexOfFirstlocalMax(y)]);
+        singleSupportDurations.push(x[Calculus.findIndexOfSecondLocalMax(y)] - x[Calculus.findIndexOfFirstlocalMax(y)]);
+      } else {
+        contactDurations.push(0);
+        stepDurations.push(0);
+        doubleSupportDurations.push(0);
+        singleSupportDurations.push(0);
+      }
+    }
+
+    return {
+      contactDurations,
+      stepDurations,
+      doubleSupportDurations,
+      singleSupportDurations,
+    }
+  }
+  
+  static calculateStepDurations(rows: Array<LineChartSeries>, frequency: number) {
+
+    var contactDurations: Array<number> = [];
+    var stepDurations: Array<number> = [];
+    var doubleSupportDurations: Array<number> = [];
+    var singleSupportDurations: Array<number> = [];
+
+    for (var i = 0; i < rows.length; i++) {
+
+      let x: Array<number> = rows[i].data.map((_, idx) => idx / frequency);
+      let y: Array<number> = rows[i].data;
+
+      if (x.length > 0) {
+        contactDurations.push(x[x.length - 1]);
+        stepDurations.push(x[Calculus.findIndexOfSecondLocalMax(y)]);
+        doubleSupportDurations.push(x[Calculus.findIndexOfFirstlocalMax(y)]);
+        singleSupportDurations.push(x[Calculus.findIndexOfSecondLocalMax(y)] - x[Calculus.findIndexOfFirstlocalMax(y)]);
+      } else {
+        contactDurations.push(0);
+        stepDurations.push(0);
+        doubleSupportDurations.push(0);
+        singleSupportDurations.push(0);
+      }
+    }
+
+    return {
+      contactDuration: (contactDurations.reduce((a, c) => a + c) / contactDurations.map(i => i != 0).length),
+      stepDuration: (stepDurations.reduce((a, c) => a + c) / stepDurations.map(i => i != 0).length),
+      doubleSupportDuration: (doubleSupportDurations.reduce((a, c) => a + c) / doubleSupportDurations.map(i => i != 0).length),
+      singleSupportDuration: (singleSupportDurations.reduce((a, c) => a + c) / singleSupportDurations.map(i => i != 0).length),
+    }
+  }
 }
 
 export { Metrics }

@@ -625,6 +625,26 @@ class Renderer {
             <td>${metrics.left.fx.lateralPushPeakForce.toFixed(2)} N</td>
             <td>${metrics.right.fx.lateralPushPeakForce.toFixed(2)} N</td>
           </tr>
+          <tr>
+            <td>Contact Duration</td>
+            <td>${metrics.left.fz.contactDuration.toFixed(2)} s</td>
+            <td>${metrics.right.fz.contactDuration.toFixed(2)} s</td>
+          </tr>
+          <tr>
+            <td>Step Duration</td>
+            <td>${metrics.left.fz.stepDuration.toFixed(2)} s</td>
+            <td>${metrics.right.fz.stepDuration.toFixed(2)} s</td>
+          </tr>
+          <tr>
+            <td>Double Support Duration</td>
+            <td>${metrics.left.fz.doubleSupportDuration.toFixed(2)} s</td>
+            <td>${metrics.right.fz.doubleSupportDuration.toFixed(2)} s</td>
+          </tr>
+           <tr>
+            <td>Single Support Duration</td>
+            <td>${metrics.left.fz.singleSupportDuration.toFixed(2)} s</td>
+            <td>${metrics.right.fz.singleSupportDuration.toFixed(2)} s</td>
+          </tr>
         </table>
       </div>
     `;

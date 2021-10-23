@@ -206,6 +206,10 @@ export interface NormalMetrics {
   lateralStrikePeakForce: number,
   lateralPushImpulse: number,
   lateralPushPeakForce: number,
+  contactDuration: number,
+  stepDuration: number,
+  doubleSupportDuration: number,
+  singleSupportDuration: number,
 }
 
 export interface StanceDuration {

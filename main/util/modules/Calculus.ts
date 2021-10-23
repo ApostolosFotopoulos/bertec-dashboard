@@ -78,6 +78,18 @@ class Calculus {
 
     return ilm;
   }
+
+  static findIndexOfSecondLocalMax(x: Array<number>): number {
+    let ilm = 0;
+
+    for (var i = 1; i < x.length - 1; ++i) {
+      if (x[i - 1] < x[i] && x[i] > x[i + 1]) {
+        ilm = i;
+      }
+    }
+
+    return ilm;
+  }
 }
 
 export { Calculus }

@@ -48,6 +48,7 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateMetricsPerFoot(steps.fz.left, frequency),
+                    ...this.calculateStepDurations(steps.fz.left, frequency)
                 },
             },
             right: {
@@ -62,6 +63,7 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateMetricsPerFoot(steps.fz.right, frequency),
+                    ...this.calculateStepDurations(steps.fz.right, frequency)
                 },
             }
         };
@@ -87,6 +89,7 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateAverageMetricsPerFoot(steps.fz.left, frequency),
+                    ...this.calculateAverageStepDurations(steps.fz.left, frequency)
                 }
             },
             right: {
@@ -101,6 +104,7 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateAverageMetricsPerFoot(steps.fz.right, frequency),
+                    ...this.calculateAverageStepDurations(steps.fz.right, frequency)
                 }
             }
         };
@@ -193,6 +197,10 @@ class Metrics {
             lateralStrikePeakForce: 0,
             lateralPushImpulse: 0,
             lateralPushPeakForce: 0,
+            contactDuration: 0,
+            stepDuration: 0,
+            doubleSupportDuration: 0,
+            singleSupportDuration: 0,
         };
     }
     static calculateImpulse(x, y) {
@@ -487,6 +495,62 @@ class Metrics {
             lateralStrikePeakForce: (lateralStrikePeakForces.reduce((a, c) => a + c) / lateralStrikePeakForces.map(i => i != 0).length),
             lateralPushImpulse: (lateralPushImpulses.reduce((a, c) => a + c) / lateralPushImpulses.map(i => i != 0).length),
             lateralPushPeakForce: (lateralPushPeakForces.reduce((a, c) => a + c) / lateralPushPeakForces.map(i => i != 0).length),
+        };
+    }
+    static calculateAverageStepDurations(rows, frequency) {
+        var contactDurations = [];
+        var stepDurations = [];
+        var doubleSupportDurations = [];
+        var singleSupportDurations = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            if (x.length > 0) {
+                contactDurations.push(x[x.length - 1]);
+                stepDurations.push(x[Calculus_1.Calculus.findIndexOfSecondLocalMax(y)]);
+                doubleSupportDurations.push(x[Calculus_1.Calculus.findIndexOfFirstlocalMax(y)]);
+                singleSupportDurations.push(x[Calculus_1.Calculus.findIndexOfSecondLocalMax(y)] - x[Calculus_1.Calculus.findIndexOfFirstlocalMax(y)]);
+            }
+            else {
+                contactDurations.push(0);
+                stepDurations.push(0);
+                doubleSupportDurations.push(0);
+                singleSupportDurations.push(0);
+            }
+        }
+        return {
+            contactDurations,
+            stepDurations,
+            doubleSupportDurations,
+            singleSupportDurations,
+        };
+    }
+    static calculateStepDurations(rows, frequency) {
+        var contactDurations = [];
+        var stepDurations = [];
+        var doubleSupportDurations = [];
+        var singleSupportDurations = [];
+        for (var i = 0; i < rows.length; i++) {
+            let x = rows[i].data.map((_, idx) => idx / frequency);
+            let y = rows[i].data;
+            if (x.length > 0) {
+                contactDurations.push(x[x.length - 1]);
+                stepDurations.push(x[Calculus_1.Calculus.findIndexOfSecondLocalMax(y)]);
+                doubleSupportDurations.push(x[Calculus_1.Calculus.findIndexOfFirstlocalMax(y)]);
+                singleSupportDurations.push(x[Calculus_1.Calculus.findIndexOfSecondLocalMax(y)] - x[Calculus_1.Calculus.findIndexOfFirstlocalMax(y)]);
+            }
+            else {
+                contactDurations.push(0);
+                stepDurations.push(0);
+                doubleSupportDurations.push(0);
+                singleSupportDurations.push(0);
+            }
+        }
+        return {
+            contactDuration: (contactDurations.reduce((a, c) => a + c) / contactDurations.map(i => i != 0).length),
+            stepDuration: (stepDurations.reduce((a, c) => a + c) / stepDurations.map(i => i != 0).length),
+            doubleSupportDuration: (doubleSupportDurations.reduce((a, c) => a + c) / doubleSupportDurations.map(i => i != 0).length),
+            singleSupportDuration: (singleSupportDurations.reduce((a, c) => a + c) / singleSupportDurations.map(i => i != 0).length),
         };
     }
 }

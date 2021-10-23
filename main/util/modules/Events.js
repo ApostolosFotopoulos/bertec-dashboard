@@ -1601,7 +1601,8 @@ class Events {
             `BrakingImpulseLeftFoot;BrakingImpulseRightFoot;BrakingPeakForceLeftFoot;BrakingPeakForceRightFoot;TimeToBrakingPeakLeftFoot;TimeToBrakingPeakRightFoot;` +
             `TimeToBPTransitionLeftFoot;TimeToBPTransitionRightFoot;PropulsiveImpulseLeftFoot;PropulsiveImpulseRightFoot;PropulsivePeakForceLeftFoot;PropulsivePeakForceRightFoot;` +
             `TimeToPropulsivePeakLeftFoot;TimeToPropulsivePeakRightFoot;LateralStrikeImpulseLeftFoot;LateralStrikeImpulseRightFoot;LateralStrikePeakForceLeftFoot;LateralStrikePeakForceRightFoot;` +
-            `LateralPushImpulseLeftFoot;LateralPushImpulseRightFoot;LateralPushPeakForceLeftFoot;LateralPushPeakForceRightFoot\n`;
+            `LateralPushImpulseLeftFoot;LateralPushImpulseRightFoot;LateralPushPeakForceLeftFoot;LateralPushPeakForceRightFoot;ContactDurationLeftFoot;ContactDurationRightFoot;` +
+            `StepDurationLeftFoot;StepDurationRightFoot;DoubleSupportDurationLeftFoot;DoubleSupportDurationRightFoot;SingleSupportDurationLeftFoot;SingleSupportDurationRightFoot\n`;
         
           // Add the averages of each metric for each step
           let csv = csvHeaders;
@@ -1625,12 +1626,14 @@ class Events {
               `${averageMetrics.left.fy.propulsiveImpulses[i]};${averageMetrics.right.fy.propulsiveImpulses[i]};${averageMetrics.left.fy.propulsivePeakForces[i]};${averageMetrics.right.fy.propulsivePeakForces[i]};` +
               `${averageMetrics.left.fy.timeToPropulsivePeaks[i]};${averageMetrics.right.fy.timeToPropulsivePeaks[i]};${averageMetrics.left.fx.lateralStrikeImpulses[i]};${averageMetrics.right.fx.lateralStrikeImpulses[i]};` +
               `${averageMetrics.left.fx.lateralStrikePeakForces[i]};${averageMetrics.right.fx.lateralStrikePeakForces[i]};${averageMetrics.left.fx.lateralPushImpulses[i]};${averageMetrics.right.fx.lateralPushImpulses[i]};` +
-              `${averageMetrics.left.fx.lateralPushPeakForces[i]};${averageMetrics.right.fx.lateralPushPeakForces[i]}\n`;
+              `${averageMetrics.left.fx.lateralPushPeakForces[i]};${averageMetrics.right.fx.lateralPushPeakForces[i]};${averageMetrics.left.fz.contactDurations[i]};${averageMetrics.right.fz.contactDurations[i]};` +
+              `${averageMetrics.left.fz.stepDurations[i]};${averageMetrics.right.fz.stepDurations[i]};${averageMetrics.left.fz.doubleSupportDurations[i]};${averageMetrics.right.fz.doubleSupportDurations[i]};` +
+              `${averageMetrics.left.fz.singleSupportDurations[i]};${averageMetrics.right.fz.singleSupportDurations[i]}\n`;
           }
 
 
           // Calculate the average of each column
-          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
+          csv = csv + ';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n';
 
           csv = csv + `;=AVERAGE(B2:B${averageMetrics.length + 1});=AVERAGE(C2:C${averageMetrics.length + 1});=AVERAGE(D2:D${averageMetrics.length + 1});=AVERAGE(E2:E${averageMetrics.length + 1});=AVERAGE(F2:F${averageMetrics.length + 1});=AVERAGE(G2:G${averageMetrics.length + 1})` +
             `;=AVERAGE(H2:H${averageMetrics.length + 1});=AVERAGE(I2:I${averageMetrics.length + 1});=AVERAGE(J2:J${averageMetrics.length + 1});=AVERAGE(K2:K${averageMetrics.length + 1});=AVERAGE(L2:L${averageMetrics.length + 1});=AVERAGE(M2:M${averageMetrics.length + 1})` +
@@ -1642,7 +1645,8 @@ class Events {
             `;=AVERAGE(AR2:AR${averageMetrics.length + 1});=AVERAGE(AS2:AS${averageMetrics.length + 1});=AVERAGE(AT2:AT${averageMetrics.length + 1});=AVERAGE(AU2:AU${averageMetrics.length + 1});=AVERAGE(AV2:AV${averageMetrics.length + 1});=AVERAGE(AW2:AW${averageMetrics.length + 1})` +
             `;=AVERAGE(AX2:AX${averageMetrics.length + 1});=AVERAGE(AY2:AY${averageMetrics.length + 1});=AVERAGE(AZ2:AZ${averageMetrics.length + 1});=AVERAGE(BA2:BA${averageMetrics.length + 1});=AVERAGE(BB2:BB${averageMetrics.length + 1});=AVERAGE(BC2:BC${averageMetrics.length + 1})` +
             `;=AVERAGE(BD2:BD${averageMetrics.length + 1});=AVERAGE(BE2:BE${averageMetrics.length + 1});=AVERAGE(BF2:BF${averageMetrics.length + 1});=AVERAGE(BG2:BG${averageMetrics.length + 1});=AVERAGE(BH2:BH${averageMetrics.length + 1});=AVERAGE(BI2:BI${averageMetrics.length + 1})` +
-            `;=AVERAGE(BJ2:BJ${averageMetrics.length + 1});=AVERAGE(BK2:BK${averageMetrics.length + 1});=AVERAGE(BL2:BL${averageMetrics.length + 1});=AVERAGE(BM2:BM${averageMetrics.length + 1})\n`;
+            `;=AVERAGE(BJ2:BJ${averageMetrics.length + 1});=AVERAGE(BK2:BK${averageMetrics.length + 1});=AVERAGE(BL2:BL${averageMetrics.length + 1});=AVERAGE(BM2:BM${averageMetrics.length + 1});=AVERAGE(BN2:BN${averageMetrics.length + 1});=AVERAGE(BO2:BO${averageMetrics.length + 1})` +
+            `;=AVERAGE(BP2:BP${averageMetrics.length + 1});=AVERAGE(BQ2:BQ${averageMetrics.length + 1});=AVERAGE(BR2:BR${averageMetrics.length + 1});=AVERAGE(BS2:BS${averageMetrics.length + 1});=AVERAGE(BT2:BT${averageMetrics.length + 1});=AVERAGE(BU2:BU${averageMetrics.length + 1})\n`;
 
           // Write the csv data to the file
           await new Promise((resolve, reject) => {
