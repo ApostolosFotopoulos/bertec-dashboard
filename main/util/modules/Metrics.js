@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Metrics = void 0;
+const tslib_1 = require("tslib");
 const Calculus_1 = require("./Calculus");
+const moment_1 = (0, tslib_1.__importDefault)(require("moment"));
 class Metrics {
     static removeNoizyData(arr, rate) {
         const average = arr.reduce((a, b) => a + b, 0) / arr.length || 0;
@@ -34,7 +36,7 @@ class Metrics {
             step
         };
     }
-    static generate(steps, frequency) {
+    static generate(steps, frequency, sd) {
         const metrics = {
             left: {
                 fx: {
@@ -48,7 +50,8 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateMetricsPerFoot(steps.fz.left, frequency),
-                    ...this.calculateStepDurations(steps.fz.left, frequency)
+                    ...this.calculateStepDurations(steps.fz.left, frequency),
+                    ...this.calculateStrideDuration(sd.left)
                 },
             },
             right: {
@@ -63,7 +66,8 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateMetricsPerFoot(steps.fz.right, frequency),
-                    ...this.calculateStepDurations(steps.fz.right, frequency)
+                    ...this.calculateStepDurations(steps.fz.right, frequency),
+                    ...this.calculateStrideDuration(sd.right)
                 },
             }
         };
@@ -75,7 +79,7 @@ class Metrics {
             ])
         };
     }
-    static generateAverage(steps, frequency) {
+    static generateAverage(steps, frequency, sd) {
         const averageMetrics = {
             left: {
                 fx: {
@@ -89,7 +93,8 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateAverageMetricsPerFoot(steps.fz.left, frequency),
-                    ...this.calculateAverageStepDurations(steps.fz.left, frequency)
+                    ...this.calculateAverageStepDurations(steps.fz.left, frequency),
+                    ...this.calculateAverageStrideDuration(sd.left)
                 }
             },
             right: {
@@ -104,7 +109,8 @@ class Metrics {
                 },
                 fz: {
                     ...this.calculateAverageMetricsPerFoot(steps.fz.right, frequency),
-                    ...this.calculateAverageStepDurations(steps.fz.right, frequency)
+                    ...this.calculateAverageStepDurations(steps.fz.right, frequency),
+                    ...this.calculateAverageStrideDuration(sd.right)
                 }
             }
         };
@@ -201,6 +207,7 @@ class Metrics {
             stepDuration: 0,
             doubleSupportDuration: 0,
             singleSupportDuration: 0,
+            strideDuration: 0,
         };
     }
     static calculateImpulse(x, y) {
@@ -551,6 +558,26 @@ class Metrics {
             stepDuration: (stepDurations.reduce((a, c) => a + c) / stepDurations.map(i => i != 0).length),
             doubleSupportDuration: (doubleSupportDurations.reduce((a, c) => a + c) / doubleSupportDurations.map(i => i != 0).length),
             singleSupportDuration: (singleSupportDurations.reduce((a, c) => a + c) / singleSupportDurations.map(i => i != 0).length),
+        };
+    }
+    static calculateStrideDuration(sd) {
+        var strideDurations = [];
+        for (var i = 1; i < sd.length - 1; i++) {
+            const diff = (0, moment_1.default)(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000), 'seconds');
+            strideDurations.push(diff);
+        }
+        return {
+            strideDuration: (strideDurations.reduce((a, c) => a + c) / strideDurations.map(i => i != 0).length),
+        };
+    }
+    static calculateAverageStrideDuration(sd) {
+        var strideDurations = [];
+        for (var i = 1; i < sd.length - 1; i++) {
+            const diff = (0, moment_1.default)(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000), 'seconds');
+            strideDurations.push(diff);
+        }
+        return {
+            strideDurations,
         };
     }
 }

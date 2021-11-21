@@ -210,6 +210,7 @@ export interface NormalMetrics {
   stepDuration: number,
   doubleSupportDuration: number,
   singleSupportDuration: number,
+  strideDuration: number,
 }
 
 export interface StanceDuration {

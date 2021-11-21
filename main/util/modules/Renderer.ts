@@ -659,6 +659,11 @@ class Renderer {
             <td>${metrics.left.fz.singleSupportDuration.toFixed(2)} s</td>
             <td>${metrics.right.fz.singleSupportDuration.toFixed(2)} s</td>
           </tr>
+          <tr>
+            <td>Stride Duration</td>
+            <td>${metrics.left.fz.strideDuration.toFixed(2)} s</td>
+            <td>${metrics.right.fz.strideDuration.toFixed(2)} s</td>
+          </tr>
         </table>
       </div>
     `;
@@ -739,7 +744,7 @@ class Renderer {
       const sd: StepDurationsPerFoot = DataProcessor.formStepsForAsymmetry(records, user.weight,FREQUENCY, selectedSteps);
       
       const steps = DataProcessor.formStepsForMetrics(records, user.weight, FREQUENCY, selectedSteps);
-      const metrics: PerFootMetrics  = Metrics.generate(steps, FREQUENCY);
+      const metrics: PerFootMetrics  = Metrics.generate(steps, FREQUENCY, sd);
       
       // Generate the html
       const html = this.generateHTML(user, trial, session, lcs, cps, tl, sd, metrics);

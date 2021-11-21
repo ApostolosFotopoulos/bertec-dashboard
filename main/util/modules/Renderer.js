@@ -645,6 +645,11 @@ class Renderer {
             <td>${metrics.left.fz.singleSupportDuration.toFixed(2)} s</td>
             <td>${metrics.right.fz.singleSupportDuration.toFixed(2)} s</td>
           </tr>
+          <tr>
+            <td>Stride Duration</td>
+            <td>${metrics.left.fz.strideDuration.toFixed(2)} s</td>
+            <td>${metrics.right.fz.strideDuration.toFixed(2)} s</td>
+          </tr>
         </table>
       </div>
     `;
@@ -720,7 +725,7 @@ class Renderer {
             const tl = DataProcessor_1.DataProcessor.formTimelinesForEveryAxes(records, selectedSteps, user.weight, constants_1.FREQUENCY, trial);
             const sd = DataProcessor_1.DataProcessor.formStepsForAsymmetry(records, user.weight, constants_1.FREQUENCY, selectedSteps);
             const steps = DataProcessor_1.DataProcessor.formStepsForMetrics(records, user.weight, constants_1.FREQUENCY, selectedSteps);
-            const metrics = Metrics_1.Metrics.generate(steps, constants_1.FREQUENCY);
+            const metrics = Metrics_1.Metrics.generate(steps, constants_1.FREQUENCY, sd);
             // Generate the html
             const html = this.generateHTML(user, trial, session, lcs, cps, tl, sd, metrics);
             const file = { content: `${decodeURIComponent(html)}` };

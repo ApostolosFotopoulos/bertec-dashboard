@@ -1,5 +1,6 @@
-import { LineChartSeries, StepsDataForAverageMetrics, AverageMetrics, StepsDataForMetrics, NormalMetrics, StepDurationsPerFoot } from "./Interfaces";
+import { LineChartSeries, StepsDataForAverageMetrics, AverageMetrics, StepsDataForMetrics, NormalMetrics, StepDurationsPerFoot, StepDuration } from "./Interfaces";
 import { Calculus } from './Calculus';
+import moment from "moment";
 
 class Metrics {
 
@@ -41,7 +42,7 @@ class Metrics {
     }
   }
 
-  static generate(steps: StepsDataForMetrics, frequency: number) {
+  static generate(steps: StepsDataForMetrics, frequency: number, sd: StepDurationsPerFoot) {
     
     const metrics = {
       left: {
@@ -56,7 +57,8 @@ class Metrics {
         },
         fz: {
           ...this.calculateMetricsPerFoot(steps.fz.left, frequency),
-          ...this.calculateStepDurations(steps.fz.left, frequency)
+          ...this.calculateStepDurations(steps.fz.left, frequency),
+          ...this.calculateStrideDuration(sd.left)
         },
       },
       right: {
@@ -71,7 +73,8 @@ class Metrics {
         },
         fz: {
           ...this.calculateMetricsPerFoot(steps.fz.right, frequency),
-          ...this.calculateStepDurations(steps.fz.right, frequency)
+          ...this.calculateStepDurations(steps.fz.right, frequency),
+          ...this.calculateStrideDuration(sd.right)
         },
       }
     };
@@ -85,7 +88,7 @@ class Metrics {
     }
   }
   
-  static generateAverage(steps: StepsDataForAverageMetrics, frequency: number) {
+  static generateAverage(steps: StepsDataForAverageMetrics, frequency: number, sd: StepDurationsPerFoot) {
     const averageMetrics = {
       left: {
         fx: {
@@ -99,7 +102,8 @@ class Metrics {
         },
         fz: {
           ...this.calculateAverageMetricsPerFoot(steps.fz.left, frequency),
-          ...this.calculateAverageStepDurations(steps.fz.left, frequency)
+          ...this.calculateAverageStepDurations(steps.fz.left, frequency),
+          ...this.calculateAverageStrideDuration(sd.left)
         }
       },
       right: {
@@ -114,7 +118,8 @@ class Metrics {
         },
         fz: {
           ...this.calculateAverageMetricsPerFoot(steps.fz.right, frequency),
-          ...this.calculateAverageStepDurations(steps.fz.right, frequency)
+          ...this.calculateAverageStepDurations(steps.fz.right, frequency),
+          ...this.calculateAverageStrideDuration(sd.right)
         }
       }
     };
@@ -235,6 +240,7 @@ class Metrics {
       stepDuration: 0,
       doubleSupportDuration: 0,
       singleSupportDuration: 0,
+      strideDuration: 0,
     }
   }
 
@@ -653,6 +659,32 @@ class Metrics {
       stepDuration: (stepDurations.reduce((a, c) => a + c) / stepDurations.map(i => i != 0).length),
       doubleSupportDuration: (doubleSupportDurations.reduce((a, c) => a + c) / doubleSupportDurations.map(i => i != 0).length),
       singleSupportDuration: (singleSupportDurations.reduce((a, c) => a + c) / singleSupportDurations.map(i => i != 0).length),
+    }
+  }
+
+  static calculateStrideDuration(sd: Array<StepDuration>) { 
+    var strideDurations: Array<number> = [];
+
+    for (var i = 1; i < sd.length - 1; i++) {
+      const diff = moment(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000),'seconds')
+      strideDurations.push(diff);
+    }
+
+    return {
+      strideDuration: (strideDurations.reduce((a, c) => a + c) / strideDurations.map(i => i != 0).length),
+    }
+  }
+
+  static calculateAverageStrideDuration(sd: Array<StepDuration>) {
+    var strideDurations: Array<number> = [];
+
+    for (var i = 1; i < sd.length - 1; i++) {
+      const diff = moment(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000),'seconds')
+      strideDurations.push(diff);
+    }
+
+    return {
+      strideDurations,
     }
   }
 }

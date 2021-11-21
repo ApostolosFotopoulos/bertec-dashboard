@@ -1586,8 +1586,8 @@ class Events {
 
           // Prepare the data to calculate the metrics from the steps
           const steps = DataProcessor.formStepsForAverageMetrics(records, user.weight, FREQUENCY);
-          const averageMetrics = Metrics.generateAverage(steps, FREQUENCY);
-          console.log(averageMetrics)
+          const sd = DataProcessor.formStepsForAsymmetry(records, user.weight,FREQUENCY, steps);
+          const averageMetrics = Metrics.generateAverage(steps, FREQUENCY, sd);
 
           // Create the headers of the csv
           const csvHeaders =
