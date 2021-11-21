@@ -124,7 +124,7 @@ namespace BertecSDK{
 
           // Write the raw data
           if(this.isWriting){
-            File.AppendAllLines(this.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
+            File.AppendAllLines(this.filePath, new []{ DateTime.Now.ToFileTime() + ";" + d });
           }
 
           // Write to TCP buffer
@@ -191,7 +191,7 @@ namespace BertecSDK{
 
         // Write the raw data
         if(this.isWriting){
-          File.AppendAllLines(this.filePath, new []{ DateTime.Now.ToString("HH:mm:ss") + ";" + d });
+          File.AppendAllLines(this.filePath, new []{ DateTime.Now.ToFileTime() + ";" + d });
         }
 
         if(dataCollected == this.underSamplingFrequency){
