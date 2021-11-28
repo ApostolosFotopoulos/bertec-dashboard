@@ -1,11 +1,14 @@
 <template>
-  <div>
+  <div v-if="Date.now() < new Date('2021-12-15')">
     <Setup
       v-if="!isDatabaseReady"
       :skipDatabase="skipDatabase"
       :continueToMain="continueToMain"
     />
     <Session v-else :backToDatabase="backToDatabase" />
+  </div>
+  <div v-else class="session-expired">
+    <h1>Your trial has expired</h1>
   </div>
 </template>
 
@@ -57,3 +60,16 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.session-expired{
+ position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border: 1px solid #fff;
+  padding: 3%;
+  border-radius:5px;
+}
+</style>

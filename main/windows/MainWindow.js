@@ -46,18 +46,6 @@ module.exports = class {
     this.createtagsw = null;
     this.window = null;
 
-    // TCP / Event Listeners
-    // this.port = 12345;
-    // this.ip = "0.0.0.0";
-    // this.server = new net.Server();
-    // this.server.listen(this.port, () => {
-    //   // console.log("[STATUS] TCP server is active");
-    //   // Start the forceplate process only at windows
-    //   // if (process.platform === "win64" || process.platform == "win32") {
-    //   //   new ForcePlatesProcess().createForcePlateProcess(()=>{});
-    //   // }
-    // });
-
     if (process.platform === 'win32' || process.platform === 'win64') {
       createForcePlateProcess(() => {
           this.client = new net.Socket();
