@@ -143,12 +143,8 @@ class Events {
         if (database) {
           let isDone = await new Promise((resolve, reject) => {
             fs.rename(
-              process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-              : app.getPath("downloads") + `/.meta/databases/${database}`,
-              process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/databases/${database}.deleted`)
-              : app.getPath("downloads") + `/.meta/databases/${database}.deleted`
+             path.resolve(__dirname, `../../../.meta/databases/${database}`),
+              path.resolve(__dirname, `../../../.meta/databases/${database}.deleted`)
               , function (error) {
               if (error) {
                 reject(false);
@@ -941,9 +937,7 @@ class Events {
         let { database, sessionId } = d;
         if (database, sessionId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           // Get all the trials from the session
@@ -980,9 +974,7 @@ class Events {
               });
             })
             fs.unlink(
-              process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trials[i].filename}`)
-              : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trials[i].filename}`
+              path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trials[i].filename}`)
             , () => { })
           }
 
@@ -1001,9 +993,7 @@ class Events {
         let { database, userId, session } = d;
         if (database && userId && session) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let filename = `session_${session}_trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}.csv`
           let trial = `trial_${moment(new Date()).format("DD_MM_YYYY_HH_mm_ss")}`
@@ -1022,9 +1012,7 @@ class Events {
           if (win && !win.isDestroyed()) {
             e.reply(CREATE_TRIAL_RESPONSE, {
               trial:
-              process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${filename}`)
-              : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${filename}`
+              path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${filename}`)
             , trialId
             })
           }
@@ -1044,9 +1032,7 @@ class Events {
 
           // Find the trial and the details
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let [trial] = await new Promise((resolve, reject) => {
             db.all(`select * from trials where id=${trialId}`, function (error, rows) {
@@ -1073,9 +1059,7 @@ class Events {
 
           // Delete the file
           fs.unlink(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${filename}`)
-            : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${filename}`
+            path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${filename}`)
           , () => { })
           
           if (win && win.window && !win.window.isDestroyed()) {
@@ -1096,9 +1080,7 @@ class Events {
         console.log(d)
         if (database && trialId && trialName) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           await new Promise((resolve, reject) => {
             db.run(
@@ -1130,9 +1112,7 @@ class Events {
         let { database, trialId } = d;
         if (database && trialId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let keys = Object.keys(d).filter(k => k != "database" && k != "trialId")
@@ -1179,9 +1159,7 @@ class Events {
         
           // Connect to the database 
           const db = new sqlite3.Database(
-            process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-              : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           // Retrieve the trial from the database
@@ -1221,9 +1199,7 @@ class Events {
           // Get all the raw data from the csv file of the trial
           const records = await new Promise((resolve, reject) => {
             fs.createReadStream(
-              process.env.NODE_ENV
-                ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
-                : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
+              path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
             ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
               if (error) {
                 reject(error)
@@ -1238,9 +1214,7 @@ class Events {
           // included at the report 
           let averageMetrics = await new Promise((resolve, reject) => {
             fs.createReadStream(
-              process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
-              : app.getPath("downloads") + `/.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`
+              path.resolve(__dirname, `../../../.meta/metrics/${database.replace(".db", "")}/average_metrics_${trial.name}.csv`)
               ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
               if (error) {
                 reject(error)
@@ -1422,9 +1396,7 @@ class Events {
         let { database, trialId } = d;
         if (database && trialId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           // Find the trial and the details
@@ -1459,9 +1431,7 @@ class Events {
             });
             await new Promise((resolve, reject) => {
               fs.copyFile(
-                process.env.NODE_ENV
-                ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
-                : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
+                path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
                 , file.filePath, (error) => {
                 if (error) {
                   reject(false);
@@ -1495,9 +1465,7 @@ class Events {
 
           // Connect to the database 
           const db = new sqlite3.Database(
-            process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-              : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           // Retrieve the trial from the database
@@ -1526,9 +1494,7 @@ class Events {
           // Get all the raw data from the csv file of the trial
           const records = await new Promise((resolve, reject) => {
             fs.createReadStream(
-              process.env.NODE_ENV
-                ? path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
-                : app.getPath("downloads") + `/.meta/trials/${database.replace(".db", "")}/${trial.filename}`
+              path.resolve(__dirname, `../../../.meta/trials/${database.replace(".db", "")}/${trial.filename}`)
             ).pipe(parse({ columns: true, bom: true, delimiter: [";"] }, function (error, records) {
               if (error) {
                 reject(error)
@@ -1785,9 +1751,7 @@ class Events {
         let { database, trialId } = d;
         if (database && trialId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-              : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           /**
@@ -1831,9 +1795,7 @@ class Events {
         let { database, trialId } = d;
         if (database && trialId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-              ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-              : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
            // Retrieve the trial from the database
