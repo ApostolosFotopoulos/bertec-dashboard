@@ -7,19 +7,19 @@ const chalk = require('chalk');
  * Start the force plate setup to connect to the force plate 
  * before the application boot
  */
-(async () => {
+const createForcePlateProcess = async (cb: Function) => {
   try {
     
     await spawn(
-      process.env.NODE_ENV == "development"
-        ? path.resolve(__dirname, '../../connection/ForcePlatesConnector.exe')
-        : app.getPath("downloads") + "/.meta/connection/ForcePlatesConnector.exe"
+      path.resolve(__dirname, '../../connection/ForcePlatesConnector.exe')
       , ["10"]
     );
+    cb();
     console.log(chalk.bold.white('[LOG] Force Plate Connector ') + chalk.bold.green('✓'));
 
   } catch (e) {
     console.log(chalk.bold.red('[ERROR] Force Plate Connector ') + chalk.bold.red('❌'));
   }
-})();
-export {};
+};
+
+export = createForcePlateProcess;

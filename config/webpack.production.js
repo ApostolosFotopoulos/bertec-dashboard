@@ -12,7 +12,7 @@ module.exports = merge(common,{
 
   output: {
     path: path.resolve(__dirname, '../dist'),
-    publicPath: '/',
+    publicPath: './',
     filename: 'js/[name].[contenthash].bundle.js'
   },
 

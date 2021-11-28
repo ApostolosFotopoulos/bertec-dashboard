@@ -13,7 +13,8 @@
     "build:renderer": "webpack build --config config/webpack.production.js --mode production",
     "build:mac": "NODE_ENV=production electron-builder build --mac",
     "build:linux": "NODE_ENV=production electron-builder build --linux",
-    "build:windows": "NODE_ENV=production electron-builder build --windows"
+    "build:windows": "NODE_ENV=production electron-builder build --windows",
+    "postinstall": "electron-builder install-app-deps"
   },
   "main": "./main/index.js",
   "dependencies": {
@@ -21,7 +22,6 @@
     "chalk": "^4.1.2",
     "core-js": "^3.8.3",
     "csv-parse": "^4.15.4",
-    "electron": "^13.1.1",
     "glob": "^7.1.7",
     "html-pdf-node": "^1.0.7",
     "lodash": "^4.17.21",
@@ -80,6 +80,7 @@
       "./node_modules/**/*",
       "./main/index.js"
     ],
+    "asar":"false",
     "directories": {
       "output": "build"
     },

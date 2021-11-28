@@ -1,5 +1,4 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const path = require('path');
 const { spawn } = require('child_process');
 const { app } = require('electron');
@@ -8,7 +7,7 @@ const chalk = require('chalk');
  * Start the force plate setup to connect to the force plate
  * before the application boot
  */
-(async () => {
+const createForcePlateProcess = async () => {
     try {
         await spawn(process.env.NODE_ENV == "development"
             ? path.resolve(__dirname, '../../connection/ForcePlatesConnector.exe')
@@ -18,4 +17,5 @@ const chalk = require('chalk');
     catch (e) {
         console.log(chalk.bold.red('[ERROR] Force Plate Connector ') + chalk.bold.red('❌'));
     }
-})();
+};
+module.exports = createForcePlateProcess;

@@ -1,6 +1,6 @@
 const { BrowserWindow, ipcMain } = require("electron");
 const SecondaryWindow = require("./SecondaryWindow");
-//const ForcePlatesProcess = require("../util/modules/ForcePlatesProcess");
+const createForcePlateProcess = require("../util/modules/ForcePlatesProcess")
 const path = require("path");
 var net = require("net");
 const Events = require('../util/modules/Events');
@@ -59,8 +59,10 @@ module.exports = class {
     // });
 
     if (process.platform === 'win32' || process.platform === 'win64') {
-      this.client = new net.Socket();
-      this.client.connect(54221, "127.0.0.1");
+      createForcePlateProcess(() => {
+          this.client = new net.Socket();
+        this.client.connect(54221, "127.0.0.1");
+      })
     }
   }
 

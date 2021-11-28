@@ -18,18 +18,13 @@ const fs = require('fs')
 const { ipcMain, dialog, app } = require("electron");
 const sqlite3 = require("sqlite3").verbose();
 const moment = require("moment");
-// const Processor = require('./_Processor');
-// const Renderer = require('./Renderer');
 var parse = require('csv-parse');
 const { DataProcessor } = require('./DataProcessor')
 const { Metrics } = require('./Metrics')
 const { FREQUENCY } = require('../constants');
 const { Renderer } = require('./Renderer');
 const { C3DConverter } = require('./C3DConverter');
-// const Metrics = require('./Metrics');
-// const { DataProcessor } = require('./_DataProcessor')
 
-// app.getPath("downloads")+'/.meta/databases/*.db' gia production
 function groupBy(list, keyGetter) {
   const map = new Map();
   list.forEach((item) => {
@@ -44,21 +39,16 @@ function groupBy(list, keyGetter) {
   return map;
 }
 
-function arrayToCSV (data) {
-  csv = data.map(row => Object.values(row));
-  csv.unshift(Object.keys(data[0]));
-  return csv.join('\n');
-}
-
 class Events {
   static createDatabaseListener(win) {
     ipcMain.on(CREATE_DATABASE, async (e, d) => {
+      console.log('PROCESS ENV:'+process.env)
       try {
         let { database } = d;
 
         if (database) {
           let files = await new Promise((resolve, reject) => {
-            glob(process.env.NODE_ENV ? path.resolve(__dirname, "../../../.meta/databases/*.db") : app.getPath("downloads") + "/.meta/databases/*.db", (error, files) => {
+            glob(path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
               if (error) {
                 reject(error);
                 return;
@@ -74,9 +64,7 @@ class Events {
           } else {
             if (win && !win.isDestroyed()) {
               const db = new sqlite3.Database(
-                process.env.NODE_ENV
-                ? path.resolve(__dirname, `../../../.meta/databases/${database}.db`)
-                : app.getPath("downloads") + `/.meta/databases/${database}.db`
+                path.resolve(__dirname, `../../../.meta/databases/${database}.db`)
               );
               db.serialize(function () {
                 db.run(
@@ -97,9 +85,8 @@ class Events {
               });
 
               // Create the metrics folder
-              await new Promise((resolve, reject) => {
+              await new Promise((resolve) => {
                 if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/metrics`))) {
-                  console.log('metrics here')
                   fs.mkdirSync(path.resolve(__dirname, `../../../.meta/metrics`));
                   resolve(true);
                 } else {
@@ -107,7 +94,8 @@ class Events {
                 }
               });
 
-              await new Promise((resolve, reject) => {
+              // Create the database folder inside the metrics
+              await new Promise((resolve) => {
                 if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`))) {
                   fs.mkdirSync(path.resolve(__dirname, `../../../.meta/metrics/${database}`));
                   resolve(true);
@@ -115,8 +103,9 @@ class Events {
                   resolve(true);
                 }
               });
-
-              await new Promise((resolve, reject) => {
+              
+              // Create the trials folder
+              await new Promise((resolve) => {
                 if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials`))) {
                   fs.mkdirSync(path.resolve(__dirname, `../../../.meta/trials`));
                   resolve(true);
@@ -125,9 +114,9 @@ class Events {
                 }
               });
 
-              // Create the trials folder
+              // Create the database folder inside the trials
               await new Promise((resolve, reject) => {
-                if (!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials/${database}`))) {
+                if ((!fs.existsSync(path.resolve(__dirname, `../../../.meta/trials/${database}`)))) {
                   fs.mkdirSync(path.resolve(__dirname, `../../../.meta/trials/${database}`));
                   resolve(true);
                 } else {
@@ -135,7 +124,6 @@ class Events {
                 }
               });
 
-              
               db.close();
               console.log("[SUCCESS]: Database successfully created")
               e.reply(CREATE_DATABASE_RESPONSE, { error: false })
@@ -188,9 +176,7 @@ class Events {
       try {
         let files = await new Promise((resolve, reject) => {
           glob(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, "../../../.meta/databases/*.db")
-            : app.getPath("downloads") + "/.meta/databases/*.db" , (error, files) => {
+            path.resolve(__dirname, "../../../.meta/databases/*.db") , (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -212,9 +198,7 @@ class Events {
       try {
         let files = await new Promise((resolve, reject) => {
           glob(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, "../../../.meta/databases/*.db")
-            : app.getPath("downloads") + "/.meta/databases/*.db", (error, files) => {
+            path.resolve(__dirname, "../../../.meta/databases/*.db"), (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -236,9 +220,9 @@ class Events {
       try {
         let files = await new Promise((resolve, reject) => {
           glob(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, "../../../.meta/databases/*.db")
-            : app.getPath("downloads") + "/.meta/databases/*.db", (error, files) => {
+            
+            path.resolve(__dirname, "../../../.meta/databases/*.db")
+           , (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -260,9 +244,8 @@ class Events {
       try {
         let files = await new Promise((resolve, reject) => {
           glob(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, "../../../.meta/databases/*.db")
-            : app.getPath("downloads") + "/.meta/databases/*.db", (error, files) => {
+            path.resolve(__dirname, "../../../.meta/databases/*.db")
+            , (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -284,9 +267,8 @@ class Events {
       try {
         let files = await new Promise((resolve, reject) => {
           glob(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, "../../../.meta/databases/*.db")
-            : app.getPath("downloads") + "/.meta/databases/*.db", (error, files) => {
+            path.resolve(__dirname, "../../../.meta/databases/*.db")
+            , (error, files) => {
             if (error) {
               reject(error);
               return;
@@ -309,9 +291,7 @@ class Events {
         let { database } = d;
         if (database && win && !win.isDestroyed()) {
           const db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let users = await new Promise((resolve, reject) => {
             db.all("select * from users", (error, rows) => {
@@ -337,9 +317,7 @@ class Events {
         let { database } = d;
         if (database && win && win.window && !win.window.isDestroyed()) {
           const db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let users = await new Promise((resolve, reject) => {
             db.all("select * from users", (error, rows) => {
@@ -365,9 +343,7 @@ class Events {
         let { database } = d;
         if (database && win && win.window && !win.window.isDestroyed()) {
           const db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let users = await new Promise((resolve, reject) => {
             db.all("select * from users", (error, rows) => {
@@ -409,9 +385,7 @@ class Events {
 
         if (database) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let isDone = await new Promise((resolve, reject) => {
             db.serialize(function () {
@@ -476,9 +450,7 @@ class Events {
 
         if (database) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let isUpdatedUser = await new Promise((resolve, reject) => {
             db.run(
@@ -527,9 +499,7 @@ class Events {
         let { database, userId } = d
         if (database && userId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let isUserDeleted = await new Promise((resolve, reject) => {
@@ -569,9 +539,7 @@ class Events {
         let { database, filters } = d
         if (database && filters) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           if (Object.keys(filters).length > 0) {
             let sqlQuery = "select * from users";
@@ -767,9 +735,7 @@ class Events {
         let { database, tag } = d;
         if (database && tag) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
     
           let isDone = await new Promise((resolve, reject) => {
@@ -800,9 +766,7 @@ class Events {
         let { database, tagId } = d;
         if (database && tagId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let isDone = await new Promise((resolve, reject) => {
@@ -833,9 +797,7 @@ class Events {
         let { database } = d;
         if (database) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let tags = await new Promise((resolve, reject) => {
@@ -864,9 +826,7 @@ class Events {
         let { database } = d;
         if (database) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let tags = await new Promise((resolve, reject) => {
@@ -895,9 +855,7 @@ class Events {
         let { database } = d;
         if (database) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
 
           let tags = await new Promise((resolve, reject) => {
@@ -926,9 +884,7 @@ class Events {
         let { database, userId } = d;
         if (database && userId) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let tags = await new Promise((resolve, reject) => {
             db.all(`select * from tags where user_id=${userId}`, function (error, rows) {
@@ -956,9 +912,7 @@ class Events {
         let { database, userId, session } = d;
         if (database, userId && session) {
           var db = new sqlite3.Database(
-            process.env.NODE_ENV
-            ? path.resolve(__dirname, `../../../.meta/databases/${database}`)
-            : app.getPath("downloads") + `/.meta/databases/${database}`
+            path.resolve(__dirname, `../../../.meta/databases/${database}`)
           );
           let sessionId = await new Promise((resolve, reject) => {
             db.run(`insert into sessions(name, user_id, created_at) values('${session}',${userId},'${new Date()}')`, function (error, rows) {
