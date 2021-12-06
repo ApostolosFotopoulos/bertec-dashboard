@@ -1,6 +1,5 @@
 const path = require('path');
 const { spawn } = require('child_process');
-const { app } = require('electron');
 const chalk = require('chalk');
 
 /** 
