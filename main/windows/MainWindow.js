@@ -4,7 +4,6 @@ const createForcePlateProcess = require("../util/modules/ForcePlatesProcess")
 const path = require("path");
 var net = require("net");
 const Events = require('../util/modules/Events');
-const sqlite3 = require("sqlite3").verbose();
 
 const {
   START_SESSION,
@@ -48,10 +47,12 @@ module.exports = class {
 
     if (process.platform === 'win32' || process.platform === 'win64') {
       createForcePlateProcess(() => {
-          this.client = new net.Socket();
+        this.client = new net.Socket();
         this.client.connect(54221, "127.0.0.1");
       })
     }
+    // this.client = new net.Socket();
+    // this.client.connect(54221, "127.0.0.1");
   }
 
   async createWindow() {
@@ -394,264 +395,9 @@ module.exports = class {
         }
         
       } catch (e) {
-        //console.log(e);
+        //throw new Error(e);
       }
     });
-
-    // Listen for TCP Packets to forward them to the dashboard
-    // this.server?.on("connection", (socket) => {
-    //   this.socket = socket;
-    //   socket.on("data", (packet) => {
-    //     // Retrieve the packet and break to each section
-    //     let packetArray = packet
-    //       .toString()
-    //       .replaceAll(/(\r\n|\n|\r)/gm, "")
-    //       .replaceAll(",", ".")
-    //       .split(";")
-    //       .filter((i, idx) => idx >= 4)
-    //       .map((i) => Number(i));
-    //     //packetArray = packet.slice(0,18);
-    //     packetArray = packetArray.slice(0, 18);
-    //     //console.log(packetArray);
-
-    //     // Retrieve the serial numbers of the devices
-    //     let details = packet
-    //       .toString()
-    //       .replaceAll(/(\r\n|\n|\r)/gm, "")
-    //       .replaceAll(",", ".")
-    //       .split(";")
-    //       .filter((i, idx) => idx < 4);
-
-    //     // Send the data to the linechart window
-    //     if (this.linechartw && this.linechartw.window) {
-    //       if (this.isSessionRunning) {
-    //         this.linechartw.window.webContents.send(LINECHART_SESSION, {
-    //           rows: packetArray,
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       } else {
-    //         this.linechartw.window.webContents.send(LINECHART_SESSION, {
-    //           rows: packetArray,
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       }
-    //     }
-
-    //     // Send the data to the COP window
-    //     if (this.cpw && this.cpw.window) {
-    //       if (this.isSessionRunning) {
-    //         this.cpw.window.webContents.send(COP_SESSION, {
-    //           rows: packetArray,
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       } else {
-    //         this.cpw.window.webContents.send(COP_SESSION, {
-    //           rows: [],
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       }
-    //     }
-
-    //     // Send the data to the speedmeter window
-    //     if (this.cw && this.cw.window) {
-    //       if (this.isSessionRunning) {
-    //         this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-    //           rows: packetArray,
-    //           force: Math.random().toFixed(2),
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       } else {
-    //         this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-    //           rows: [],
-    //           force: 0,
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       }
-    //     }
-
-    //     // Send the data to the timeline window
-    //     if (this.timelinew && this.timelinew.window) {
-    //       if (this.isSessionRunning) {
-    //         this.timelinew.window.webContents.send(
-    //           TIMELINE_SESSION,
-    //           {
-    //             rows: packetArray,
-    //             force: Math.random().toFixed(2),
-    //             isSessionRunning: this.isSessionRunning,
-    //             weight: this.weight,
-    //             session: this.session,
-    //             database: this.database,
-    //             user: this.user,
-    //           }
-    //         );
-    //       } else {
-    //         this.timelinew.window.webContents.send(
-    //           TIMELINE_SESSION,
-    //           {
-    //             rows: [],
-    //             force: 0,
-    //             isSessionRunning: this.isSessionRunning,
-    //             weight: this.weight,
-    //             session: this.session,
-    //             database: this.database,
-    //             user: this.user,
-    //           }
-    //         );
-    //       }
-    //     }
-
-    //     // Send the details the main window with the options
-    //     if (this.window) {
-    //       this.window.webContents.send(SESSION_OPTIONS, {
-    //         rows: packetArray,
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         filePath: this.filePath,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-
-    //       // Send the device serial to the dashboard
-    //       this.window.webContents.send(DEVICE_DETAILS, {
-    //         deviceLeft: Number(details[1]),
-    //         deviceRight: Number(details[3]),
-    //       });
-    //     }
-
-    //     if (this.createuserw && this.createuserw.window) {
-    //       this.createuserw.window.webContents.send(SESSION_OPTIONS, {
-    //         rows: packetArray,
-    //       });
-    //     }
-    //   });
-    // });
-
-    //// TESTING PURPOSE PLEASE REMOVE //////
-    // setInterval(() => {
-    //   if (this.linechartw && this.linechartw.window) {
-    //     if (this.isSessionRunning) {
-    //       this.linechartw.window.webContents.send(LINECHART_SESSION, {
-    //         rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     } else {
-    //       this.linechartw.window.webContents.send(LINECHART_SESSION, {
-    //         rows: [],
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     }
-    //   }
-      
-    //   if (this.cw && this.cw.window) {
-    //     if (this.isSessionRunning) {
-    //       this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-    //         rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //         force: Math.random().toFixed(2),
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     } else {
-    //       this.cw.window.webContents.send(SPEEDMETER_SESSION, {
-    //         rows: [],
-    //         force: 0,
-    //         isSessionRunning: this.isSessionRunning,
-    //         weight: this.weight,
-    //         session: this.session,
-    //         database: this.database,
-    //         user: this.user,
-    //       });
-    //     }
-    //   }
-
-    //   // Send the data to the timeline window
-    //     if (this.timelinew && this.timelinew.window) {
-    //       if (this.isSessionRunning) {
-    //         this.timelinew.window.webContents.send(
-    //           TIMELINE_SESSION,
-    //           {
-    //             rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //             force: Math.random().toFixed(2),
-    //             isSessionRunning: this.isSessionRunning,
-    //             weight: this.weight,
-    //             session: this.session,
-    //             database: this.database,
-    //             user: this.user,
-    //           }
-    //         );
-    //       } else {
-    //         this.timelinew.window.webContents.send(
-    //           TIMELINE_SESSION,
-    //           {
-    //             rows: [],
-    //             force: 0,
-    //             isSessionRunning: this.isSessionRunning,
-    //             weight: this.weight,
-    //             session: this.session,
-    //             database: this.database,
-    //             user: this.user,
-    //           }
-    //         );
-    //       }
-    //     }
-    //     if (this.cpw && this.cpw.window) {
-    //       if (this.isSessionRunning) {
-    //         this.cpw.window.webContents.send(COP_SESSION, {
-    //           rows: [19.505222,96.193161,(Math.floor(Math.random() * (100 - 0 + 1)) + 0),417717.6563,295928.6563,38152.90234,16.356413,26.872471,0.5564720000000001,8926.452148,2860.318359,679.038086,464.08469047566115,655.0780571709173,802.8087324641617,5140.093947224657,16041.152381431586,16844.558038446834],
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       } else {
-    //         this.cpw.window.webContents.send(COP_SESSION, {
-    //           rows: [],
-    //           isSessionRunning: this.isSessionRunning,
-    //           weight: this.weight,
-    //           session: this.session,
-    //           database: this.database,
-    //           user: this.user,
-    //         });
-    //       }
-    //     }
-    // })
-
 
     ipcMain.on(START_TRIAL_WRITING, (e, d) => {
       const { trial } = d
