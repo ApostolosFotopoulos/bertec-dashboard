@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Metrics = void 0;
 const tslib_1 = require("tslib");
 const Calculus_1 = require("./Calculus");
-const moment_1 = (0, tslib_1.__importDefault)(require("moment"));
+const moment_1 = tslib_1.__importDefault(require("moment"));
 class Metrics {
     static removeNoizyData(arr, rate) {
         const average = arr.reduce((a, b) => a + b, 0) / arr.length || 0;
@@ -563,7 +563,7 @@ class Metrics {
     static calculateStrideDuration(sd) {
         var strideDurations = [];
         for (var i = 1; i < sd.length - 1; i++) {
-            const diff = (0, moment_1.default)(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000), 'seconds');
+            const diff = moment_1.default(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000), 'seconds');
             strideDurations.push(diff);
         }
         return {
@@ -573,7 +573,7 @@ class Metrics {
     static calculateAverageStrideDuration(sd) {
         var strideDurations = [];
         for (var i = 1; i < sd.length - 1; i++) {
-            const diff = (0, moment_1.default)(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000), 'seconds');
+            const diff = moment_1.default(new Date(parseInt(sd[i + 1].startTimestamp, 10) / 1000)).diff(new Date(parseInt(sd[i].startTimestamp, 10) / 1000), 'seconds');
             strideDurations.push(diff);
         }
         return {

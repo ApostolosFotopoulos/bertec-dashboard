@@ -51,8 +51,8 @@ module.exports = class {
         this.client.connect(54221, "127.0.0.1");
       })
     }
-    // this.client = new net.Socket();
-    // this.client.connect(54221, "127.0.0.1");
+    this.client = new net.Socket();
+    this.client.connect(54221, "127.0.0.1");
   }
 
   async createWindow() {
