@@ -75,6 +75,6 @@ func main() {
 
 		currentIndex += 1
 		collectedRows += 1
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(100 * time.Nanosecond)
 	}
 }
