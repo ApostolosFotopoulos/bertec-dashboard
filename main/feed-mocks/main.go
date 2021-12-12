@@ -50,11 +50,9 @@ func main() {
 	collectedRows := 0
 	samplingFrequency := 10
 
-	//fmt.Println(records)
 	for {
 
 		if collectedRows == samplingFrequency {
-			// Send the record to the client
 			currentMetrics := records[currentIndex%len(records)]
 			fmt.Println(currentMetrics)
 			event := Event{"FORCE_PLATES_EVENT", "62307970739173", "82581949806217", strings.Join(currentMetrics, "")}
@@ -63,8 +61,6 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-
-			fmt.Println(string(d))
 			c.Write(d)
 			collectedRows = 0
 		}
@@ -75,6 +71,6 @@ func main() {
 
 		currentIndex += 1
 		collectedRows += 1
-		time.Sleep(100 * time.Nanosecond)
+		time.Sleep(800 * time.Nanosecond)
 	}
 }
