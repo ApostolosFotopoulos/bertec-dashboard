@@ -3,20 +3,19 @@ const { VueLoaderPlugin } = require('vue-loader');
 const path = require('path');
 
 module.exports = {
+  entry: path.resolve(__dirname, "../renderer/src/main.js"),
 
-  entry: path.resolve(__dirname, '../renderer/src/main.js'),
-  
   output: {
-    path: path.resolve(__dirname, '../dist'),
-    filename: 'js/bundle-[hash].js',
+    path: path.resolve(__dirname, "../dist"),
+    filename: "js/bundle-[fullhash].js",
   },
 
   resolve: {
-    extensions: ['.vue','.js','.ts','.tsx','.json', '.css', '.html'],
+    extensions: [".vue", ".js", ".ts", ".tsx", ".json", ".css", ".html"],
     symlinks: true,
-		alias: {
-			vue$: 'vue/dist/vue.esm.js'
-		}
+    alias: {
+      vue$: "vue/dist/vue.esm.js",
+    },
   },
 
   module: {
@@ -24,7 +23,7 @@ module.exports = {
       {
         test: /\.vue$/,
         exclude: /node_modules/,
-        loader: 'vue-loader',
+        loader: "vue-loader",
       },
       {
         test: /\.(js)$/,
@@ -34,24 +33,26 @@ module.exports = {
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
-        use: [{
-          loader: "ts-loader",
-          options: {
-            compilerOptions: {
-              noEmit: false,
+        use: [
+          {
+            loader: "ts-loader",
+            options: {
+              compilerOptions: {
+                noEmit: false,
+              },
             },
           },
-        }],
+        ],
       },
-    ]
+    ],
   },
 
   plugins: [
     new VueLoaderPlugin(),
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname,'../renderer/public/index.html'),
-      filename: 'index.html',
+      template: path.resolve(__dirname, "../renderer/public/index.html"),
+      filename: "index.html",
       inject: true,
-    })
+    }),
   ],
-}
+};
