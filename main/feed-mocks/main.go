@@ -48,14 +48,16 @@ func main() {
 	records, _ := reader.ReadAll()
 	currentIndex := 0
 	collectedRows := 0
-	samplingFrequency := 10
+	samplingFrequency := 5
 
 	for {
 
 		if collectedRows == samplingFrequency {
 			currentMetrics := records[currentIndex%len(records)]
-			fmt.Println(currentMetrics)
-			event := Event{"FORCE_PLATES_EVENT", "62307970739173", "82581949806217", strings.Join(currentMetrics, "")}
+			currentMetricsString := strings.Join(currentMetrics, "")
+			currentMetricsString = currentMetricsString[strings.Index(currentMetricsString, ";") + 1:]
+
+			event := Event{"FORCE_PLATES_EVENT", "62307970739173", "82581949806217", currentMetricsString}
 			d, err := json.Marshal(event)
 
 			if err != nil {
@@ -71,6 +73,6 @@ func main() {
 
 		currentIndex += 1
 		collectedRows += 1
-		time.Sleep(800 * time.Nanosecond)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
