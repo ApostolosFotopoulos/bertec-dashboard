@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import _ from 'lodash';
 import moment from 'moment';
 import rowsNames from '../../../assets/store/rowsNames.json';
 Vue.use(Vuex);
@@ -60,7 +59,7 @@ export default new Vuex.Store({
 			shouldUpdateRight: false,
 			yAxisMaxValue: -1,
 			threshold: 5,
-			nOfLines: 10,
+			nOfLines: 30,
 			dataType: 'Normalized'
 		},
 		speedmeter: {
@@ -113,7 +112,7 @@ export default new Vuex.Store({
 			rightPlateRows: 0,
 			leftSteps: 0,
 			rightSteps: 0,
-			nOfGroupPoints: 10
+			nOfGroupPoints: 30
 		},
 		timeline: {
 			leftPlateSeries: [
@@ -132,14 +131,12 @@ export default new Vuex.Store({
 			isLeftPlateReset: false,
 			isRightPlateReset: false,
 			isRightPlateLocked: false,
-			leftPlateChannel: 'FZ1',
-			rightPlateChannel: 'FZ2',
 			leftPlateMax: -1,
 			rightPlateMax: -1,
 			shouldUpdateLeft: false,
 			shouldUpdateRight: false,
 			threshold: 5,
-			nOfPoints: 5,
+			nOfPoints: 30,
 			dataType: 'Normalized',
 			leftPlateChannel: 'FZ1',
 			rightPlateChannel: 'FZ2',
@@ -522,7 +519,7 @@ export default new Vuex.Store({
 					// threshold and activate the step process
 					state.lineChart.isLeftPlateLocked = true;
 					let d = state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data;
-					if (state.lineChart.dataType == 'Normalized') {
+					if (state.lineChart.dataType === 'Normalized') {
 						if (state.lineChart.leftPlateChannel.includes('COP')) {
 							d.push(entry);
 						} else {
