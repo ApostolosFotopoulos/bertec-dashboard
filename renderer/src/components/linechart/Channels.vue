@@ -4,6 +4,7 @@
       <v-col>
         <v-select
           class="mt-3"
+          dense
           @change="(v) => $store.commit('setLeftPlateChannel', v)"
           :value="$store.state.lineChart.leftPlateChannel"
           :items="leftForcePlateChannels"
@@ -14,6 +15,7 @@
       <v-col>
         <v-select
           class="mt-3"
+          dense
           @change="(v) => $store.commit('setRightPlateChannel', v)"
           :value="$store.state.lineChart.rightPlateChannel"
           :items="rightForcePlateChannels"
@@ -23,12 +25,14 @@
       </v-col>
       <v-col>
         <v-select
+            dense
           @change="
             (v) => {
               $store.commit('setDataTypeAtLineChart', v);
               $store.commit('resetLineChartState');
             }
           "
+          dense
           class="mt-3"
           :disabled="$store.state.options.isSessionRunning"
           :value="$store.state.lineChart.dataType"
@@ -39,6 +43,7 @@
       </v-col>
       <v-col>
         <v-text-field
+          dense
           class="mt-3"
           @change="(v) => $store.commit('setThresholdAtLineChart', Number(v))"
           :value="$store.state.lineChart.threshold"
@@ -52,6 +57,7 @@
         <v-tooltip top>
           <template v-slot:activator="{ on, attrs }">
             <v-text-field
+              dense
               v-bind="attrs"
               v-on="on"
               class="mt-3"
@@ -70,19 +76,37 @@
       </v-col>
       <v-col>
         <v-btn
+          dense
           @click="$store.commit('resetLineChartState')"
-          class="resetButton v-input__control mt-4"
+          class="resetButton mt-4"
           >Reset</v-btn
         >
       </v-col>
     </v-row>
-    <v-row class="mt-0 pt-0">
+    <v-row class="mt-3 pt-0">
+      <v-col cols="2" class="mt-0 pt-0">
+        <v-alert
+            dense
+            icon="mdi-chart-bell-curve"
+            text
+            type="success"
+        >{{$store.state.lineChart.leftPlateFinalSeries.length - 1}} of {{$store.state.lineChart.nOfLines}}</v-alert>
+      </v-col>
+      <v-col cols="2" class="mt-0 pt-0">
+        <v-alert
+            dense
+            icon="mdi-chart-bell-curve"
+            text
+            type="error"
+        >{{$store.state.lineChart.rightPlateFinalSeries.length - 1}} of {{$store.state.lineChart.nOfLines}}</v-alert>
+      </v-col>
       <v-col cols="2" class="mt-0 pt-0">
         <v-text-field
           @change="(v) => $store.commit('setTime', Number(v))"
           :value="$store.state.options.timeout"
           label="Time (in seconds)"
           outlined
+          dense
           :disabled="$store.state.options.isSessionRunning"
           min="0"
         />
@@ -90,11 +114,12 @@
       <v-col cols="2" class="mt-0 pt-0">
         <v-btn
           elevation="25"
+          dense
           :disabled="this.$store.state.options.session == -1"
           :class="
             isTrialRunning
-              ? 'stopButton v-input__control mt-1'
-              : 'startButton v-input__control mt-1'
+              ? 'stopButton mt-1'
+              : 'startButton mt-1'
           "
           @click="() => startStopTrial()"
         >
@@ -213,18 +238,12 @@ export default {
 
 <style scoped>
 .resetButton {
-  height: 48px !important;
-  min-height: 48px !important;
   background: #6ab187 !important;
 }
 .startButton {
-  height: 48px !important;
-  min-height: 48px !important;
   background: #6ab187 !important;
 }
 .stopButton {
-  height: 48px !important;
-  min-height: 48px !important;
   background: #d32d41 !important;
 }
 </style>

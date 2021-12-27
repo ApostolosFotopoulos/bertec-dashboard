@@ -17,6 +17,13 @@
           class="resetButton v-input__control mt-3"
           >Reset</v-btn
         >
+        <v-alert
+            class="mt-3"
+            dense
+            icon="mdi-chart-bell-curve"
+            text
+            type="info"
+        >{{$store.state.copChart.rightPlateFinalSeries.length - 1}} of {{$store.state.copChart.nOfGroupPoints}}</v-alert>
         <v-text-field
           class="mt-4"
           @change="(v) => $store.commit('setNofGroupPoints', Number(v))"

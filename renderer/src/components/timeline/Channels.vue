@@ -3,6 +3,7 @@
     <v-row class="pb-0 mb-0">
       <v-col class="pb-0 mb-0">
         <v-select
+          dense
           class="mt-3"
           @change="(v) => $store.commit('setLeftPlateChannelAtTimeline', v)"
           :value="$store.state.timeline.leftPlateChannel"
@@ -13,6 +14,7 @@
       </v-col>
       <v-col>
         <v-select
+          dense
           class="mt-3"
           @change="(v) => $store.commit('setRightPlateChannelAtTimeline', v)"
           :value="$store.state.timeline.rightPlateChannel"
@@ -23,6 +25,7 @@
       </v-col>
       <v-col>
         <v-select
+          dense
           @change="
             (v) => {
               $store.commit('setDataTypeAtTimeline', v);
@@ -37,18 +40,9 @@
           outlined
         ></v-select>
       </v-col>
-      <!-- <v-col>
-        <v-text-field
-          class="mt-3"
-          @input="(v) => $store.commit('setTrialThreshold', Number(v))"
-          :value="$store.state.timeline.trialThreshold"
-          label="Trial Threshold"
-          outlined
-          :disabled="$store.state.options.isSessionRunning"
-        />
-      </v-col> -->
       <v-col>
         <v-text-field
+          dense
           class="mt-3"
           @change="(v) => $store.commit('setNofPointsAtTimeline', Number(v))"
           :value="$store.state.timeline.nOfPoints"
@@ -59,9 +53,23 @@
         />
       </v-col>
       <v-col>
+        <v-text-field
+            class="mt-4"
+            dense
+            @change="(v) => $store.commit('setThresholdAtLineChart', Number(v))"
+            :value="$store.state.timeline.threshold"
+            label="Minimum Threshold - Standard value = 5"
+            outlined
+            :disabled="$store.state.options.isSessionRunning"
+            min="0"
+        />
+      </v-col>
+      <v-col>
         <v-btn
+          dense
+          block
           @click="$store.commit('resetTimelineState')"
-          class="resetButton v-input__control mt-4"
+          class="resetButton  mt-4"
           >Reset</v-btn
         >
       </v-col>
@@ -69,6 +77,7 @@
     <v-row class="pt-0 mt-0">
       <v-col cols="2" class="pt-0 mt-0">
         <v-text-field
+          dense
           @input="(v) => $store.commit('setRangeMin', Number(v))"
           :value="$store.state.timeline.rangeMin"
           label="Min Range"
@@ -78,6 +87,7 @@
       </v-col>
       <v-col cols="2" class="pt-0 mt-0">
         <v-text-field
+          dense
           @input="(v) => $store.commit('setRangeMax', Number(v))"
           :value="$store.state.timeline.rangeMax"
           label="Max Range"
@@ -85,18 +95,9 @@
           :disabled="$store.state.options.isSessionRunning"
         />
       </v-col>
-      <v-col cols="4" class="pt-0 mt-0">
-        <v-text-field
-          @change="(v) => $store.commit('setThresholdAtLineChart', Number(v))"
-          :value="$store.state.timeline.threshold"
-          label="Minimum Threshold - Standard value = 5"
-          outlined
-          :disabled="$store.state.options.isSessionRunning"
-          min="0"
-        />
-      </v-col>
       <v-col cols="2" class="pt-0 mt-0">
         <v-text-field
+          dense
           @change="(v) => $store.commit('setTime', Number(v))"
           :value="$store.state.options.timeout"
           label="Time (in seconds)"
@@ -107,12 +108,14 @@
       </v-col>
       <v-col cols="2" class="pt-0 mt-0">
         <v-btn
+          dense
+          block
           elevation="25"
           :disabled="this.$store.state.options.session == -1"
           :class="
             isTrialRunning
-              ? 'stopButton v-input__control mt-1'
-              : 'startButton v-input__control mt-1'
+              ? 'stopButton mt-1'
+              : 'startButton mt-1'
           "
           @click="() => startStopTrial()"
         >
@@ -163,6 +166,9 @@ export default {
     };
   },
   mounted() {
+    setInterval(()=>{
+      console.log(this.$store.state.timeline.leftPlateSeries.length);
+    },2);
     ipcRenderer.on(CREATE_TRIAL_RESPONSE,(_,responseData)=>{
       this.isTrialRunning = true;
       this.$store.commit("setTrial", responseData.trial);
@@ -227,18 +233,12 @@ export default {
 
 <style>
 .startButton {
-  height: 48px !important;
-  min-height: 48px !important;
   background: #6ab187 !important;
 }
 .stopButton {
-  height: 48px !important;
-  min-height: 48px !important;
   background: #d32d41 !important;
 }
 .resetButton {
-  height: 48px !important;
-  min-height: 48px !important;
   background: #6ab187 !important;
 }
 .v-text-field__details {
