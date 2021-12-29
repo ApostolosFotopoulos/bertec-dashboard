@@ -19,14 +19,14 @@ body,
   color: #fff !important;
 }
 html::-webkit-scrollbar-track {
-  background-color: 25282f !important;
+  background-color: #25282f !important;
 }
 html::-webkit-scrollbar-track {
   background-color: #25282f !important;
 }
 html::-webkit-scrollbar {
   width: 8px;
-  background-color: 25282f !important;
+  background-color: #25282f !important;
   border-radius: 20px;
 }
 html::-webkit-scrollbar-thumb {

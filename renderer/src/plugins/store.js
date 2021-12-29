@@ -469,12 +469,42 @@ export default new Vuex.Store({
 						// Then add the series to the final series and
 						// also prepare the state for the next series
 						let s = state.lineChart.leftPlateSeries;
-						state.lineChart.leftPlateFinalSeries = s;
-						s.push({
-							data: []
-						});
-						state.lineChart.leftPlateSeries = s;
-						state.lineChart.leftPlateRows += 1;
+
+						if (state.lineChart.dataType === 'Normalized') {
+							const currentLen = s[state.lineChart.leftPlateRows].data.length;
+
+							const moreThan5PercentThanWeight = s[state.lineChart.leftPlateRows].data.length
+								? s[state.lineChart.leftPlateRows].data[0] > 0.15 * (Number(state.options.weight)/100) &&  s[state.lineChart.leftPlateRows].data[0] < (Number(state.options.weight)/100)
+								: false
+							const moreThan100PercentThanWeight = s[state.lineChart.leftPlateRows].data.filter((v,idx) => ( v > (Number(state.options.weight))/100 )).length > 0;
+
+							if(moreThan5PercentThanWeight && moreThan100PercentThanWeight){
+								state.lineChart.leftPlateFinalSeries = s;
+								s.push({
+									data: []
+								});
+								state.lineChart.leftPlateSeries = s;
+								state.lineChart.leftPlateRows += 1;
+							} else {
+								state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data = [];
+							}
+						} else {
+							const moreThan5PercentThanWeight = s[state.lineChart.leftPlateRows].data.length
+								? s[state.lineChart.leftPlateRows].data[0] > 0.15 * Number(state.options.weight) &&  s[state.lineChart.leftPlateRows].data[0] < Number(state.options.weight)
+								: false
+							const moreThan100PercentThanWeight = s[state.lineChart.leftPlateRows].data.filter((v,idx) => ( v > (Number(state.options.weight))/100 )).length > 0;
+
+							if(moreThan5PercentThanWeight && moreThan100PercentThanWeight){
+								state.lineChart.leftPlateFinalSeries = s;
+								s.push({
+									data: []
+								});
+								state.lineChart.leftPlateSeries = s;
+								state.lineChart.leftPlateRows += 1;
+							} else {
+								state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data = [];
+							}
+						}
 					} else {
 						// If there is no step then reset the data array for the next data
 						state.lineChart.leftPlateSeries[state.lineChart.leftPlateRows].data = [];
@@ -587,12 +617,41 @@ export default new Vuex.Store({
 						// Then add the series to the final series and
 						// also prepare the state for the next series
 						let s = state.lineChart.righPlateSeries;
-						state.lineChart.rightPlateFinalSeries = s;
-						s.push({
-							data: []
-						});
-						state.lineChart.righPlateSeries = s;
-						state.lineChart.rightPlateRows += 1;
+						if (state.lineChart.dataType === 'Normalized') {
+							const currentLen = s[state.lineChart.rightPlateRows].data.length;
+
+							const moreThan5PercentThanWeight = s[state.lineChart.rightPlateRows].data.length
+								? s[state.lineChart.rightPlateRows].data[0] > 0.15 * (Number(state.options.weight)/100) &&  s[state.lineChart.rightPlateRows].data[0] < (Number(state.options.weight)/100)
+								: false
+							const moreThan100PercentThanWeight = s[state.lineChart.rightPlateRows].data.filter((v,idx) => ( v > (Number(state.options.weight))/100 )).length > 0;
+
+							if(moreThan5PercentThanWeight && moreThan100PercentThanWeight){
+								state.lineChart.rightPlateFinalSeries = s;
+								s.push({
+									data: []
+								});
+								state.lineChart.righPlateSeries = s;
+								state.lineChart.rightPlateRows += 1;
+							} else {
+								state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data = [];
+							}
+						} else {
+							const moreThan5PercentThanWeight = s[state.lineChart.rightPlateRows].data.length
+								? s[state.lineChart.rightPlateRows].data[0] > 0.15 * Number(state.options.weight) &&  s[state.lineChart.rightPlateRows].data[0] < Number(state.options.weight)
+								: false
+							const moreThan100PercentThanWeight = s[state.lineChart.rightPlateRows].data.filter((v,idx) => ( v > (Number(state.options.weight))/100 )).length > 0;
+
+							if(moreThan5PercentThanWeight && moreThan100PercentThanWeight){
+								state.lineChart.rightPlateFinalSeries = s;
+								s.push({
+									data: []
+								});
+								state.lineChart.righPlateSeries = s;
+								state.lineChart.rightPlateRows += 1;
+							} else {
+								state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data = [];
+							}
+						}
 					} else {
 						// If there is no step then reset the data array for the next data
 						state.lineChart.righPlateSeries[state.lineChart.rightPlateRows].data = [];
