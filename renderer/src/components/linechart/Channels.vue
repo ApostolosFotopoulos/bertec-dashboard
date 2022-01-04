@@ -85,22 +85,6 @@
     </v-row>
     <v-row class="mt-3 pt-0">
       <v-col cols="2" class="mt-0 pt-0">
-        <v-alert
-            dense
-            icon="mdi-chart-bell-curve"
-            text
-            type="success"
-        >{{$store.state.lineChart.leftPlateFinalSeries.length - 1}} of {{$store.state.lineChart.nOfLines}}</v-alert>
-      </v-col>
-      <v-col cols="2" class="mt-0 pt-0">
-        <v-alert
-            dense
-            icon="mdi-chart-bell-curve"
-            text
-            type="error"
-        >{{$store.state.lineChart.rightPlateFinalSeries.length - 1}} of {{$store.state.lineChart.nOfLines}}</v-alert>
-      </v-col>
-      <v-col cols="2" class="mt-0 pt-0">
         <v-text-field
           @change="(v) => $store.commit('setTime', Number(v))"
           :value="$store.state.options.timeout"

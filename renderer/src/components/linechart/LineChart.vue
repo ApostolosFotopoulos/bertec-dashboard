@@ -1,6 +1,28 @@
 <template>
   <v-card elevation="10" color="#25282F" class="mt-5">
     <v-row>
+      <v-col cols="2" offset="2">
+        <v-alert
+            dense
+            icon="mdi-chart-bell-curve"
+            text
+            type="success"
+        >
+          {{$store.state.lineChart.leftPlateFinalSeries.length - 1}} of {{$store.state.lineChart.nOfLines}}
+        </v-alert>
+      </v-col>
+      <v-col cols="2" offset="4">
+        <v-alert
+            dense
+            icon="mdi-chart-bell-curve"
+            text
+            type="error"
+        >
+          {{$store.state.lineChart.rightPlateFinalSeries.length - 1}} of {{$store.state.lineChart.nOfLines}}
+        </v-alert>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="6">
         <VueApexCharts
           ref="leftPlateChart"

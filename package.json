@@ -80,7 +80,7 @@
       "./node_modules/**/*",
       "./main/index.js"
     ],
-    "asar":"false",
+    "asar": "false",
     "directories": {
       "output": "build"
     },
