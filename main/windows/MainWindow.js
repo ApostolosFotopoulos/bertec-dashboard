@@ -4,21 +4,24 @@ const createForcePlateProcess = require("../util/modules/ForcePlatesProcess")
 const path = require("path");
 var net = require("net");
 const Events = require('../util/modules/Events');
+const serialNumber = require('serial-number');
 
 const {
   START_SESSION,
   STOP_SESSION,
   LINECHART_SESSION,
   COP_SESSION,
-	SPEEDMETER_SESSION,
-	TIMELINE_SESSION,
-	SESSION_OPTIONS,
-	DEVICE_DETAILS,
-	RESET_FORCE_PLATES,
-	WINDOWS_STATUS,
+  SPEEDMETER_SESSION,
+  TIMELINE_SESSION,
+  SESSION_OPTIONS,
+  DEVICE_DETAILS,
+  RESET_FORCE_PLATES,
+  WINDOWS_STATUS,
   WINDOWS_STATUS_RESPONSE,
   START_TRIAL_WRITING,
-  STOP_TRIAL_WRITING
+  STOP_TRIAL_WRITING,
+  VALIDATE_KEY,
+  VALIDATE_KEY_RESPONSE
 } = require("../util/types");
 
 module.exports = class {
@@ -33,6 +36,7 @@ module.exports = class {
     this.threshold = -1;
     this.socket = null;
     this.isSessionRunning = false;
+    this.serialNumber = "03000200-0400-0500-0006-000700080009";
     this.selectedDatabase = "";
 
     // Window Options
@@ -47,12 +51,12 @@ module.exports = class {
 
     if (process.platform === 'win32' || process.platform === 'win64') {
       createForcePlateProcess(() => {
-        this.client = new net.Socket();
-        this.client.connect(54221, "127.0.0.1");
+        setTimeout(() => {
+          this.client = new net.Socket();
+          this.client.connect(54221, "127.0.0.1");
+        },6000)
       })
     }
-    this.client = new net.Socket();
-    this.client.connect(54221, "127.0.0.1");
   }
 
   async createWindow() {
@@ -227,6 +231,13 @@ module.exports = class {
     Events.afterTrialProcess(this.usersw);
     Events.editAverageMetrics(this.usersw);
     Events.downloadC3DFile(this.usersw);
+
+    ipcMain.on(VALIDATE_KEY,(e, d) => {
+      serialNumber.preferUUID = true;
+      serialNumber( (err, value) => {
+        e.reply(VALIDATE_KEY_RESPONSE, { isValid: this.serialNumber === value.toString() })
+      });
+    });
 
     // Session Events
     ipcMain.on(START_SESSION, (_, d) => {

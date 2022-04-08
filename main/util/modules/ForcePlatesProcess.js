@@ -9,11 +9,11 @@ const chalk = require('chalk');
 const createForcePlateProcess = async (cb) => {
     try {
         await spawn(path.resolve(__dirname, '../../connection/ForcePlatesConnector.exe'), ["10"]);
-        cb();
-        console.log(chalk.bold.white('[LOG] Force Plate Connector ') + chalk.bold.green('✓'));
+        await cb();
+        console.log(chalk.bold.white('[LOG] Force Plate Connector started'));
     }
     catch (e) {
-        console.log(chalk.bold.red('[ERROR] Force Plate Connector ') + chalk.bold.red('❌'));
+        console.log(chalk.bold.red('[ERROR] Force Plate Connector failed'));
     }
 };
 module.exports = createForcePlateProcess;

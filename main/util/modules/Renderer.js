@@ -31,7 +31,7 @@ class Renderer {
               ${session.name}
             </div>
             <div>
-              ${moment_1.default(new Date(trial.created_at)).format("DD-MM-YYYY HH:mm")}
+              ${(0, moment_1.default)(new Date(trial.created_at)).format("DD-MM-YYYY HH:mm")}
             </div>
           </div>
           <div class="column has-text-centered  is-vcentered is-centered pt-5">
